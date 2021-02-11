@@ -11,9 +11,10 @@ plco.loadScript=async(url,host)=>{
     return document.head.appendChild(s)
 }
 
-if(location.href.match('localhost')){
-    plco.loadScript(`${location.href}plcoJonas.js`)
-    plco.loadScript(`${location.href}plcoLorena.js`)
+if(location.href.match('localhost')||location.href.match('127.0.0.1')){
+    let scriptHost=location.href.replace(/\/[^\/]*$/,'/')
+    plco.loadScript(`${scriptHost}plcoJonas.js`)
+    plco.loadScript(`${scriptHost}plcoLorena.js`)
 }else{
     plco.loadScript('https://episphere.github.io/plco/plcoJonas.js')
     plco.loadScript('https://episphere.github.io/plco/plcoLorena.js')
