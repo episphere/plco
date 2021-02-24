@@ -33,6 +33,7 @@ plco.api.parms2string=(prm={phenotype_id:3080,sex:"all",ancestry:"east_asian",p_
     return Object.keys(prm).map(p=>`${p}=${prm[p]}`).join('&')
 }
 
+plco.crazy="thing"
 
 
 plco.api.summary=async(parms)=>{
