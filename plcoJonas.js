@@ -48,6 +48,4 @@ plco.api.summary=async(parms)=>{
     //phenotype_id=3080&sex=all&ancestry=east_asian&p_value_nlog_min=4"
 }
 
-
-
 plco.jonas=true
