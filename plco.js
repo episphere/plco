@@ -13,8 +13,7 @@ plco.loadScript=async(url,host)=>{
 
 plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
 
-//plco.plotTest=async(chr=1,div,url='https://exploregwas-dev.cancer.gov/plco-atlas/api/summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true')=>{
-plco.plotTest=async(chr=1,div,url='https://georgetown.app.box.com/file/790147208541')=>{
+plco.plotTest=async(chr=1,div,url='https://exploregwas-dev.cancer.gov/plco-atlas/api/summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true')=>{
    let xx = await (await fetch(url)).json()
    div=div||document.createElement('div')
    let dt = xx.data.filter(x=>x[4]==chr)
