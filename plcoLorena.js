@@ -52,11 +52,3 @@ if(typeof(define)!='undefined'){
 }
 
 
-if(typeof(plco)=='undefined'){
-    plco={}
-}
-
-plco.lorena=true
-
-
-console.log('plco.js loaded')
