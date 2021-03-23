@@ -1,13 +1,6 @@
 console.log('plcoLorena.js loaded')
 
-if(typeof(plco)=='undefined'){
-    plco={}
-}
 
-plco.lorena=true
-
-
-console.log('plco.js loaded')
 
 plco={
     date:new Date()
@@ -57,3 +50,13 @@ if(location.href.match('localhost')||location.href.match('127.0.0.1')){
 if(typeof(define)!='undefined'){
     define(plco)
 }
+
+
+if(typeof(plco)=='undefined'){
+    plco={}
+}
+
+plco.lorena=true
+
+
+console.log('plco.js loaded')
