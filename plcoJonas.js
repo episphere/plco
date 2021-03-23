@@ -6,7 +6,6 @@ if(typeof(plco)=='undefined'){
 
 if(!plco.api){plco.api={}}
 
-//plco.api.url='https://exploregwas-dev.cancer.gov/plco-atlas/api/'
 plco.api.url='https://api.box.com/2.0/files/790147208541/content?version=4'
 
 plco.api.ping=async()=>{
