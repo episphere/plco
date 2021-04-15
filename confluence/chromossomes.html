@@ -1,0 +1,40 @@
+<html>
+<head>
+    <script src="https://episphere.github.io/plotly/epiPlotly.js"></script>
+    <style>
+    body {
+        color:navy;
+        font-family:verdana
+    }
+    </style>
+</head>
+<body>
+<h3>Source: GWAS_data374674.json</h3>
+<p>Chromossom <select id="selChr"></select></p>
+<div id="plotChrDiv"></div>
+<script>
+    chrs=[...Array(23)].map((_,i)=>i+1)
+    chrs.forEach(chri=>{
+        let opt = document.createElement('option')
+        opt.textContent=opt.value=chri
+        selChr.appendChild(opt)
+    })
+
+    plotChr = chri=>{
+        plotChrDiv.innerHTML='' // clear
+        epiP = document.createElement('epi-plotly')
+        epiP.plotDataURL=`${location.href.replace(/[^\/]*$/,'')}chromossome${chri}.json`
+        plotChrDiv.appendChild(epiP)
+        return epiP
+    }
+
+    selChr.onchange=()=>{
+        plotChrDiv.innerHTML=`<p>ploting chromossome ${selChr.value}...</p>`
+        plotChr(selChr.value)
+    }
+
+    selChr.onchange()
+
+</script>
+</body>
+</html>
