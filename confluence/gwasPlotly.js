@@ -9,7 +9,7 @@ convert2Plotly=async(url="GWAS_data1000.json")=>{
         convert2Plotly.gwas(dt)
         break;
 
-      case "GWAS_data374674.json":
+      case "GWAS_data374674_v2.json":
         console.log(dt)
         convert2Plotly.gwas(dt)
         break;
@@ -39,12 +39,15 @@ convert2Plotly.gwas=dt=>{
     
     // find chromossome and position
     //let chr=dt.data.map(x=>parseInt(x[0][0].match(/^\d+/)[0]))
-    let chr = dt.data.map(x=>x[0][8]) // chr.iCOGs
+    const chr_i = dt.columns.indexOf("chr.iCOGs")
+    let chr = dt.data.map(x=>x[0][chr_i]) // chr.iCOGs
     //let pos=dt.data.map(x=>parseInt(x[0][0].match(/_\d+_/)[0].slice(1,-1)))
-    let pos = dt.data.map(x=>x[0][9]) // Position.iCOGs
+    const pos_i = dt.columns.indexOf("Position.iCOGs")
+    let pos = dt.data.map(x=>x[0][pos_i]) // Position.iCOGs
     let chrs = [... new Set(chr)]
     //let p =dt.data.map(x=>x[0][38]) // P1df_risk_LRT.Onco
-    let p =dt.data.map(x=>(x[0][45]||0.000001))  // p.meta
+    const p_i = dt.columns.indexOf("p.meta")
+    let p =dt.data.map(x=>(x[0][p_i]||1e-323))  // p.meta
     let pLog=p.map(x=>-Math.log10(x))
     debugger
     // try with a single chromossome
@@ -76,4 +79,4 @@ convert2Plotly.gwas=dt=>{
     })  
 }
 
-//convert2Plotly("GWAS_data374674.json")
+//convert2Plotly("GWAS_data374674_v2.json")
