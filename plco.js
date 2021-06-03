@@ -65,9 +65,23 @@ plco.api.parms2string=(prm={phenotype_id:3080,sex:"all",ancestry:"east_asian",p_
     return Object.keys(prm).map(p=>`${p}=${prm[p]}`).join('&')
 }
 
+plco.api.download= async (parms, phenotype_id=3080, get_link_only=undefined) => {
+    parms = typeof(params) == "string" ? plco.api.string2parms(parms) : parms
+    parms = parms || {
+        phenotype_id: phenotype_id
+    }
+    if (typeof(parms['phenotype_id']) == 'undefined') {
+        parms['phenotype_id'] = phenotype_id
+    }
+    if (typeof(parms['get_link_only']) == 'undefined' && typeof(get_link_only) != 'undefined') {
+        parms['get_link_only'] = get_link_only
+    }
+    return await plco.api.get(cmd="download", parms)
+}
+
 plco.api.summary=async(parms)=>{
     parms= typeof(parms)=="string" ? plco.api.string2parms(parms) : parms
-    parms=parms|{
+    parms=parms||{
         phenotype_id:3080,
         sex:"all",
         ancestry:"east_asian",
