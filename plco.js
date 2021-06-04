@@ -5,6 +5,21 @@ plco={
 
 }
 
+/**
+ * TEMP work-around for the CORS issue, do NOT use in the final SDK. 
+ * Modified from https://github.com/jonasalmeida/jmat.
+ * @param {string} url The download link.
+ * @returns {HTMLAnchorElement} HTMLAnchorElement.
+ */ 
+plco.saveFile = (url) => {
+    url = url || 'https://downloadgwas-dev.cancer.gov/j_breast_cancer.tsv.gz'
+    let a = document.createElement('a')
+    a.href = url
+    a.target = '_blank'
+    a.click() 
+    return a
+}
+
 plco.loadScript=async(url,host)=>{
     let s = document.createElement('script')
     s.src=url
@@ -49,6 +64,19 @@ plco.api.get=async(cmd="ping",parms={})=>{
     // content-type = await res.blob().type
     if(cmd=="ping"){
         return await(await fetch(plco.api.url+'ping')).text()=="true"? true : false;
+    } else if (cmd==='download') {
+        if (parms['get_link_only'] === 'true') {
+            return (
+                await fetch(
+                    plco.api.url + cmd + '?' + plco.api.parms2string(parms)
+                )
+            ).text()
+        } else {
+            plco.saveFile(
+                plco.api.url + cmd + '?' + plco.api.parms2string(parms)
+            )
+            return await new Promise((resolve) => resolve({}))
+        }
     }else{
         return (await fetch(plco.api.url+cmd+'?'+plco.api.parms2string(parms))).json()
     }
