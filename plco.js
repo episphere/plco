@@ -45,6 +45,8 @@ plco.api.ping=async()=>{
 }
 
 plco.api.get=async(cmd="ping",parms={})=>{
+    // res = await fetch(...)
+    // content-type = await res.blob().type
     if(cmd=="ping"){
         return await(await fetch(plco.api.url+'ping')).text()=="true"? true : false;
     }else{
@@ -77,7 +79,7 @@ plco.api.download = async (
             ? Object.fromEntries(parms)
             : parms
     parms = parms || {
-        phenotype_id: phenotype_id,
+        phenotype_id,
     }
     if (typeof parms['phenotype_id'] == 'undefined') {
         parms['phenotype_id'] = phenotype_id
