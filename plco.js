@@ -7,6 +7,9 @@ plco={
 
 /**
  * TEMP work-around for the CORS issue, do NOT use in the final SDK. 
+ * 
+ * Instead, fetch the blob from the API and use a blob link just like in jmat.
+ * 
  * Modified from https://github.com/jonasalmeida/jmat.
  * @param {string} url The download link.
  * @returns {HTMLAnchorElement} HTMLAnchorElement.
@@ -19,6 +22,23 @@ plco.saveFile = (url) => {
     a.click() 
     return a
 }
+
+plco.defineAttributes = (obj, m_fields, o_fields = {}) => {
+    Object.keys(m_fields).forEach((key) => {
+        if (typeof obj[key] === 'undefined') {
+            obj[key] = m_fields[key]
+        }
+    })
+    Object.keys(o_fields).forEach((key) => {
+        if (
+            typeof obj[key] === 'undefined' &&
+            typeof o_fields[key] !== 'undefined'
+        ) {
+            obj[key] = o_fields[key]
+        }
+    })
+}
+ 
 
 plco.loadScript=async(url,host)=>{
     let s = document.createElement('script')
@@ -109,16 +129,30 @@ plco.api.download = async (
     parms = parms || {
         phenotype_id,
     }
-    if (typeof parms['phenotype_id'] == 'undefined') {
-        parms['phenotype_id'] = phenotype_id
-    }
-    if (
-        typeof parms['get_link_only'] == 'undefined' &&
-        typeof get_link_only != 'undefined'
-    ) {
-        parms['get_link_only'] = get_link_only
-    }
+    plco.defineAttributes(parms, { phenotype_id }, { get_link_only })
     return await plco.api.get((cmd = 'download'), parms)
+}
+
+plco.api.participants = async (
+    parms,
+    phenotype_id = 2250,
+    columns = undefined,
+    precision = undefined,
+    raw = undefined
+) => {
+    parms =
+        typeof parms == 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+            ? Object.fromEntries(parms)
+            : parms
+    parms = parms || {
+        phenotype_id,
+        columns: 'value',
+        precision: 0,
+    }
+    plco.defineAttributes(parms, { phenotype_id }, { columns, precision, raw })
+    return await plco.api.get((cmd = 'participants'), parms)
 }
 
 plco.api.summary=async(parms)=>{
