@@ -136,6 +136,17 @@ plco.api.download = async (
     return await plco.api.get((cmd = 'download'), parms)
 }
 
+// Example call: await plco.api.metadata({ phenotype_id: 3080, sex: "female", ancestry: "european" })
+plco.api.metadata = async (parms) => {
+    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : parms
+    parms = parms || {
+        phenotype_id: 3080,
+        sex: "female",
+        ancestry: "european"
+    }
+    return await plco.api.get((cmd = 'metadata'), parms)
+}
+
 plco.api.participants = async (
     parms,
     phenotype_id = 2250,
