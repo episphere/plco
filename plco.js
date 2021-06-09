@@ -162,8 +162,8 @@ plco.api.summary = async (parms) => {
     parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
     parms = parms || {
         phenotype_id: 3080,
-        sex: "all",
-        ancestry: "east_asian",
+        sex: "female",
+        ancestry: "european",
         p_value_nlog_min: 4
     }
     return await plco.api.get(cmd = "summary", parms)
