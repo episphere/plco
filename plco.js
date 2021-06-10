@@ -169,6 +169,12 @@ plco.api.participants = async (
     return await plco.api.get((cmd = 'participants'), parms)
 }
 
+// Example call: await plco.api.phenotypes({ q: "first_ca125_level" })
+plco.api.phenotypes = async (parms) => {
+    parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
+    return await plco.api.get(cmd = "phenotypes", parms)
+}
+
 // Example call: await plco.api.summary({ phenotype_id: 3080, sex: "female", ancestry: "european", p_value_nlog_min: 4 })
 plco.api.summary = async (parms) => {
     parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
