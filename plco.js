@@ -182,6 +182,21 @@ plco.api.summary = async (parms) => {
     //phenotype_id=3080&sex=all&ancestry=east_asian&p_value_nlog_min=4"
 }
 
+// Example call: await plco.api.variants({ phenotype_id: 3080, sex: "female", ancestry: "european", chromosome: 8,
+// p_value_nlog_min: 4,  limit: 10 })
+plco.api.variants = async (parms)  => {
+    parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
+    parms = parms || {
+        phenotype_id: 3080,
+        sex: "female",
+        ancestry: "european",
+        chromosome: 8,
+        p_value_nlog_min: 1.3,
+        limit: 10
+    }
+    return await plco.api.get(cmd = "summary", parms)
+}
+
 /*
 if(location.href.match('localhost')||location.href.match('127.0.0.1')){
     let scriptHost=location.href.replace(/\/[^\/]*$/,'/')
