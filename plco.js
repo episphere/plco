@@ -136,6 +136,17 @@ plco.api.download = async (
     return await plco.api.get((cmd = 'download'), parms)
 }
 
+// Example call: await plco.api.metadata({ phenotype_id: 3080, sex: "female", ancestry: "european" })
+plco.api.metadata = async (parms) => {
+    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : parms
+    parms = parms || {
+        phenotype_id: 3080,
+        sex: "female",
+        ancestry: "european"
+    }
+    return await plco.api.get((cmd = 'metadata'), parms)
+}
+
 plco.api.participants = async (
     parms,
     phenotype_id = 2250,
@@ -158,16 +169,38 @@ plco.api.participants = async (
     return await plco.api.get((cmd = 'participants'), parms)
 }
 
+// Example call: await plco.api.phenotypes({ q: "first_ca125_level" })
+plco.api.phenotypes = async (parms) => {
+    parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
+    return await plco.api.get(cmd = "phenotypes", parms)
+}
+
+// Example call: await plco.api.summary({ phenotype_id: 3080, sex: "female", ancestry: "european", p_value_nlog_min: 4 })
 plco.api.summary = async (parms) => {
     parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
     parms = parms || {
         phenotype_id: 3080,
-        sex: "all",
-        ancestry: "east_asian",
+        sex: "female",
+        ancestry: "european",
         p_value_nlog_min: 4
     }
     return await plco.api.get(cmd = "summary", parms)
     //phenotype_id=3080&sex=all&ancestry=east_asian&p_value_nlog_min=4"
+}
+
+// Example call: await plco.api.variants({ phenotype_id: 3080, sex: "female", ancestry: "european", chromosome: 8,
+// p_value_nlog_min: 4,  limit: 10 })
+plco.api.variants = async (parms)  => {
+    parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
+    parms = parms || {
+        phenotype_id: 3080,
+        sex: "female",
+        ancestry: "european",
+        chromosome: 8,
+        p_value_nlog_min: 1.3,
+        limit: 10
+    }
+    return await plco.api.get(cmd = "summary", parms)
 }
 
 /*
