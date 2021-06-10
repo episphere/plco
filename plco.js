@@ -22,7 +22,7 @@ plco.saveFile = (url) => {
     return a
 }
 
-plco.defineAttributes = (obj, m_fields, o_fields = {}) => {
+plco.defineProperties = (obj, m_fields, o_fields = {}) => {
     Object.keys(m_fields).forEach((key) => {
         if (typeof obj[key] === 'undefined') {
             obj[key] = m_fields[key]
@@ -124,7 +124,7 @@ plco.api.download = async (
     get_link_only = undefined
 ) => {
     parms =
-        typeof parms == 'string'
+        typeof parms === 'string'
             ? plco.api.string2parms(parms)
             : Array.isArray(parms)
                 ? Object.fromEntries(parms)
@@ -132,7 +132,7 @@ plco.api.download = async (
     parms = parms || {
         phenotype_id,
     }
-    plco.defineAttributes(parms, { phenotype_id }, { get_link_only })
+    plco.defineProperties(parms, { phenotype_id }, { get_link_only })
     return await plco.api.get((cmd = 'download'), parms)
 }
 
@@ -144,7 +144,7 @@ plco.api.participants = async (
     raw = undefined
 ) => {
     parms =
-        typeof parms == 'string'
+        typeof parms === 'string'
             ? plco.api.string2parms(parms)
             : Array.isArray(parms)
                 ? Object.fromEntries(parms)
@@ -154,8 +154,59 @@ plco.api.participants = async (
         columns: 'value',
         precision: 0,
     }
-    plco.defineAttributes(parms, { phenotype_id }, { columns, precision, raw })
+    plco.defineProperties(parms, { phenotype_id }, { columns, precision, raw })
     return await plco.api.get((cmd = 'participants'), parms)
+}
+
+/**
+ * Retrieve PCA coordinates for the specified phenotype and platform.
+ * @param {object | string | *[][]} parms An object, query string, or 2-d array that contains the query parameters.
+ * @param {integer} phenotype_id A numeric phenotype id.
+ * @param {string} platform A character vector specifying the platform to retrieve data for.
+ * @param {integer} pc_x A numeric value (1-20) specifying the x axis's principal component.
+ * @param {integer} pc_y A numeric value (1-20) specifying the y axis's principal component.
+ * @param {integer} limit _Optional_. A numeric value to limit the number of variants returned (used for pagination). 
+ * Capped at 1 million.
+ * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @returns A dataframe containing pca coordinates.
+ * @example
+ * plco.api.pca()
+ * plco.api.pca({}, 3080, 'PLCO_GSA', 1, 1, 1000)
+ * plco.api.pca({phenotype_id: 3080, platform: 'PLCO_GSA', pc_x: 1, pc_y: 1, limit: 1000 })
+ * plco.api.pca("phenotype_id=3080&platform=PLCO_GSA&pc_x=1&pc_y=1&limit=1000")
+ * plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y",1], ["limit",1000]])
+ */
+plco.api.pca = async (
+    parms,
+    phenotype_id = 3080,
+    platform = 'PLCO_GSA',
+    pc_x = 1,
+    pc_y = 2,
+    limit = undefined,
+    raw = undefined
+) => {
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
+    parms = parms || {
+        phenotype_id,
+        platform,
+        pc_x,
+        pc_y,
+        limit: 10,
+    }
+    plco.defineProperties(parms, { phenotype_id, platform, pc_x, pc_y }, { limit, raw })
+
+    if (!Number.isInteger(parms['pc_x']) || parms['pc_x'] < 1 || parms['pc_x'] > 20) {
+        throw new RangeError('pc_x must be an integer between 1 and 20 inclusive.')
+    }
+    if (!Number.isInteger(parms['pc_y']) || parms['pc_y'] < 1 || parms['pc_y'] > 20) {
+        throw new RangeError('pc_y must be an integer between 1 and 20 inclusive.')
+    }
+    return await plco.api.get((cmd = 'pca'), parms)
 }
 
 plco.api.summary = async (parms) => {
