@@ -200,7 +200,7 @@ plco.api.variants = async (parms)  => {
         p_value_nlog_min: 1.3,
         limit: 10
     }
-    return await plco.api.get(cmd = "summary", parms)
+    return await plco.api.get(cmd = "variants", parms)
 }
 
 /*
