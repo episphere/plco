@@ -23,9 +23,9 @@ plco.saveFile = (url) => {
 }
 
 /**
- * Adds a key-value pair as specified in `m_fields` and `o_fields` to `obj` if the key does not already exist.  
+ * Adds a key-value pair as specified in `m_fields` and `o_fields` to `obj` if the key does not already exist.
  * @param {object} obj An object.
- * @param {object} m_fields Mandatory fields. 
+ * @param {object} m_fields Mandatory fields.
  * @param {object} o_fields Optional fields. Same as `m_fields`, but will not add in the key-value pair if value is undefined.
  */
 plco.defineProperties = (obj, m_fields, o_fields = {}) => {
