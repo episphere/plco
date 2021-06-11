@@ -22,6 +22,12 @@ plco.saveFile = (url) => {
     return a
 }
 
+/**
+ * Adds a key-value pair as specified in `m_fields` and `o_fields` to `obj` if the key does not already exist.  
+ * @param {object} obj An object.
+ * @param {object} m_fields Mandatory fields. 
+ * @param {object} o_fields Optional fields. Same as `m_fields`, but will not add in the key-value pair if value is undefined.
+ */
 plco.defineProperties = (obj, m_fields, o_fields = {}) => {
     Object.keys(m_fields).forEach((key) => {
         if (typeof obj[key] === 'undefined') {
@@ -226,6 +232,37 @@ plco.api.phenotypes = async (parms) => {
     return await plco.api.get(cmd = "phenotypes", parms)
 }
 
+/**
+ * Retrieves sampled variants suitable for visualizing a QQ plot for the specified phenotype, sex, and ancestry.
+ * @param {object | string | *[][]} parms An object, query string, or 2-d array that contains the query parameters.
+ * @param {integer} phenotype_id A numeric phenotype id.
+ * @param {string} sex A character vector specifying a sex to retrieve data for.
+ * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
+ * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @returns A dataframe containing variants.
+ */
+plco.api.points = async (parms,
+    phenotype_id = 3080,
+    sex = 'female',
+    ancestry = 'european',
+    raw = undefined
+) => {
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
+    parms = parms || {
+        phenotype_id,
+        sex,
+        ancestry,
+    }
+    plco.defineProperties(parms, { phenotype_id, sex, ancestry }, { raw })
+
+    return await plco.api.get((cmd = 'points'), parms)
+}
+
 // Example call: await plco.api.summary({ phenotype_id: 3080, sex: "female", ancestry: "european", p_value_nlog_min: 4 })
 plco.api.summary = async (parms) => {
     parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
@@ -241,7 +278,7 @@ plco.api.summary = async (parms) => {
 
 // Example call: await plco.api.variants({ phenotype_id: 3080, sex: "female", ancestry: "european", chromosome: 8,
 // p_value_nlog_min: 4,  limit: 10 })
-plco.api.variants = async (parms)  => {
+plco.api.variants = async (parms) => {
     parms = typeof (parms) == "string" ? plco.api.string2parms(parms) : parms
     parms = parms || {
         phenotype_id: 3080,
