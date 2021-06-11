@@ -44,7 +44,6 @@ plco.defineProperties = (obj, m_fields, o_fields = {}) => {
     })
 }
 
-
 plco.loadScript = async (url, host) => {
     let s = document.createElement('script')
     s.src = url
@@ -53,7 +52,12 @@ plco.loadScript = async (url, host) => {
 
 plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
 
-plco.plotTest = async (chr = 1, div, url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true') => {
+plco.plotTest = async (
+    chr = 1,
+    div,
+    url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
+        summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true'
+) => {
     let xx = await (await fetch(url)).json()
     div = div || document.createElement('div')
     let dt = xx.data.filter(x => x[4] == chr)
@@ -124,6 +128,17 @@ plco.api.parms2string = (
     return Object.keys(prm).map(p => `${p}=${prm[p]}`).join('&')
 }
 
+/**
+ * Downloads the original association results in tsv.gz format.
+ * @param {object | string | *[][] } parms A JSON object, query string, or array containing the query parameters.
+ * @param {integer} phenotype_id A numeric phenotype id.
+ * @param {string} get_link_only A string if equal to 'true' will return the link instead of downloading the tsv.gz. 
+ * @returns Results of the API call.
+ * @example
+ * plco.api.download({phenotype_id: 3080, get_link_only: 'true'})
+ * 
+ * plco.api.download({}, 3080, 'true')
+ */
 plco.api.download = async (
     parms,
     phenotype_id = 3080,
@@ -153,6 +168,17 @@ plco.api.metadata = async (parms) => {
     return await plco.api.get((cmd = 'metadata'), parms)
 }
 
+/**
+ * 
+ * @param {object | string | *[][] } parms 
+ * @param {integer} phenotype_id A numeric phenotype id.
+ * @param {string} columns A character vector specifying properties for which to retrieve counts for. 
+ * Valid properties are: value, ancestry, genetic_ancestry, sex, and age.
+ * @param {integer} precision For continuous phenotypes, a numeric value specifying the -log10(precision) 
+ * to which values should be rounded to.
+ * @param {string} raw 
+ * @returns Results of the API call.
+ */
 plco.api.participants = async (
     parms,
     phenotype_id = 2250,
