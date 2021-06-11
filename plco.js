@@ -132,12 +132,8 @@ plco.api.parms2string = (
  * Downloads the original association results in tsv.gz format.
  * @param {object | string | *[][] } parms A JSON object, query string, or array containing the query parameters.
  * @param {integer} phenotype_id A numeric phenotype id.
- * @param {string} get_link_only A string if equal to 'true' will return the link instead of downloading the tsv.gz. 
+ * @param {string} get_link_only _Optional_. If set to 'true', returns the download link instead of redirecting automatically to the file.
  * @returns Results of the API call.
- * @example
- * plco.api.download({phenotype_id: 3080, get_link_only: 'true'})
- * 
- * plco.api.download({}, 3080, 'true')
  */
 plco.api.download = async (
     parms,
@@ -169,14 +165,14 @@ plco.api.metadata = async (parms) => {
 }
 
 /**
- * 
- * @param {object | string | *[][] } parms 
+ * Retrieves aggregate counts for participants. Aggregate counts under 10 are returned as "< 10".
+ * @param {object | string | *[][] } parms An object, query string, or 2-d array that contains the query parameters.
  * @param {integer} phenotype_id A numeric phenotype id.
- * @param {string} columns A character vector specifying properties for which to retrieve counts for. 
+ * @param {string} columns _Optional_. A character vector specifying properties for which to retrieve counts for. 
  * Valid properties are: value, ancestry, genetic_ancestry, sex, and age.
- * @param {integer} precision For continuous phenotypes, a numeric value specifying the -log10(precision) 
+ * @param {integer} precision _Optional_. For continuous phenotypes, a numeric value specifying the -log10(precision) 
  * to which values should be rounded to.
- * @param {string} raw 
+ * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @returns Results of the API call.
  */
 plco.api.participants = async (
