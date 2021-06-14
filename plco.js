@@ -1,7 +1,13 @@
 console.log('plco.js loaded')
 
-plco = {
+/* plco = {
     date: new Date()
+}
+*/
+
+const plco = async function() {
+    plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
+    console.log("plotly.js loaded")
 }
 
 /**
@@ -49,8 +55,6 @@ plco.loadScript = async (url, host) => {
     s.src = url
     return document.head.appendChild(s)
 }
-
-plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
 
 plco.plotTest = async (
     chr = 1,
@@ -438,10 +442,6 @@ if(location.href.match('localhost')||location.href.match('127.0.0.1')){
 }
 */
 
-if (typeof (define) != 'undefined') {
-    define(plco)
-}
-
 /*
 if(typeof(define)!='undefined'){
 
@@ -458,3 +458,9 @@ if(typeof(define)!='undefined'){
     })
 }
 */
+
+plco()
+
+if (typeof (define) != 'undefined') {
+    define(plco)
+}
