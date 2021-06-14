@@ -10,7 +10,8 @@ console.log('plco.js loaded')
 /**
  * Main global portable module.
  * @namespace plco
- * @property {Date} date - {@link plco.saveFile}
+ * @property {Function} saveFile - {@link plco.saveFile}
+ * @property {Function} defineProperties - {@link plco.defineProperties}
  */
 plco = {
     /** @type {Date} */
@@ -97,6 +98,14 @@ plco.plotTest = async (
  * Sub-module grouping API methods.
  * @memberof plco
  * @namespace plco.api
+ * @property {Function} download - {@link plco.api.download}
+ * @property {Function} metadata - {@link plco.api.metadata}
+ * @property {Function} participants - {@link plco.api.participants}
+ * @property {Function} pca - {@link plco.api.pca}
+ * @property {Function} phenotypes - {@link plco.api.phenotypes}
+ * @property {Function} points - {@link plco.api.points}
+ * @property {Function} summary - {@link plco.api.summary}
+ * @property {Function} variants - {@link plco.api.variants}
  */
 plco.api = {}
 
