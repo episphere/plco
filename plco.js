@@ -5,7 +5,7 @@ console.log('plco.js loaded')
 }
 */
 
-let plco = async function() {
+const plco = async function() {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
 }
