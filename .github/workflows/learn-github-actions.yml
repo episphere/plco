@@ -20,6 +20,8 @@ jobs:
         run: git status
       - name: Commit.
         run: |
+          git config --global user.name "Eric Ruan"
+          git config --global user.email "eric.ruan.130@gmail.com"
           git add .
           git commit -am 'Updated docs.'
           git push
