@@ -9,7 +9,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
-      - run: ls -l
+      - name: A quick check on what's inside the directory.
+        run: ls -l
+      - name: A quick check to see what branch we are in.
+        run: git branch -vv
       - run: npm install -g jsdoc
       - run: jsdoc -v
       - run: jsdoc --readme README.md plco.js -c conf.json
+      - name: A quick check on what's new.
+        run: git status
+      - name: Commit.
+        run: |
+          git add .
+          git commit -am 'Updated docs.'
+          git push
