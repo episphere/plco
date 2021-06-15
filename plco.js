@@ -1,5 +1,5 @@
 /** 
- * @file JS SDK for NCI DCEG's PLCO API. :cat:
+ * @file JS SDK for NCI DCEG's PLCO API. 〜(￣▽￣〜)
  * 
  * @version 0.5
  * @author Jonas Almeida, Lorena Sandoval, Erika Nemeth, Eric Ruan
