@@ -11,7 +11,4 @@ jobs:
       - uses: actions/setup-node@v1
       - run: npm install -g jsdoc
       - run: jsdoc -v
-  generate-jsdoc:
-    runs-on: ubuntu-latest
-    steps:
       - run: jsdoc --readme README.md plco.js -c conf.json
