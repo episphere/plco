@@ -45,7 +45,7 @@ plco.saveFile = (url) => {
  * Adds a key-value pair as specified in `m_fields` and `o_fields` to `obj` if the key does not already exist.
  * @param {object} obj An object.
  * @param {object} m_fields Mandatory fields.
- * @param {object} o_fields Optional fields. Same as `m_fields`, but will not add in the key-value pair if value is undefined.
+ * @param {object} [o_fields={}] Optional fields. Same as `m_fields`, but will not add in the key-value pair if value is undefined.
  */
 plco.defineProperties = (obj, m_fields, o_fields = {}) => {
     Object.keys(m_fields).forEach((key) => {
@@ -161,8 +161,8 @@ plco.api.parms2string = (
 /**
  * Downloads the original association results in tsv.gz format.
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {integer} phenotype_id A numeric phenotype id.
- * @param {string} get_link_only _Optional_. If set to 'true', returns the download link instead of redirecting automatically to the file.
+ * @param {integer} [phenotype_id=3080] A numeric phenotype id.
+ * @param {string} [get_link_only] _Optional_. If set to 'true', returns the download link instead of redirecting automatically to the file.
  * @returns Results of the API call.
  */
 plco.api.download = async (
@@ -186,10 +186,10 @@ plco.api.download = async (
 /**
  * Retrieves metadata for phenotypes specified
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {number} phenotype_id A phenotype id.
- * @param {string} sex A sex, which may be "all", "female", or "male".
- * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {number} [phenotype_id=3080] A phenotype id.
+ * @param {string} [sex=female] A sex, which may be "all", "female", or "male".
+ * @param {string} [ancestry=european] A character vector specifying ancestries to retrieve data for.
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return A dataframe containing phenotype metadata
  * @example
  * plco.api.metadata()
@@ -218,12 +218,12 @@ plco.api.metadata = async (
 /**
  * Retrieves aggregate counts for participants. Aggregate counts under 10 are returned as "< 10".
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {integer} phenotype_id A numeric phenotype id.
- * @param {string} columns _Optional_. A character vector specifying properties for which to retrieve counts for. 
+ * @param {integer} [phenotype_id=2250] A numeric phenotype id.
+ * @param {string} [columns] _Optional_. A character vector specifying properties for which to retrieve counts for. 
  * Valid properties are: value, ancestry, genetic_ancestry, sex, and age.
- * @param {integer} precision _Optional_. For continuous phenotypes, a numeric value specifying the -log10(precision) 
+ * @param {integer} [precision] _Optional_. For continuous phenotypes, a numeric value specifying the -log10(precision) 
  * to which values should be rounded to.
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @returns Results of the API call.
  */
 plco.api.participants = async (
@@ -252,13 +252,13 @@ plco.api.participants = async (
 /**
  * Retrieve PCA coordinates for the specified phenotype and platform.
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {integer} phenotype_id A numeric phenotype id.
- * @param {string} platform A character vector specifying the platform to retrieve data for.
- * @param {integer} pc_x A numeric value (1-20) specifying the x axis's principal component.
- * @param {integer} pc_y A numeric value (1-20) specifying the y axis's principal component.
- * @param {integer} limit _Optional_. A numeric value to limit the number of variants returned (used for pagination). 
+ * @param {integer} [phenotype_id=3080] A numeric phenotype id.
+ * @param {string} [platform=PLCO_GSA] A character vector specifying the platform to retrieve data for.
+ * @param {integer} [pc_x=1] A numeric value (1-20) specifying the x axis's principal component.
+ * @param {integer} [pc_y=2] A numeric value (1-20) specifying the y axis's principal component.
+ * @param {integer} [limit] _Optional_. A numeric value to limit the number of variants returned (used for pagination). 
  * Capped at 1 million.
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @returns A dataframe containing pca coordinates.
  * @example
  * plco.api.pca()
@@ -303,8 +303,8 @@ plco.api.pca = async (
 /**
  * Retrieves phenotypes
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {string} q _Optional_. A query term
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {string} [q] _Optional_. A query term
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return If query is specified, a list of phenotypes that contain the query term is returned. Otherwise, a tree of all phenotypes is returned.
  * @example
  * plco.api.phenotypes()
@@ -328,10 +328,10 @@ plco.api.phenotypes = async (
 /**
  * Retrieves sampled variants suitable for visualizing a QQ plot for the specified phenotype, sex, and ancestry.
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {integer} phenotype_id A numeric phenotype id.
- * @param {string} sex A character vector specifying a sex to retrieve data for.
- * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {integer} [phenotype_id=3080] A numeric phenotype id.
+ * @param {string} [sex=female] A character vector specifying a sex to retrieve data for.
+ * @param {string} [ancestry=european] A character vector specifying ancestries to retrieve data for.
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @returns A dataframe containing variants.
  */
 plco.api.points = async (parms,
@@ -359,11 +359,11 @@ plco.api.points = async (parms,
 /**
  * Retrieve variants for all chromosomes at a resolution of 400x800 bins across the whole genome and specified -log10(p) range
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {number} phenotype_id A phenotype id.
- * @param {string} sex A sex, which may be "all", "female", or "male".
- * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
- * @param {number} p_value_nlog_min A numeric value >= 0 specifying the minimum -log10(p) for variants.
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {number} [phenotype_id=3080] A phenotype id.
+ * @param {string} [sex=female] A sex, which may be "all", "female", or "male".
+ * @param {string} [ancestry=european] A character vector specifying ancestries to retrieve data for.
+ * @param {number} [p_value_nlog_min=4] A numeric value >= 0 specifying the minimum -log10(p) for variants.
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return A dataframe with aggregated variants.
  * @example
  * plco.api.summary()
@@ -394,24 +394,24 @@ plco.api.summary = async (
 /**
  * Retrieve variants for specified phenotype, sex, ancestry, chromosome, and other optional fields.
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {number} phenotype_id Phenotype id(s)
- * @param {string} sex A sex, which may be "all", "female", or "male".
- * @param {string} ancestry An ancestry, which may be "african_american", "east_asian", or "european".
- * @param {number} chromosome A chromosome number.
- * @param {string} columns _Optional_ Properties for each variant. Default: all properties.
- * @param {string} snp _Optional_ Snps.
- * @param {number} position _Optional_ The exact position of the variant within a chromosome.
- * @param {number} position_min _Optional_ The minimum chromosome position for variants.
- * @param {number} position_max _Optional_ The maximum chromosome position for variants.
- * @param {number} p_value_nlog_min _Optional_ The minimum -log10(p) of variants in the chromosome.
- * @param {number} p_value_nlog_max _Optional_ The maximum -log10(p) of variants in the chromosome.
- * @param {number} p_value_min _Optional_ The minimum p-value of variants in the chromosome.
- * @param {number} p_value_max _Optional_ The maximum p-value of variants in the chromosome.
- * @param {string} orderBy _Optional_ A property to order variants by. May be "id", "snp", "chromosome", "position", "p_value", or "p_value_nlog".
- * @param {string} order _Optional_ An order in which to sort variants. May be "asc" or "desc".
- * @param {number} offset _Optional_ The number of records by which to offset the variants (for pagination)
- * @param {number} limit _Optional_ The maximum number of variants to return (for pagination). Highest allowed value is 1 million.
- * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
+ * @param {number} [phenotype_id=3080] Phenotype id(s)
+ * @param {string} [sex=female] A sex, which may be "all", "female", or "male".
+ * @param {string} [ancestry=european] An ancestry, which may be "african_american", "east_asian", or "european".
+ * @param {number} [chromosome=8] A chromosome number.
+ * @param {string} [columns] _Optional_ Properties for each variant. Default: all properties.
+ * @param {string} [snp] _Optional_ Snps.
+ * @param {number} [position] _Optional_ The exact position of the variant within a chromosome.
+ * @param {number} [position_min] _Optional_ The minimum chromosome position for variants.
+ * @param {number} [position_max] _Optional_ The maximum chromosome position for variants.
+ * @param {number} [p_value_nlog_min] _Optional_ The minimum -log10(p) of variants in the chromosome.
+ * @param {number} [p_value_nlog_max] _Optional_ The maximum -log10(p) of variants in the chromosome.
+ * @param {number} [p_value_min] _Optional_ The minimum p-value of variants in the chromosome.
+ * @param {number} [p_value_max] _Optional_ The maximum p-value of variants in the chromosome.
+ * @param {string} [orderBy] _Optional_ A property to order variants by. May be "id", "snp", "chromosome", "position", "p_value", or "p_value_nlog".
+ * @param {string} [order] _Optional_ An order in which to sort variants. May be "asc" or "desc".
+ * @param {number} [offset] _Optional_ The number of records by which to offset the variants (for pagination)
+ * @param {number} [limit] _Optional_ The maximum number of variants to return (for pagination). Highest allowed value is 1 million.
+ * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return A dataframe with variants.
  * @example
  * plco.api.variants()
