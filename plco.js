@@ -21,6 +21,8 @@ console.log('plco.js loaded')
 const plco = async function () {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
+    plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
+    plco.plot.manhattan()
 }
 
 /**
@@ -455,6 +457,44 @@ plco.api.variants = async (
         { columns, snp, position, position_min, position_max, p_value_nlog_min, p_value_nlog_max, p_value_min, p_value_max, orderBy, order, offset, limit, raw }
     )
     return await plco.api.get(cmd = "variants", parms)
+}
+
+plco.plot = async function() {
+
+}
+
+plco.plot.manhattan = async function() {
+
+    let inputData = await plco.api.summary({ phenotype_id: 3080, sex: "female", ancestry: "european", p_value_nlog_min: 2 });
+    let chromosomeNumber = 1; // default
+    inputDataByChromosome = inputData.data.filter(x => x.chromosome == "" + chromosomeNumber)
+
+    let traces = {
+        x: inputDataByChromosome.map(x => parseInt(x.position_abs)),
+        y: inputDataByChromosome.map(x => parseInt(x.p_value_nlog)),
+        mode: "markers",
+        type: "scatter",
+        marker: {
+            symbol: 3,
+            size: 5
+        }
+    }
+
+    let layout = {
+        title: "Chromosome ${chromosomeNumber}",
+        xaxis: {
+            title: 'position'
+        },
+        yaxis: {
+            title: '-log(p)'
+        }
+    };
+
+    tracesString = '{"traces":' + JSON.stringify(traces) + ','
+    layoutString = '"layout":' + JSON.stringify(layout) + '}'
+    tracesAndLayoutString = tracesString + layoutString
+    console.log(tracesAndLayoutString)
+
 }
 
 /*
