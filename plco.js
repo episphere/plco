@@ -485,6 +485,10 @@ if(typeof(define)!='undefined'){
 }
 */
 
+plco.plot = async function () {
+
+}
+
 /**
  * The manhattan uses 3, metadata, summary, and variants for the bottom stuff
  * 
@@ -497,10 +501,13 @@ if(typeof(define)!='undefined'){
  * @param {*} ancestry 
  */
 plco.plot.qq = async (
+    div,
     phenotype_id,
     sex,
-    ancestry,
+    ancestry
 ) => {
+    const isPairwise = false
+
     /**
      * @prop {integer} id
      * @prop {integer} phenotype_id
@@ -513,7 +520,7 @@ plco.plot.qq = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-    const metadata = await plco.api.metadata({ chromosome = 'all' }, phenotype_id, sex, ancestry)
+    const metadata = await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
 
     if (metadata === [] || metadata['count'] === null) {
         throw new Error('No data found for this combination of sex and/or ancestry.')
@@ -521,13 +528,18 @@ plco.plot.qq = async (
 
     const points = await plco.api.points({}, phenotype_id, sex, ancestry)
 
-    const div = document.createElement('div')
+    const div = document.getElementById(div) || document.createElement('div')
 
     const trace = {
         x: points.data.map(p => p.p_value_nlog_expected),
         y: points.data.map(p => p.p_value_nlog),
         type: 'scattergl',
         mode: 'markers',
+        marker: {
+            color: 'black',
+            size: 5,
+            opacity: 0.65
+        }
     }
 
     const layout = {
