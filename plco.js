@@ -485,6 +485,125 @@ if(typeof(define)!='undefined'){
 }
 */
 
+/**
+ * The manhattan uses 3, metadata, summary, and variants for the bottom stuff
+ * 
+ * Only uses two endpoints, metadata and points
+ *      The on-hover action of the individual point will use the __variants__ endpoint!
+ * 
+ * Pca plot uses two endpoints, metadata and pca
+ * @param {*} phenotype_id 
+ * @param {*} sex 
+ * @param {*} ancestry 
+ */
+plco.plot.qq = async (
+    phenotype_id,
+    sex,
+    ancestry,
+) => {
+    /**
+     * @prop {integer} id
+     * @prop {integer} phenotype_id
+     * @prop {string} phenotype_name
+     * @prop {string} phenotype_display_name
+     * @prop {string} sex
+     * @prop {string} ancestry
+     * @prop {string} chromosome
+     * @prop {number} lambda_gc
+     * @prop {number} lambda_gc_ld_score
+     * @prop {integer} count
+     */
+    const metadata = await plco.api.metadata({ chromosome = 'all' }, phenotype_id, sex, ancestry)
+
+    if (metadata === [] || metadata['count'] === null) {
+        throw new Error('No data found for this combination of sex and/or ancestry.')
+    }
+
+    const points = await plco.api.points({}, phenotype_id, sex, ancestry)
+
+    const div = document.createElement('div')
+
+    const trace = {
+        x: points.data.map(p => p.p_value_nlog_expected),
+        y: points.data.map(p => p.p_value_nlog),
+        type: 'scattergl',
+        mode: 'markers',
+    }
+
+    const layout = {
+        hoverlabel: {
+            bgcolor: '#fff',
+            bordercolor: '#bbb',
+            font: {
+                size: 14,
+                color: '#212529',
+            }
+        },
+        dragmode: 'pan',
+        clickmode: 'event',
+        hovermode: 'closest',
+        width: 800,
+        height: 800,
+        autosize: true,
+        title: {
+            text: 'title',
+            font: {
+                size: 14,
+                color: 'black'
+            }
+        },
+        xaxis: {
+            automargin: true,
+            rangemode: 'tozero', // only show positive
+            showgrid: false, // disable grid lines
+            fixedrange: true, // disable zoom
+            title: {
+                text: '<b>Expected -log<sub>10</sub>(p)</b>',
+                font: {
+                    size: 14,
+                    color: 'black'
+                }
+            },
+            tick0: 0,
+            ticklen: 10,
+            tickfont: {
+                size: 10,
+                color: 'black'
+            }
+        },
+        yaxis: {
+            automargin: true,
+            rangemode: 'tozero', // only show positive
+            showgrid: false, // disable grid lines
+            fixedrange: true, // disable zoom
+            title: {
+                text: '<b>Observed -log<sub>10</sub>(p)</b>',
+                font: {
+                    size: 14,
+                    color: 'black'
+                }
+            },
+            tick0: 0,
+            ticklen: 10,
+            tickfont: {
+                size: 10,
+                color: 'black'
+            }
+        },
+        showlegend: isPairwise,
+        legend: {
+            // itemclick: false,
+            itemdoubleclick: false,
+            orientation: 'v',
+            x: 0.0,
+            y: 1.1
+        }
+    }
+
+    Plotly.newPlot(div, [trace], layout)
+    return div
+}
+
 plco()
 
 if (typeof (define) != 'undefined') {
