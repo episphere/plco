@@ -22,7 +22,7 @@ const plco = async function () {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
-    plco.plot.manhattan()
+
 }
 
 /**
@@ -463,38 +463,76 @@ plco.plot = async function() {
 
 }
 
-plco.plot.manhattan = async function() {
+/**
+ * @param {number} phenotype_id 
+ * @param {string} sex 
+ * @param {string} ancestry 
+ * @param {number} p_value_nlog_min 
+ * @param {integer} chromosome _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
+ */
+plco.plot.manhattan = async function(
+    phenotype_id,
+    sex,
+    ancestry,
+    p_value_nlog_min,
+    chromosome
+) {
 
-    let inputData = await plco.api.summary({ phenotype_id: 3080, sex: "female", ancestry: "european", p_value_nlog_min: 2 });
-    let chromosomeNumber = 1; // default
-    inputDataByChromosome = inputData.data.filter(x => x.chromosome == "" + chromosomeNumber)
+    //let manhattanDiv = document.createElement('div')
+    //manhattanDiv.id = "manhattanDiv"
 
-    let traces = {
-        x: inputDataByChromosome.map(x => parseInt(x.position_abs)),
-        y: inputDataByChromosome.map(x => parseInt(x.p_value_nlog)),
-        mode: "markers",
-        type: "scatter",
-        marker: {
-            symbol: 3,
-            size: 5
+    let inputData = await plco.api.summary({ phenotype_id, sex, ancestry, p_value_nlog_min });
+
+    let chromosomeName;
+    let numberOfChromosomes;
+    if(chromosome) {
+        inputData = inputData.data.filter(x => x.chromosome == "" + chromosome)
+        chromosomeName = "Chromosome " + chromosome
+        numberOfChromosomes = 1
+    } else {
+        inputData = inputData.data
+        chromosomeName = "All Chromosomes"
+        numberOfChromosomes = 22
+    }
+
+    let traces = []
+    let currentChromosome;
+    for(i = 1; i <= numberOfChromosomes; i++) {
+        if(numberOfChromosomes == 1) {
+            currentChromosome = chromosome
+        } else {
+            currentChromosome = i
         }
+        currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        traces.push({
+            x: currentChromosomeData.map(x => parseInt(x.position_abs)),
+            y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
+            mode: "markers",
+            type: "scatter",
+            marker: {
+                opacity: 0.65,
+                size: 5
+            },
+            name: "Chromosome " + currentChromosome
+        })
     }
 
     let layout = {
-        title: "Chromosome ${chromosomeNumber}",
+        title: "SNPs in " + chromosomeName,
         xaxis: {
-            title: 'position'
+            title: 'absolute position'
         },
         yaxis: {
-            title: '-log(p)'
+            title: '-log<sub>10</sub>(p)'
         }
     };
 
     tracesString = '{"traces":' + JSON.stringify(traces) + ','
     layoutString = '"layout":' + JSON.stringify(layout) + '}'
     tracesAndLayoutString = tracesString + layoutString
-    console.log(tracesAndLayoutString)
-
+    //console.log(tracesAndLayoutString)
+    //Plotly.newPlot("manhattanDiv", traces, layout)
+    return tracesAndLayoutString
 }
 
 /*
