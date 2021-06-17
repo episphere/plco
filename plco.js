@@ -505,7 +505,8 @@ plco.plot.qq = async (
     div_id,
     phenotype_id = 3080,
     sex = 'female',
-    ancestry = 'east_asian'
+    ancestry = 'east_asian',
+    to_json = false
 ) => {
     /**
      * @type {Array<object>} Each object in the array has the properties defined below.
@@ -551,25 +552,42 @@ plco.plot.qq = async (
             size: 4,
             opacity: 0.75
         },
-        text: 'This is the hover info.',
         // customdata contains more info about each individual point, this is useful later with the onClick event
-        customdata: points.data.map((point, index) => ({
-            phenotypeId,
+        customdata: points.data.map(point => ({
+            phenotype_id,
             sex,
             ancestry,
             variantId: point['id'],
             p: Math.pow(10, -point['p_value_nlog']),
         })),
+        text: points.data.map(point =>
+            'Variant Id: ' + point['id'] +
+            '<br>p-value: ' + Math.pow(10, -point['p_value_nlog']) +
+            '<br>Click to learn more.'),
+        hoverinfo: 'text+x+y+name',
+        name: `${sex}, ${ancestry}`,
     }
 
+    const max = points.data.reduce(
+        (max, cur) => cur.p_value_nlog_expected > max ? cur.p_value_nlog_expected : max, 0)
+
     const traceLine = {
-        // TODO
+        x: [0, max],
+        y: [0, max],
+        type: 'scattergl',
+        mode: 'line',
+        marker: {
+            color: '#BBB',
+            opacity: 0.4,
+            size: 0.1,
+        },
+        hoverinfo: 'none',
     }
 
     const layout = {
         hoverlabel: {
-            bgcolor: '#fff',
-            bordercolor: '#bbb',
+            bgcolor: '#FFF',
+            bordercolor: '#BBB',
             font: {
                 size: 14,
                 color: '#212529',
@@ -630,6 +648,7 @@ plco.plot.qq = async (
         clickmode: 'event',
         hovermode: 'closest', // When a point is hovered, it will display their (x, y) coordinate
         dragmode: 'pan',
+        showlegend: false,
     }
 
     const config = {
@@ -641,14 +660,18 @@ plco.plot.qq = async (
         ],
     }
 
-    Plotly.newPlot(div, [trace], layout, config)
+    if (!to_json) {
+        Plotly.newPlot(div, [traceLine, trace], layout, config)
 
-    div.on('plotly_click', (data) => {
-        console.log(data) // contains the custom data
-        // TODO
-        alert('test!')
-    })
-    return div
+        div.on('plotly_click', (data) => {
+            console.log(data) // contains the custom data
+            // TODO
+            alert('test!')
+        })
+        return div
+    } else {
+        return JSON.stringify('')
+    }
 }
 
 plco.plot.qq2 = () => {
