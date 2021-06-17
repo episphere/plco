@@ -496,19 +496,19 @@ plco.plot = async function () {
  *      The on-hover action of the individual point will use the __variants__ endpoint!
  * 
  * Pca plot uses two endpoints, metadata and pca
+ * @param {*} div_id
  * @param {*} phenotype_id 
  * @param {*} sex 
  * @param {*} ancestry 
  */
 plco.plot.qq = async (
-    div,
-    phenotype_id,
-    sex,
-    ancestry
+    div_id,
+    phenotype_id = 3080,
+    sex = 'female',
+    ancestry = 'east_asian'
 ) => {
-    const isPairwise = false
-
     /**
+     * @type {Array<object>} Each object in the array has the properties defined below.
      * @prop {integer} id
      * @prop {integer} phenotype_id
      * @prop {string} phenotype_name
@@ -520,15 +520,26 @@ plco.plot.qq = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-    const metadata = await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
+    // const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
+    metadata = metadata[2]
 
-    if (metadata === [] || metadata['count'] === null) {
+    if (metadata === undefined || metadata['count'] === null) {
         throw new Error('No data found for this combination of sex and/or ancestry.')
     }
 
-    const points = await plco.api.points({}, phenotype_id, sex, ancestry)
+    /**
+     * @type {object}
+     * @prop {Array<object>} data
+     * @prop {Array<string>} columns
+     */
+    // const points = await plco.api.points({}, phenotype_id, sex, ancestry)
 
-    const div = document.getElementById(div) || document.createElement('div')
+    let div = document.getElementById(div_id)
+
+    if (div === null) {
+        div = document.createElement('div')
+        document.body.appendChild(div)
+    }
 
     const trace = {
         x: points.data.map(p => p.p_value_nlog_expected),
@@ -536,10 +547,23 @@ plco.plot.qq = async (
         type: 'scattergl',
         mode: 'markers',
         marker: {
-            color: 'black',
-            size: 5,
-            opacity: 0.65
-        }
+            color: '#A71515',
+            size: 4,
+            opacity: 0.75
+        },
+        text: 'This is the hover info.',
+        // customdata contains more info about each individual point, this is useful later with the onClick event
+        customdata: points.data.map((point, index) => ({
+            phenotypeId,
+            sex,
+            ancestry,
+            variantId: point['id'],
+            p: Math.pow(10, -point['p_value_nlog']),
+        })),
+    }
+
+    const traceLine = {
+        // TODO
     }
 
     const layout = {
@@ -551,14 +575,13 @@ plco.plot.qq = async (
                 color: '#212529',
             }
         },
-        dragmode: 'pan',
-        clickmode: 'event',
-        hovermode: 'closest',
-        width: 800,
-        height: 800,
-        autosize: true,
+        width: 750,
+        height: 750,
         title: {
-            text: 'title',
+            text:
+                `\u03BB (median) = ${metadata['lambda_gc']} <b>|</b>` +
+                `\u03BB (LD score) = ${metadata['lambda_gc_ld_score']} <b>|</b> ` +
+                `Number of variants = ${metadata['count']}`,
             font: {
                 size: 14,
                 color: 'black'
@@ -566,54 +589,70 @@ plco.plot.qq = async (
         },
         xaxis: {
             automargin: true,
-            rangemode: 'tozero', // only show positive
-            showgrid: false, // disable grid lines
-            fixedrange: true, // disable zoom
+            rangemode: 'tozero',
+            showgrid: false,
+            fixedrange: false,
             title: {
                 text: '<b>Expected -log<sub>10</sub>(p)</b>',
                 font: {
-                    size: 14,
+                    size: 15,
                     color: 'black'
                 }
             },
-            tick0: 0,
-            ticklen: 10,
+            ticklen: 10, // Length of the tick marks on the x-axis
+            tickwidth: 1,
+            dtick: 0.5,
             tickfont: {
-                size: 10,
+                size: 12,
                 color: 'black'
             }
         },
         yaxis: {
             automargin: true,
-            rangemode: 'tozero', // only show positive
-            showgrid: false, // disable grid lines
-            fixedrange: true, // disable zoom
+            rangemode: 'tozero',
+            showgrid: true,
+            fixedrange: false,
             title: {
                 text: '<b>Observed -log<sub>10</sub>(p)</b>',
                 font: {
-                    size: 14,
+                    size: 15,
                     color: 'black'
                 }
             },
-            tick0: 0,
-            ticklen: 10,
+            ticklen: 10, // Length of the tick marks on the y-axis
+            tickwidth: 1,
+            dtick: 0.5,
             tickfont: {
-                size: 10,
+                size: 12,
                 color: 'black'
             }
         },
-        showlegend: isPairwise,
-        legend: {
-            // itemclick: false,
-            itemdoubleclick: false,
-            orientation: 'v',
-            x: 0.0,
-            y: 1.1
-        }
+        clickmode: 'event',
+        hovermode: 'closest', // When a point is hovered, it will display their (x, y) coordinate
+        dragmode: 'pan',
     }
 
-    Plotly.newPlot(div, [trace], layout)
+    const config = {
+        scrollZoom: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+            'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
+            'hoverCompareCartesian', 'hoverClosestCartesian',
+        ],
+    }
+
+    Plotly.newPlot(div, [trace], layout, config)
+
+    div.on('plotly_click', (data) => {
+        console.log(data) // contains the custom data
+        // TODO
+        alert('test!')
+    })
     return div
+}
+
+plco.plot.qq2 = () => {
+    // TODO show legend
 }
 
 plco()
