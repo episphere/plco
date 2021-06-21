@@ -552,8 +552,9 @@ plco.plot.qq = async (
             size: 4,
             opacity: 0.75
         },
-        // customdata contains more info about each individual point, this is useful later with the onClick event
-        customdata: points.data.map(point => ({
+        // customdata is an array containing more data on each of the individual point corresponding to indices of x
+        // this is useful later with the onClick event
+        customdata: points.data.map((point) => ({
             phenotype_id,
             sex,
             ancestry,
@@ -574,7 +575,7 @@ plco.plot.qq = async (
     const traceLine = {
         x: [0, max],
         y: [0, max],
-        type: 'scattergl',
+        type: 'scattergl', // scattergl seems to load faster than scatter, else no major diff
         mode: 'line',
         marker: {
             color: '#BBB',
@@ -663,14 +664,26 @@ plco.plot.qq = async (
     if (!to_json) {
         Plotly.newPlot(div, [traceLine, trace], layout, config)
 
-        div.on('plotly_click', (data) => {
+        div.on('plotly_click', async (data) => {
             console.log(data) // contains the custom data
-            // TODO
-            alert('test!')
+
+            // An array
+            const { points } = data
+
+            for (let i = 0; i < points.length; i++) {
+                const res = await plco.api.variants({ id: points.data.customdata.id },
+                    phenotype_id, sex, ancestry, 'all', 'chromosome,position,snp')
+                updatedText = points[i].data.text.slice()
+                updatedText[points[i].pointIndex] = JSON.stringify(res)
+
+                Plotly.restyle(div, { text: [updatedText] }, [1])
+            }
         })
         return div
     } else {
-        return JSON.stringify('')
+        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
+        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
+        return tracesString + layoutString
     }
 }
 
