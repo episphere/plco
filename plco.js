@@ -521,8 +521,8 @@ plco.plot.qq = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-    // const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
-    metadata = metadata[2]
+    const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
+    // metadata = metadata[2]
 
     if (metadata === undefined || metadata['count'] === null) {
         throw new Error('No data found for this combination of sex and/or ancestry.')
@@ -533,7 +533,7 @@ plco.plot.qq = async (
      * @prop {Array<object>} data
      * @prop {Array<string>} columns
      */
-    // const points = await plco.api.points({}, phenotype_id, sex, ancestry)
+    const points = await plco.api.points({}, phenotype_id, sex, ancestry)
 
     let div = document.getElementById(div_id)
 
@@ -671,12 +671,21 @@ plco.plot.qq = async (
             const { points } = data
 
             for (let i = 0; i < points.length; i++) {
-                const res = await plco.api.variants({ id: points.data.customdata.id },
-                    phenotype_id, sex, ancestry, 'all', 'chromosome,position,snp')
-                updatedText = points[i].data.text.slice()
-                updatedText[points[i].pointIndex] = JSON.stringify(res)
-
-                Plotly.restyle(div, { text: [updatedText] }, [1])
+                try {
+                    const res = await plco.api.get('variants', {
+                        id: points[i].customdata.variantId,
+                        phenotype_id,
+                        sex,
+                        ancestry,
+                        columns: 'chromosome,position,snp',
+                    })
+                    const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
+                    let updatedText = points[i].data.text.slice()
+                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br> Position: ${resPosition} <br> SNP: ${resSnp}`
+                    Plotly.restyle(div, { text: [updatedText] }, [1])
+                } catch (e) {
+                    console.error('Failed to fetch data/malformed data.')
+                }
             }
         })
         return div
