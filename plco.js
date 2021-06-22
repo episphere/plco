@@ -583,6 +583,7 @@ plco.plot.qq = async (
             size: 0.1,
         },
         hoverinfo: 'none',
+        showlegend: false,
     }
 
     const layout = {
@@ -701,7 +702,10 @@ plco.plot.qq = async (
  * 
  * @param {*} div_id 
  * @param {*} arrayOfObjects 
- * @returns 
+ * @returns
+ * @example
+ * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, 
+ * {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
  */
 plco.plot.qq2 = (
     div_id,
@@ -749,9 +753,23 @@ plco.plot.qq2 = (
                 })
             })
 
-            const layout = arrayOfJson[0].layout
-
-            // TODO show legend
+            const layout = {
+                ...arrayOfJson[0].layout,
+                showlegend: true,
+                width: 900,
+                height: 900,
+                hoverlabel: {
+                },
+                title: {
+                    text: arrayOfJson.reduce((word, cur) => 
+                        word + cur.layout.title.text + '<br>'
+                    , ''),
+                    font: {
+                        size: 15,
+                        color: 'black'
+                    }
+                }
+            }
 
             const config = {
                 scrollZoom: true,
