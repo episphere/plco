@@ -469,17 +469,24 @@ plco.plot = async function() {
  * @param {string} ancestry 
  * @param {number} p_value_nlog_min 
  * @param {integer} chromosome _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
- */
+ * @param {boolean} to_json _Optional_ If true, a JSON object is returned. If false, a plot is created.
+*/
 plco.plot.manhattan = async function(
-    phenotype_id,
-    sex,
-    ancestry,
-    p_value_nlog_min,
-    chromosome
+    div_id,
+    phenotype_id = 3080,
+    sex = 'female',
+    ancestry = 'european',
+    p_value_nlog_min = 2,
+    chromosome,
+    to_json = false
 ) {
 
-    //let manhattanDiv = document.createElement('div')
-    //manhattanDiv.id = "manhattanDiv"
+    let div = document.getElementById(div_id)
+
+    if(div === null && !to_json) {
+        div = document.createElement('div')
+        document.body.appendChild(div)
+    }
 
     let inputData = await plco.api.summary({ phenotype_id, sex, ancestry, p_value_nlog_min });
 
@@ -487,11 +494,11 @@ plco.plot.manhattan = async function(
     let numberOfChromosomes;
     if(chromosome) {
         inputData = inputData.data.filter(x => x.chromosome == "" + chromosome)
-        chromosomeName = "Chromosome " + chromosome
+        chromosomeName = 'Chromosome ' + chromosome
         numberOfChromosomes = 1
     } else {
         inputData = inputData.data
-        chromosomeName = "All Chromosomes"
+        chromosomeName = 'All Chromosomes'
         numberOfChromosomes = 22
     }
 
@@ -507,18 +514,18 @@ plco.plot.manhattan = async function(
         traces.push({
             x: currentChromosomeData.map(x => parseInt(x.position_abs)),
             y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
-            mode: "markers",
-            type: "scatter",
+            mode: 'markers',
+            type: 'scatter',
             marker: {
                 opacity: 0.65,
                 size: 5
             },
-            name: "Chromosome " + currentChromosome
+            name: 'Chromosome ' + currentChromosome
         })
     }
 
     let layout = {
-        title: "SNPs in " + chromosomeName,
+        title: 'SNPs in ' + chromosomeName,
         xaxis: {
             title: 'absolute position'
         },
@@ -527,12 +534,14 @@ plco.plot.manhattan = async function(
         }
     };
 
-    tracesString = '{"traces":' + JSON.stringify(traces) + ','
-    layoutString = '"layout":' + JSON.stringify(layout) + '}'
-    tracesAndLayoutString = tracesString + layoutString
-    //console.log(tracesAndLayoutString)
-    //Plotly.newPlot("manhattanDiv", traces, layout)
-    return tracesAndLayoutString
+    if(!to_json) {
+        Plotly.newPlot(div, traces, layout)
+        return div
+    } else {
+        tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        layoutString = '"layout":' + JSON.stringify(layout) + '}'
+        return tracesString + layoutString
+    }
 }
 
 /*
