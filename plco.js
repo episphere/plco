@@ -537,7 +537,7 @@ plco.plot.qq = async (
 
     let div = document.getElementById(div_id)
 
-    if (div === null) {
+    if (div === null && !to_json) {
         div = document.createElement('div')
         document.body.appendChild(div)
     }
@@ -681,7 +681,8 @@ plco.plot.qq = async (
                     })
                     const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
                     let updatedText = points[i].data.text.slice()
-                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br> Position: ${resPosition} <br> SNP: ${resSnp}`
+                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                        `Position: ${resPosition} <br> SNP: ${resSnp}`
                     Plotly.restyle(div, { text: [updatedText] }, [1])
                 } catch (e) {
                     console.error('Failed to fetch data/malformed data.')
@@ -696,8 +697,72 @@ plco.plot.qq = async (
     }
 }
 
-plco.plot.qq2 = () => {
+/**
+ * 
+ * @param {*} div_id 
+ * @param {*} arrayOfObjects 
+ * @returns 
+ */
+plco.plot.qq2 = (
+    div_id,
+    arrayOfObjects = []
+) => {
+    const promises = []
+    arrayOfObjects.forEach((obj) => {
+        const { phenotype_id, sex, ancestry } = obj
+        if (!phenotype_id || !sex || !ancestry) {
+            console.error('An object is missing mandatory fields, skipping ...')
+            return
+        } else {
+            promises.push(plco.plot.qq('', phenotype_id, sex, ancestry, true))
+        }
+    })
+
+    /**
+     * @type {Array<object>} Each object has the following props:
+     * @prop {Array<object>} traces
+     * @prop {object} layout
+     */
+    const arrayOfJson = Promise.all(promises)
+        .then((arrayOfJsonStr) => arrayOfJsonStr.map((str) => JSON.parse(str)))
+
+    if (arrayOfJson.length === 0) return
+
+    const colors = ['#01A5E4', '#FFBF65', '#FF5768', '#8DD7C0', '#FF96C6']
+
+    let div = document.getElementById(div_id)
+    if (div === null) {
+        div = document.createElement('div')
+        document.body.appendChild(div)
+    }
+
+    const traces = [arrayOfJson.traces[0]]
+
+    arrayOfJson.forEach((obj, index) => {
+        traces.push({
+            ...obj.traces[1],
+            marker: {
+                color: colors[index] % colors.length,
+                size: 4,
+                opacity: 0.6
+            }
+        })
+    })
+
+    const layout = arrayOfJson.layout
+
     // TODO show legend
+
+    const config = {
+        scrollZoom: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+            'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
+            'hoverCompareCartesian', 'hoverClosestCartesian',
+        ],
+    }
+
+    Plotly.newPlot(div, traces, layout, config)
 }
 
 plco()
