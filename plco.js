@@ -723,46 +723,47 @@ plco.plot.qq2 = (
      * @prop {Array<object>} traces
      * @prop {object} layout
      */
-    const arrayOfJson = Promise.all(promises)
+    Promise.all(promises)
         .then((arrayOfJsonStr) => arrayOfJsonStr.map((str) => JSON.parse(str)))
+        .then((arrayOfJson) => {
+            if (arrayOfJson.length === 0) return
 
-    if (arrayOfJson.length === 0) return
+            const colors = ['#01A5E4', '#FFBF65', '#FF5768', '#8DD7C0', '#FF96C6']
 
-    const colors = ['#01A5E4', '#FFBF65', '#FF5768', '#8DD7C0', '#FF96C6']
-
-    let div = document.getElementById(div_id)
-    if (div === null) {
-        div = document.createElement('div')
-        document.body.appendChild(div)
-    }
-
-    const traces = [arrayOfJson.traces[0]]
-
-    arrayOfJson.forEach((obj, index) => {
-        traces.push({
-            ...obj.traces[1],
-            marker: {
-                color: colors[index] % colors.length,
-                size: 4,
-                opacity: 0.6
+            let div = document.getElementById(div_id)
+            if (div === null) {
+                div = document.createElement('div')
+                document.body.appendChild(div)
             }
+
+            const traces = [arrayOfJson[0].traces[0]]
+
+            arrayOfJson.forEach((obj, index) => {
+                traces.push({
+                    ...obj.traces[1],
+                    marker: {
+                        color: colors[index] % colors.length,
+                        size: 4,
+                        opacity: 0.6
+                    }
+                })
+            })
+
+            const layout = arrayOfJson[0].layout
+
+            // TODO show legend
+
+            const config = {
+                scrollZoom: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: [
+                    'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
+                    'hoverCompareCartesian', 'hoverClosestCartesian',
+                ],
+            }
+
+            Plotly.newPlot(div, traces, layout, config)
         })
-    })
-
-    const layout = arrayOfJson.layout
-
-    // TODO show legend
-
-    const config = {
-        scrollZoom: true,
-        displaylogo: false,
-        modeBarButtonsToRemove: [
-            'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
-            'hoverCompareCartesian', 'hoverClosestCartesian',
-        ],
-    }
-
-    Plotly.newPlot(div, traces, layout, config)
 }
 
 plco()
