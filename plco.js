@@ -691,7 +691,9 @@ plco.plot.qq = async (
     if (!to_json) {
         Plotly.newPlot(div, [traceLine, trace], layout, config)
 
-        div.on('plotly_click', plco.plot.qqClickHandler)
+        div.on('plotly_click', async (data) => {
+            await plco.plot.qqClickHandler(data)
+        })
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
@@ -756,7 +758,7 @@ plco.plot.qq2 = (
                 traces.push({
                     ...obj.traces[1],
                     marker: {
-                        color: colors[index] % colors.length,
+                        color: colors[index % colors.length],
                         size: 4,
                         opacity: 0.6
                     }
@@ -772,10 +774,9 @@ plco.plot.qq2 = (
                 },
                 title: {
                     text: arrayOfJson.reduce((word, cur, index) =>
-                        word + `<h6 style="color:${colors[index] % colors.length};">`
-                        + cur.layout.title.text + '</h6><br>', ''),
+                        word + traces[index + 1].name + cur.layout.title.text + '<br>', ''),
                     font: {
-                        size: 15,
+                        size: 12,
                         color: 'black'
                     }
                 }
@@ -791,7 +792,9 @@ plco.plot.qq2 = (
             }
 
             if (!to_json) {
-                div.on('plotly_click', plco.plot.qqClickHandler)
+                div.on('plotly_click', async (data) => {
+                    await plco.plot.qqClickHandler(data)
+                })
                 Plotly.newPlot(div, traces, layout, config)
                 return div
             } else {
