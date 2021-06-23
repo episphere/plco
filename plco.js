@@ -489,32 +489,6 @@ plco.plot = async function () {
 
 }
 
-plco.plot.qqClickHandler = async (data) => {
-    console.log(data) // contains the custom data
-
-    // An array
-    const { points } = data
-
-    for (let i = 0; i < points.length; i++) {
-        try {
-            const res = await plco.api.get('variants', {
-                id: points[i].customdata.variantId,
-                phenotype_id,
-                sex,
-                ancestry,
-                columns: 'chromosome,position,snp',
-            })
-            const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
-            let updatedText = points[i].data.text.slice()
-            updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
-                `Position: ${resPosition} <br> SNP: ${resSnp}`
-            Plotly.restyle(div, { text: [updatedText] }, [1])
-        } catch (e) {
-            console.error('Failed to fetch data/malformed data.')
-        }
-    }
-}
-
 /**
  * The manhattan uses 3, metadata, summary, and variants for the bottom stuff
  * 
@@ -692,7 +666,29 @@ plco.plot.qq = async (
         Plotly.newPlot(div, [traceLine, trace], layout, config)
 
         div.on('plotly_click', async (data) => {
-            await plco.plot.qqClickHandler(data)
+            console.log(data) // contains the custom data
+
+            // An array
+            const { points } = data
+
+            for (let i = 0; i < points.length; i++) {
+                try {
+                    const res = await plco.api.get('variants', {
+                        id: points[i].customdata.variantId,
+                        phenotype_id,
+                        sex,
+                        ancestry,
+                        columns: 'chromosome,position,snp',
+                    })
+                    const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
+                    let updatedText = points[i].data.text.slice()
+                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                        `Position: ${resPosition} <br> SNP: ${resSnp}`
+                    Plotly.restyle(div, { text: [updatedText] }, [1])
+                } catch (e) {
+                    console.error('Failed to fetch data/malformed data.')
+                }
+            }
         })
         return div
     } else {
@@ -738,7 +734,7 @@ plco.plot.qq2 = (
      * @prop {Array<object>} traces
      * @prop {object} layout
      */
-    Promise.all(promises)
+    return Promise.all(promises)
         .then((_) => _.filter(Boolean)) // Filters out all undefined and null
         .then((arrayOfJsonStr) => arrayOfJsonStr.map((str) => JSON.parse(str)))
         .then((arrayOfJson) => {
@@ -793,7 +789,29 @@ plco.plot.qq2 = (
 
             if (!to_json) {
                 div.on('plotly_click', async (data) => {
-                    await plco.plot.qqClickHandler(data)
+                    console.log(data) // contains the custom data
+
+                    // An array
+                    const { points } = data
+
+                    for (let i = 0; i < points.length; i++) {
+                        try {
+                            const res = await plco.api.get('variants', {
+                                id: points[i].customdata.variantId,
+                                phenotype_id,
+                                sex,
+                                ancestry,
+                                columns: 'chromosome,position,snp',
+                            })
+                            const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
+                            let updatedText = points[i].data.text.slice()
+                            updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                                `Position: ${resPosition} <br> SNP: ${resSnp}`
+                            Plotly.restyle(div, { text: [updatedText] }, [1])
+                        } catch (e) {
+                            console.error('Failed to fetch data/malformed data.')
+                        }
+                    }
                 })
                 Plotly.newPlot(div, traces, layout, config)
                 return div
