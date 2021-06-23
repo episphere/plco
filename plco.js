@@ -489,6 +489,32 @@ plco.plot = async function () {
 
 }
 
+plco.plot.qqClickHandler = async (data) => {
+    console.log(data) // contains the custom data
+
+    // An array
+    const { points } = data
+
+    for (let i = 0; i < points.length; i++) {
+        try {
+            const res = await plco.api.get('variants', {
+                id: points[i].customdata.variantId,
+                phenotype_id,
+                sex,
+                ancestry,
+                columns: 'chromosome,position,snp',
+            })
+            const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
+            let updatedText = points[i].data.text.slice()
+            updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                `Position: ${resPosition} <br> SNP: ${resSnp}`
+            Plotly.restyle(div, { text: [updatedText] }, [1])
+        } catch (e) {
+            console.error('Failed to fetch data/malformed data.')
+        }
+    }
+}
+
 /**
  * The manhattan uses 3, metadata, summary, and variants for the bottom stuff
  * 
@@ -665,31 +691,7 @@ plco.plot.qq = async (
     if (!to_json) {
         Plotly.newPlot(div, [traceLine, trace], layout, config)
 
-        div.on('plotly_click', async (data) => {
-            console.log(data) // contains the custom data
-
-            // An array
-            const { points } = data
-
-            for (let i = 0; i < points.length; i++) {
-                try {
-                    const res = await plco.api.get('variants', {
-                        id: points[i].customdata.variantId,
-                        phenotype_id,
-                        sex,
-                        ancestry,
-                        columns: 'chromosome,position,snp',
-                    })
-                    const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
-                    let updatedText = points[i].data.text.slice()
-                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
-                        `Position: ${resPosition} <br> SNP: ${resSnp}`
-                    Plotly.restyle(div, { text: [updatedText] }, [1])
-                } catch (e) {
-                    console.error('Failed to fetch data/malformed data.')
-                }
-            }
-        })
+        div.on('plotly_click', plco.plot.qqClickHandler)
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
@@ -709,7 +711,8 @@ plco.plot.qq = async (
  */
 plco.plot.qq2 = (
     div_id,
-    arrayOfObjects = []
+    arrayOfObjects = [],
+    to_json = false
 ) => {
     const promises = []
     arrayOfObjects.forEach((obj) => {
@@ -718,7 +721,13 @@ plco.plot.qq2 = (
             console.error('An object is missing mandatory fields, skipping ...')
             return
         } else {
-            promises.push(plco.plot.qq('', phenotype_id, sex, ancestry, true))
+            promises.push(
+                plco.plot.qq('', phenotype_id, sex, ancestry, true)
+                    .catch(() => {
+                        console.error('Unable to fetch data, skipping...')
+                        return undefined
+                    })
+            )
         }
     })
 
@@ -728,6 +737,7 @@ plco.plot.qq2 = (
      * @prop {object} layout
      */
     Promise.all(promises)
+        .then((_) => _.filter(Boolean)) // Filters out all undefined and null
         .then((arrayOfJsonStr) => arrayOfJsonStr.map((str) => JSON.parse(str)))
         .then((arrayOfJson) => {
             if (arrayOfJson.length === 0) return
@@ -735,7 +745,7 @@ plco.plot.qq2 = (
             const colors = ['#01A5E4', '#FFBF65', '#FF5768', '#8DD7C0', '#FF96C6']
 
             let div = document.getElementById(div_id)
-            if (div === null) {
+            if (div === null && !to_json) {
                 div = document.createElement('div')
                 document.body.appendChild(div)
             }
@@ -761,9 +771,9 @@ plco.plot.qq2 = (
                 hoverlabel: {
                 },
                 title: {
-                    text: arrayOfJson.reduce((word, cur) => 
-                        word + cur.layout.title.text + '<br>'
-                    , ''),
+                    text: arrayOfJson.reduce((word, cur, index) =>
+                        word + `<h6 style="color:${colors[index] % colors.length};">`
+                        + cur.layout.title.text + '</h6><br>', ''),
                     font: {
                         size: 15,
                         color: 'black'
@@ -780,7 +790,15 @@ plco.plot.qq2 = (
                 ],
             }
 
-            Plotly.newPlot(div, traces, layout, config)
+            if (!to_json) {
+                div.on('plotly_click', plco.plot.qqClickHandler)
+                Plotly.newPlot(div, traces, layout, config)
+                return div
+            } else {
+                const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+                const layoutString = '"layout":' + JSON.stringify(layout) + '}'
+                return tracesString + layoutString
+            }
         })
 }
 
