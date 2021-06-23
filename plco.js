@@ -539,6 +539,7 @@ plco.plot.qq = async (
 
     if (div === null && !to_json) {
         div = document.createElement('div')
+        div.id = div_id
         document.body.appendChild(div)
     }
 
@@ -686,7 +687,7 @@ plco.plot.qq = async (
                         `Position: ${resPosition} <br> SNP: ${resSnp}`
                     Plotly.restyle(div, { text: [updatedText] }, [1])
                 } catch (e) {
-                    console.error('Failed to fetch data/malformed data.')
+                    console.error(e)
                 }
             }
         })
@@ -745,6 +746,7 @@ plco.plot.qq2 = (
             let div = document.getElementById(div_id)
             if (div === null && !to_json) {
                 div = document.createElement('div')
+                div.id = div_id
                 document.body.appendChild(div)
             }
 
@@ -757,7 +759,8 @@ plco.plot.qq2 = (
                         color: colors[index % colors.length],
                         size: 4,
                         opacity: 0.6
-                    }
+                    },
+                    traceIndex: index + 1,
                 })
             })
 
@@ -770,7 +773,7 @@ plco.plot.qq2 = (
                 },
                 title: {
                     text: arrayOfJson.reduce((word, cur, index) =>
-                        word + traces[index + 1].name + cur.layout.title.text + '<br>', ''),
+                        word + traces[index + 1].name + ' ' + cur.layout.title.text + '<br>', ''),
                     font: {
                         size: 12,
                         color: 'black'
@@ -788,6 +791,7 @@ plco.plot.qq2 = (
             }
 
             if (!to_json) {
+                Plotly.newPlot(div, traces, layout, config)
                 div.on('plotly_click', async (data) => {
                     console.log(data) // contains the custom data
 
@@ -796,8 +800,9 @@ plco.plot.qq2 = (
 
                     for (let i = 0; i < points.length; i++) {
                         try {
+                            const { id, phenotype_id, sex, ancestry } = points[i].customdata
                             const res = await plco.api.get('variants', {
-                                id: points[i].customdata.variantId,
+                                id,
                                 phenotype_id,
                                 sex,
                                 ancestry,
@@ -807,13 +812,12 @@ plco.plot.qq2 = (
                             let updatedText = points[i].data.text.slice()
                             updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
                                 `Position: ${resPosition} <br> SNP: ${resSnp}`
-                            Plotly.restyle(div, { text: [updatedText] }, [1])
+                            Plotly.restyle(div, { text: [updatedText] }, [points[i].traceIndex])
                         } catch (e) {
-                            console.error('Failed to fetch data/malformed data.')
+                            console.error(e)
                         }
                     }
                 })
-                Plotly.newPlot(div, traces, layout, config)
                 return div
             } else {
                 const tracesString = '{"traces":' + JSON.stringify(traces) + ','
