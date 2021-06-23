@@ -760,7 +760,6 @@ plco.plot.qq2 = (
                         size: 4,
                         opacity: 0.6
                     },
-                    traceIndex: index + 1,
                 })
             })
 
@@ -812,7 +811,7 @@ plco.plot.qq2 = (
                             let updatedText = points[i].data.text.slice()
                             updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
                                 `Position: ${resPosition} <br> SNP: ${resSnp}`
-                            Plotly.restyle(div, { text: [updatedText] }, [points[i].traceIndex])
+                            Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
                         } catch (e) {
                             console.error(e)
                         }
