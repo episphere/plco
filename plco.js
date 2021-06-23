@@ -485,21 +485,33 @@ if(typeof(define)!='undefined'){
 }
 */
 
+/**
+ * Sub-module grouping plotting methods.
+ * @memberof — plco
+ * @namespace — plco.plot
+ * @prop {Function} manhattan - {@link plco.plot.manhattan} 
+ * The manhattan uses 3, metadata, summary, and variants for the bottom stuff.
+ * @prop {Function} qq - {@link plco.plot.qq}
+ * Only uses two endpoints, metadata and points
+ * The on-hover action of the individual point will use the __variants__ endpoint!
+ * @prop {Function} qq2 - {@link plco.plot.qq2}
+ * Pca plot uses two endpoints, metadata and pca
+ */
 plco.plot = async function () {
 
 }
 
 /**
- * The manhattan uses 3, metadata, summary, and variants for the bottom stuff
- * 
- * Only uses two endpoints, metadata and points
- *      The on-hover action of the individual point will use the __variants__ endpoint!
- * 
- * Pca plot uses two endpoints, metadata and pca
- * @param {*} div_id
- * @param {*} phenotype_id 
- * @param {*} sex 
- * @param {*} ancestry 
+ * Generates a Plotly quartile-quartile plot at the given div element with support for a single input.
+ * @param {string} div_id The id of the div element, if it does not exist, a new div will be created.
+ * @param {number} [phenotype_id=3080] A phenotype id.
+ * @param {string} [sex=female] A sex, which may be "all", "female", or "male".
+ * @param {string} [ancestry=east_asian] A character vector specifying ancestries to retrieve data for.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * Else, returns a div element containing the Plotly graph.
+ * @returns A div element or a string if `to_json` is true.
+ * @example
+ * await plco.plot.qq('plot', 3080, 'female', 'east_asian')
  */
 plco.plot.qq = async (
     div_id,
@@ -522,14 +534,13 @@ plco.plot.qq = async (
      * @prop {integer} count
      */
     const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
-    // metadata = metadata[2]
 
     if (metadata === undefined || metadata['count'] === null) {
         throw new Error('No data found for this combination of sex and/or ancestry.')
     }
 
     /**
-     * @type {object}
+     * @type {object} Object with the following props:
      * @prop {Array<object>} data
      * @prop {Array<string>} columns
      */
@@ -700,10 +711,12 @@ plco.plot.qq = async (
 }
 
 /**
- * 
- * @param {*} div_id 
- * @param {*} arrayOfObjects 
- * @returns
+ * Generates a Plotly quartile-quartile plot at the given div element with support for multiple inputs. 
+ * @param {string} div_id The id of the div element, if it does not exist, a new div will be created.
+ * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * Else, returns a div element containing the Plotly graph.
+ * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, 
  * {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
