@@ -1059,18 +1059,18 @@ plco.plot.helpers.pcaGenerateTraces = async (
             x: others.map(obj => obj.pc_x),
             y: others.map(obj => obj.pc_y),
             marker: {
-                color: '#212529',
-                size: 5,
-                opacity: 0.65
+                color: '#A6A6A6',
+                size: 4,
+                opacity: 0.3
             },
             name: 'Other'
         })
 
-        const controls = pca.data.filter(obj =>
+        const controls = item.data.filter(obj =>
             obj.ancestry === validArray[index].ancestry &&
             obj.sex === validArray[index].sex && (obj.value === null || obj.value === 0)
         )
-        const cases = pca.data.filter(obj =>
+        const cases = item.data.filter(obj =>
             obj.ancestry === validArray[index].ancestry &&
             obj.sex === validArray[index].sex && (obj.value !== null && obj.value !== 0)
         )
