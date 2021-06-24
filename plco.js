@@ -474,7 +474,9 @@ plco.plot = async function() {
  * @param {boolean} to_json _Optional_ If true, returns a stringified JSON object containing traces and layout.
  * If false, returns a div element containing the Plotly graph.
  * @returns A div element or a string if 'to_json' is true.
- * @example plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
+ * @example 
+ * plco.plot.manhattan()
+ * plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
 */
 plco.plot.manhattan = async function(
     div_id,
@@ -509,6 +511,13 @@ plco.plot.manhattan = async function(
         numberOfChromosomes = 22
     }
 
+    // Retrieve rs number for all SNPs if a chromosome number was passed as an argument.
+    let rsNumbers = [];
+    if(numberOfChromosomes == 1) {
+        let rsNumbers_allData = await plco.api.variants({}, phenotype_id, sex, ancestry, chromosome);
+        rsNumbers_allData.data.map(x => rsNumbers.push(x.snp))
+    }
+
     // Set up traces
     let traces = []
     let currentChromosome;
@@ -534,6 +543,12 @@ plco.plot.manhattan = async function(
                 '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
             )
         })
+    }
+
+   if(numberOfChromosomes == 1) {
+        for(i = 0; i < traces[0].hovertemplate.length; i++) {
+            traces[0].hovertemplate[i] += '<br>snp: ' + rsNumbers[i]
+        }
     }
 
     let layout = {
