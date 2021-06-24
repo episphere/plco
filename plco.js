@@ -558,7 +558,8 @@ plco.plot.manhattan = async function(
         },
         yaxis: {
             title: '-log<sub>10</sub>(p)'
-        }
+        },
+        hovermode: 'closest'
     };
 
     if(!to_json) {
