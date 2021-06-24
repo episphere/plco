@@ -464,15 +464,17 @@ plco.plot = async function() {
 }
 
 /**
+ * Generates a Plotly manhattan plot at the given div element with support for a single input.
  * @param {string} div_id The id of the div element. If it does not exist, a new div will be created.
  * @param {number} phenotype_id A phenotype id.
  * @param {string} sex A sex, which may be "all, "female", or "male".
  * @param {string} ancestry An ancestry, which may be  "african_american", "east_asian" or "european".
  * @param {number} p_value_nlog_min A numeric value >= 0 specifying the minimum -log10(p) for variants.
  * @param {integer} chromosome _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
- * @param {boolean} to_json _Optional_ If true,An ancestry, which may be  "african_american", "east_asian" or "european". 
+ * @param {boolean} to_json _Optional_ If true, returns a stringified JSON object containing traces and layout.
  * If false, returns a div element containing the Plotly graph.
  * @returns A div element or a string if 'to_json' is true.
+ * @example plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
 */
 plco.plot.manhattan = async function(
     div_id,
@@ -484,15 +486,17 @@ plco.plot.manhattan = async function(
     to_json = false
 ) {
 
+    // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
-
     if(div === null && !to_json) {
         div = document.createElement('div')
         document.body.appendChild(div)
     }
 
+    // Retrieve all summary data.
     let inputData = await plco.api.summary({ phenotype_id, sex, ancestry, p_value_nlog_min });
 
+    // Filter summary data if chromosome number was specified, and set associated variables for later.
     let chromosomeName;
     let numberOfChromosomes;
     if(chromosome) {
@@ -505,6 +509,7 @@ plco.plot.manhattan = async function(
         numberOfChromosomes = 22
     }
 
+    // Set up traces
     let traces = []
     let currentChromosome;
     for(i = 1; i <= numberOfChromosomes; i++) {
@@ -523,7 +528,11 @@ plco.plot.manhattan = async function(
                 opacity: 0.65,
                 size: 5
             },
-            name: 'Chromosome ' + currentChromosome
+            name: 'Chromosome ' + currentChromosome, // appears as legend item
+            hovertemplate: currentChromosomeData.map(x =>
+                'absolute position: ' + parseInt(x.position_abs) +
+                '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
+            )
         })
     }
 
