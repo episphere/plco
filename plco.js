@@ -847,6 +847,9 @@ plco.plot.pca = async (
     to_json = false
 ) => {
 
+    let pc_x = 1
+    let pc_y = 2
+
     /**
      * @type {Array<object>} Each object in the array has the properties defined below.
      * @prop {integer} id
@@ -900,6 +903,7 @@ plco.plot.pca = async (
         type: 'scattergl',
         hoverinfo: 'none',
         showlegend: true,
+        mode: 'markers',
     }
 
     const othersTrace = {
@@ -943,7 +947,6 @@ plco.plot.pca = async (
             font: {
                 size: 14,
                 color: '#212529',
-                family: systemFont
             }
         },
         dragmode: 'pan',
@@ -955,7 +958,6 @@ plco.plot.pca = async (
         // title: {
         //   text: title,
         //   font: {
-        //     family: systemFont,
         //     size: 14,
         //     color: 'black'
         //   }
@@ -963,14 +965,10 @@ plco.plot.pca = async (
         xaxis: {
             // tickmode: 'auto',
             automargin: true,
-            // rangemode: 'tozero', // only show positive
             showgrid: false, // disable grid lines
-            // zeroline: false,
-            // fixedrange: true, // disable zoom
             title: {
                 text: `<b>PC ${(pc_x || '1')}</b>`,
                 font: {
-                    family: systemFont,
                     size: 14,
                     color: 'black'
                 }
@@ -978,7 +976,6 @@ plco.plot.pca = async (
             tick0: 0,
             ticklen: 10,
             tickfont: {
-                family: systemFont,
                 size: 10,
                 color: 'black'
             }
@@ -986,14 +983,10 @@ plco.plot.pca = async (
         yaxis: {
             // tickmode: 'auto',
             automargin: true,
-            // rangemode: 'tozero', // only show positive
             showgrid: false, // disable grid lines
-            // zeroline: false,
-            // fixedrange: true, // disable zoom
             title: {
                 text: `<b>PC ${(pc_y || '2')}</b>`,
                 font: {
-                    family: systemFont,
                     size: 14,
                     color: 'black'
                 }
@@ -1001,7 +994,6 @@ plco.plot.pca = async (
             tick0: 0,
             ticklen: 10,
             tickfont: {
-                family: systemFont,
                 size: 10,
                 color: 'black'
             }
