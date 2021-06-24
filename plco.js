@@ -1036,6 +1036,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
             plco.api.pca({}, obj.phenotype_id, platform, pc_x, pc_y)
         )
     )
+    // Pca [] should have a one-to-one correspondence with validArray []
     const pcadatas = await Promise.all(pcaPromises)
 
     const baseTrace = {
@@ -1050,7 +1051,8 @@ plco.plot.helpers.pcaGenerateTraces = async (
     pcadatas.forEach((item, index) => {
         // create the other traces first
         const others = item.data.filter(obj =>
-            obj.ancestry !== metadatas[index].ancestry || obj.sex !== metadatas[index].sex || obj.value === null
+            obj.ancestry !== validArray[index].ancestry ||
+            obj.sex !== validArray[index].sex || obj.value === null
         )
         otherTraces.push({
             ...baseTrace,
@@ -1065,10 +1067,12 @@ plco.plot.helpers.pcaGenerateTraces = async (
         })
 
         const controls = pca.data.filter(obj =>
-            obj.ancestry === ancestry && obj.sex === sex && (obj.value === null || obj.value === 0)
+            obj.ancestry === validArray[index].ancestry &&
+            obj.sex === validArray[index].sex && (obj.value === null || obj.value === 0)
         )
         const cases = pca.data.filter(obj =>
-            obj.ancestry === ancestry && obj.sex === sex && (obj.value !== null && obj.value !== 0)
+            obj.ancestry === validArray[index].ancestry &&
+            obj.sex === validArray[index].sex && (obj.value !== null && obj.value !== 0)
         )
         const controlsTrace = {
             ...baseTrace,
