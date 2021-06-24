@@ -839,6 +839,219 @@ plco.plot.qq2 = (
         })
 }
 
+plco.plot.pca = async (
+    div_id,
+    phenotype_id,
+    sex,
+    ancestry,
+    to_json = false
+) => {
+
+    /**
+     * @type {Array<object>} Each object in the array has the properties defined below.
+     * @prop {integer} id
+     * @prop {integer} phenotype_id
+     * @prop {string} phenotype_name
+     * @prop {string} phenotype_display_name
+     * @prop {string} sex
+     * @prop {string} ancestry
+     * @prop {string} chromosome
+     * @prop {number} lambda_gc
+     * @prop {number} lambda_gc_ld_score
+     * @prop {integer} count
+     */
+    const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
+
+    if (metadata === undefined || metadata['count'] === null) {
+        throw new Error('No data found for this combination of sex and/or ancestry.')
+    }
+
+    /**
+     * @type {object}
+     * @prop {Array} columns 
+     * @prop {Array} data - `data` is an array of object that has the following props: 
+     * pc_x, pc_y, ancestry, sex, value
+     */
+    const pca = await plco.api.pca({}, phenotype_id)
+
+    let div = document.getElementById(div_id)
+
+    if (div === null && !to_json) {
+        div = document.createElement('div')
+        div.id = div_id
+        document.body.appendChild(div)
+    }
+
+    // Other are the points that do not share the inputted ancestry or sex or value == null
+    // Control are the same ancestry and sex, but value == null or 0
+    // Cases are the same ancestry and sex, but value != null and != 0
+
+    const others = pca.data.filter(obj =>
+        obj.ancestry !== ancestry || obj.sex !== sex || obj.value === null
+    )
+    const controls = pca.data.filter(obj =>
+        obj.ancestry === ancestry && obj.sex === sex && (obj.value === null || obj.value === 0)
+    )
+    const cases = pca.data.filter(obj =>
+        obj.ancestry === ancestry && obj.sex === sex && (obj.value !== null && obj.value !== 0)
+    )
+
+    const baseTrace = {
+        type: 'scattergl',
+        hoverinfo: 'none',
+        showlegend: true,
+    }
+
+    const othersTrace = {
+        ...baseTrace,
+        x: others.map(obj => obj.pc_x),
+        y: others.map(obj => obj.pc_y),
+        marker: {
+            color: '#212529',
+            size: 5,
+            opacity: 0.65
+        },
+        name: 'Other'
+    }
+
+    const controlsTrace = {
+        x: controls.map(obj => obj.pc_x),
+        y: controls.map(obj => obj.pc_y),
+        marker: {
+            color: '##CC4553',
+            size: 5,
+            opacity: 0.65
+        },
+        name: 'Controls'
+    }
+
+    const casesTrace = {
+        x: cases.map(obj => obj.pc_x),
+        y: cases.map(obj => obj.pc_y),
+        marker: {
+            color: '##FF5768',
+            size: 5,
+            opacity: 0.65
+        },
+        name: 'Cases'
+    }
+
+    const layout = {
+        hoverlabel: {
+            bgcolor: '#fff',
+            bordercolor: '#bbb',
+            font: {
+                size: 14,
+                color: '#212529',
+                family: systemFont
+            }
+        },
+        dragmode: 'pan',
+        clickmode: 'event',
+        hovermode: 'closest',
+        width: 800,
+        height: 800,
+        autosize: true,
+        // title: {
+        //   text: title,
+        //   font: {
+        //     family: systemFont,
+        //     size: 14,
+        //     color: 'black'
+        //   }
+        // },
+        xaxis: {
+            // tickmode: 'auto',
+            automargin: true,
+            // rangemode: 'tozero', // only show positive
+            showgrid: false, // disable grid lines
+            // zeroline: false,
+            // fixedrange: true, // disable zoom
+            title: {
+                text: `<b>PC ${(pc_x || '1')}</b>`,
+                font: {
+                    family: systemFont,
+                    size: 14,
+                    color: 'black'
+                }
+            },
+            tick0: 0,
+            ticklen: 10,
+            tickfont: {
+                family: systemFont,
+                size: 10,
+                color: 'black'
+            }
+        },
+        yaxis: {
+            // tickmode: 'auto',
+            automargin: true,
+            // rangemode: 'tozero', // only show positive
+            showgrid: false, // disable grid lines
+            // zeroline: false,
+            // fixedrange: true, // disable zoom
+            title: {
+                text: `<b>PC ${(pc_y || '2')}</b>`,
+                font: {
+                    family: systemFont,
+                    size: 14,
+                    color: 'black'
+                }
+            },
+            tick0: 0,
+            ticklen: 10,
+            tickfont: {
+                family: systemFont,
+                size: 10,
+                color: 'black'
+            }
+        },
+        showlegend: true,
+        legend: {
+            title: {
+                text: 'Click legend to show/hide points',
+                font: {
+                    size: 12,
+                    color: 'grey'
+                }
+            },
+            // itemclick: false,
+            itemdoubleclick: false,
+            orientation: 'v',
+            x: 0.0,
+            y: 1.2
+        }
+    }
+
+    const config = {
+        responsive: true,
+        toImageButtonOptions: {
+            format: 'svg', // one of png, svg, jpeg, webp
+            filename: 'pca_plot',
+            height: 1000,
+            width: 1000,
+            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+        },
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+            'select2d',
+            'autoScale2d',
+            'hoverClosestCartesian',
+            'hoverCompareCartesian',
+            'lasso2d'
+        ]
+    }
+
+    if (!to_json) {
+        Plotly.newPlot(div, [othersTrace, controlsTrace, casesTrace], layout, config)
+        return div
+    } else {
+        const tracesString = '{"traces":' + JSON.stringify([othersTrace, controlsTrace, casesTrace]) + ','
+        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
+        return tracesString + layoutString
+    }
+}
+
 plco()
 
 if (typeof (define) != 'undefined') {
