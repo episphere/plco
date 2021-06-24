@@ -851,6 +851,7 @@ plco.plot.pca = async (
     let pc_y = 2
 
     /**
+     * Metadata
      * @type {Array<object>} Each object in the array has the properties defined below.
      * @prop {integer} id
      * @prop {integer} phenotype_id
@@ -863,19 +864,15 @@ plco.plot.pca = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-    const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
 
-    if (metadata === undefined || metadata['count'] === null) {
-        throw new Error('No data found for this combination of sex and/or ancestry.')
-    }
 
     /**
+     * PCA
      * @type {object}
      * @prop {Array} columns 
      * @prop {Array} data - `data` is an array of object that has the following props: 
      * pc_x, pc_y, ancestry, sex, value
      */
-    const pca = await plco.api.pca({}, phenotype_id)
 
     let div = document.getElementById(div_id)
 
@@ -889,56 +886,7 @@ plco.plot.pca = async (
     // Control are the same ancestry and sex, but value == null or 0
     // Cases are the same ancestry and sex, but value != null and != 0
 
-    const others = pca.data.filter(obj =>
-        obj.ancestry !== ancestry || obj.sex !== sex || obj.value === null
-    )
-    const controls = pca.data.filter(obj =>
-        obj.ancestry === ancestry && obj.sex === sex && (obj.value === null || obj.value === 0)
-    )
-    const cases = pca.data.filter(obj =>
-        obj.ancestry === ancestry && obj.sex === sex && (obj.value !== null && obj.value !== 0)
-    )
-
-    const baseTrace = {
-        type: 'scattergl',
-        hoverinfo: 'none',
-        showlegend: true,
-        mode: 'markers',
-    }
-
-    const othersTrace = {
-        ...baseTrace,
-        x: others.map(obj => obj.pc_x),
-        y: others.map(obj => obj.pc_y),
-        marker: {
-            color: '#212529',
-            size: 5,
-            opacity: 0.65
-        },
-        name: 'Other'
-    }
-
-    const controlsTrace = {
-        x: controls.map(obj => obj.pc_x),
-        y: controls.map(obj => obj.pc_y),
-        marker: {
-            color: '##CC4553',
-            size: 5,
-            opacity: 0.65
-        },
-        name: 'Controls'
-    }
-
-    const casesTrace = {
-        x: cases.map(obj => obj.pc_x),
-        y: cases.map(obj => obj.pc_y),
-        marker: {
-            color: '##FF5768',
-            size: 5,
-            opacity: 0.65
-        },
-        name: 'Cases'
-    }
+    const traces = await plco.plot.helpers.pcaHelper([{ phenotype_id, ancestry, sex }], 'PLCO_GSA', 1, 2)
 
     const layout = {
         hoverlabel: {
@@ -1035,13 +983,131 @@ plco.plot.pca = async (
     }
 
     if (!to_json) {
-        Plotly.newPlot(div, [othersTrace, controlsTrace, casesTrace], layout, config)
+        Plotly.newPlot(div, traces, layout, config)
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify([othersTrace, controlsTrace, casesTrace]) + ','
+        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
         const layoutString = '"layout":' + JSON.stringify(layout) + '}'
         return tracesString + layoutString
     }
+}
+
+plco.plot.helpers = {
+
+}
+
+plco.plot.helpers.pcaValidate = async (
+    arrayOfObjects = []
+) => {
+    const promises = []
+    arrayOfObjects.forEach(({ phenotype_id, sex, ancestry }) => {
+        promises.push(
+            plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
+                .then(array => array[0])
+                .then(metadata => {
+                    if (metadata === undefined || metadata['count'] === null) {
+                        throw new Error('No data found for this combination of sex and/or ancestry.')
+                    } else
+                        return metadata
+                })
+                .catch(() => {
+                    console.error('Unable to fetch data, skipping...')
+                    return undefined
+                })
+        )
+    })
+
+    return (await Promise.all(promises)).filter(Boolean)
+}
+
+plco.plot.helpers.pcaGenerateTraces = async (
+    validArray,
+    platform,
+    pc_x,
+    pc_y
+) => {
+    // [light, dark]
+    const colors = [['#D4A8E2', '#A482AF'], ['#FFD5A6', '#CCAA84'],
+    ['#8DD7C0', '#6BA392'], ['#01A7FF', '#0085CC']]
+
+    const pcaPromises = []
+    validArray.forEach((obj) =>
+        pcaPromises.push(
+            plco.api.pca({}, obj.phenotype_id, platform, pc_x, pc_y)
+        )
+    )
+    const pcadatas = await Promise.all(pcaPromises)
+
+    const baseTrace = {
+        type: 'scattergl',
+        hoverinfo: 'none',
+        showlegend: true,
+        mode: 'markers',
+    }
+    const traces = []
+    const otherTraces = []
+
+    pcadatas.forEach((item, index) => {
+        // create the other traces first
+        const others = item.data.filter(obj =>
+            obj.ancestry !== metadatas[index].ancestry || obj.sex !== metadatas[index].sex || obj.value === null
+        )
+        otherTraces.push({
+            ...baseTrace,
+            x: others.map(obj => obj.pc_x),
+            y: others.map(obj => obj.pc_y),
+            marker: {
+                color: '#212529',
+                size: 5,
+                opacity: 0.65
+            },
+            name: 'Other'
+        })
+
+        const controls = pca.data.filter(obj =>
+            obj.ancestry === ancestry && obj.sex === sex && (obj.value === null || obj.value === 0)
+        )
+        const cases = pca.data.filter(obj =>
+            obj.ancestry === ancestry && obj.sex === sex && (obj.value !== null && obj.value !== 0)
+        )
+        const controlsTrace = {
+            ...baseTrace,
+            x: controls.map(obj => obj.pc_x),
+            y: controls.map(obj => obj.pc_y),
+            marker: {
+                color: colors[index % colors.length][1],
+                size: 5,
+                opacity: 0.65
+            },
+            name: `'Controls' ${index}`
+        }
+        const casesTrace = {
+            ...baseTrace,
+            x: cases.map(obj => obj.pc_x),
+            y: cases.map(obj => obj.pc_y),
+            marker: {
+                color: colors[index % colors.length][0],
+                size: 5,
+                opacity: 0.65
+            },
+            name: `Cases ${index}`
+        }
+
+        traces.push(controlsTrace, casesTrace)
+    })
+
+    return otherTraces.concat(traces)
+}
+
+plco.plot.helpers.pcaHelper = async (
+    arrayOfObjects,
+    platform,
+    pc_x,
+    pc_y
+) => {
+    const metadatas = await plco.plot.helpers.pcaValidate(arrayOfObjects)
+    const traces = await plco.plot.helpers.pcaGenerateTraces(metadatas, platform, pc_x, pc_y)
+    return traces
 }
 
 plco()
