@@ -578,7 +578,7 @@ plco.plot.qq = async (
             '<br>p-value: ' + Math.pow(10, -point['p_value_nlog']) +
             '<br>Click to learn more.'),
         hoverinfo: 'text+x+y+name',
-        name: `${sex}, ${ancestry}`,
+        name: `${metadata[phenotype_display_name]}, ${sex}, ${ancestry}`,
     }
 
     const max = points.data.reduce(
@@ -839,6 +839,15 @@ plco.plot.qq2 = (
         })
 }
 
+/**
+ * 
+ * @param {string} div_id 
+ * @param {number} phenotype_id 
+ * @param {string} sex 
+ * @param {string} ancestry 
+ * @param {boolean} to_json 
+ * @returns 
+ */
 plco.plot.pca = async (
     div_id,
     phenotype_id,
@@ -889,33 +898,16 @@ plco.plot.pca = async (
     const traces = await plco.plot.helpers.pcaHelper([{ phenotype_id, ancestry, sex }], 'PLCO_GSA', 1, 2)
 
     const layout = {
-        hoverlabel: {
-            bgcolor: '#fff',
-            bordercolor: '#bbb',
-            font: {
-                size: 14,
-                color: '#212529',
-            }
-        },
         dragmode: 'pan',
         clickmode: 'event',
-        hovermode: 'closest',
         width: 800,
         height: 800,
         autosize: true,
-        // title: {
-        //   text: title,
-        //   font: {
-        //     size: 14,
-        //     color: 'black'
-        //   }
-        // },
         xaxis: {
-            // tickmode: 'auto',
             automargin: true,
-            showgrid: false, // disable grid lines
+            showgrid: false,
             title: {
-                text: `<b>PC ${(pc_x || '1')}</b>`,
+                text: `<b>PC-X ${(pc_x || '1')}</b>`,
                 font: {
                     size: 14,
                     color: 'black'
@@ -929,11 +921,10 @@ plco.plot.pca = async (
             }
         },
         yaxis: {
-            // tickmode: 'auto',
             automargin: true,
-            showgrid: false, // disable grid lines
+            showgrid: false,
             title: {
-                text: `<b>PC ${(pc_y || '2')}</b>`,
+                text: `<b>PC-Y ${(pc_y || '2')}</b>`,
                 font: {
                     size: 14,
                     color: 'black'
@@ -949,13 +940,11 @@ plco.plot.pca = async (
         showlegend: true,
         legend: {
             title: {
-                text: 'Click legend to show/hide points',
                 font: {
                     size: 12,
                     color: 'grey'
                 }
             },
-            // itemclick: false,
             itemdoubleclick: false,
             orientation: 'v',
             x: 0.0,
@@ -964,13 +953,14 @@ plco.plot.pca = async (
     }
 
     const config = {
+        scrollZoom: true,
         responsive: true,
         toImageButtonOptions: {
-            format: 'svg', // one of png, svg, jpeg, webp
+            format: 'svg',
             filename: 'pca_plot',
             height: 1000,
             width: 1000,
-            scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+            scale: 1
         },
         displaylogo: false,
         modeBarButtonsToRemove: [
@@ -992,9 +982,15 @@ plco.plot.pca = async (
     }
 }
 
-plco.plot.helpers = {
-
+plco.plot.pca2 = async () => {
+    // TODO
 }
+
+/**
+ * A collection of helper methods for plotting, not intended to be used on its own.
+ * @memberof plco.plot
+ */
+plco.plot.helpers = {}
 
 plco.plot.helpers.pcaValidate = async (
     arrayOfObjects = []
@@ -1049,7 +1045,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
     const otherTraces = []
 
     pcadatas.forEach((item, index) => {
-        // create the other traces first
+        // Create the other traces first
         const others = item.data.filter(obj =>
             obj.ancestry !== validArray[index].ancestry ||
             obj.sex !== validArray[index].sex || obj.value === null
@@ -1111,6 +1107,7 @@ plco.plot.helpers.pcaHelper = async (
 ) => {
     const metadatas = await plco.plot.helpers.pcaValidate(arrayOfObjects)
     const traces = await plco.plot.helpers.pcaGenerateTraces(metadatas, platform, pc_x, pc_y)
+    // TODO Create the selectors
     return traces
 }
 
