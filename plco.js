@@ -21,6 +21,8 @@ console.log('plco.js loaded')
 const plco = async function () {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
+    plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
+
 }
 
 /**
@@ -186,9 +188,9 @@ plco.api.download = async (
 /**
  * Retrieves metadata for phenotypes specified
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {number} phenotype_id A phenotype id.
+ * @param {integer} phenotype_id A phenotype id.
  * @param {string} sex A sex, which may be "all", "female", or "male".
- * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
+ * @param {string} ancestry An ancestry, which may be  "african_american", "east_asian" or "european".
  * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return A dataframe containing phenotype metadata
  * @example
@@ -359,9 +361,9 @@ plco.api.points = async (parms,
 /**
  * Retrieve variants for all chromosomes at a resolution of 400x800 bins across the whole genome and specified -log10(p) range
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {number} phenotype_id A phenotype id.
+ * @param {integer} phenotype_id A phenotype id.
  * @param {string} sex A sex, which may be "all", "female", or "male".
- * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
+ * @param {string} ancestry An ancestry, which may be  "african_american", "east_asian" or "european".
  * @param {number} p_value_nlog_min A numeric value >= 0 specifying the minimum -log10(p) for variants.
  * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return A dataframe with aggregated variants.
@@ -394,23 +396,23 @@ plco.api.summary = async (
 /**
  * Retrieve variants for specified phenotype, sex, ancestry, chromosome, and other optional fields.
  * @param {object | string | Array<Array>} parms A JSON object, query string, or 2-d array containing the query parameters.
- * @param {number} phenotype_id Phenotype id(s)
+ * @param {integer} phenotype_id Phenotype id(s)
  * @param {string} sex A sex, which may be "all", "female", or "male".
  * @param {string} ancestry An ancestry, which may be "african_american", "east_asian", or "european".
- * @param {number} chromosome A chromosome number.
+ * @param {integer} chromosome A chromosome number.
  * @param {string} columns _Optional_ Properties for each variant. Default: all properties.
  * @param {string} snp _Optional_ Snps.
- * @param {number} position _Optional_ The exact position of the variant within a chromosome.
- * @param {number} position_min _Optional_ The minimum chromosome position for variants.
- * @param {number} position_max _Optional_ The maximum chromosome position for variants.
+ * @param {integer} position _Optional_ The exact position of the variant within a chromosome.
+ * @param {integer} position_min _Optional_ The minimum chromosome position for variants.
+ * @param {integer} position_max _Optional_ The maximum chromosome position for variants.
  * @param {number} p_value_nlog_min _Optional_ The minimum -log10(p) of variants in the chromosome.
  * @param {number} p_value_nlog_max _Optional_ The maximum -log10(p) of variants in the chromosome.
  * @param {number} p_value_min _Optional_ The minimum p-value of variants in the chromosome.
  * @param {number} p_value_max _Optional_ The maximum p-value of variants in the chromosome.
  * @param {string} orderBy _Optional_ A property to order variants by. May be "id", "snp", "chromosome", "position", "p_value", or "p_value_nlog".
  * @param {string} order _Optional_ An order in which to sort variants. May be "asc" or "desc".
- * @param {number} offset _Optional_ The number of records by which to offset the variants (for pagination)
- * @param {number} limit _Optional_ The maximum number of variants to return (for pagination). Highest allowed value is 1 million.
+ * @param {integer} offset _Optional_ The number of records by which to offset the variants (for pagination)
+ * @param {integer} limit _Optional_ The maximum number of variants to return (for pagination). Highest allowed value is 1 million.
  * @param {string} raw _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @return A dataframe with variants.
  * @example
@@ -455,6 +457,119 @@ plco.api.variants = async (
         { columns, snp, position, position_min, position_max, p_value_nlog_min, p_value_nlog_max, p_value_min, p_value_max, orderBy, order, offset, limit, raw }
     )
     return await plco.api.get(cmd = "variants", parms)
+}
+
+plco.plot = async function() {
+
+}
+
+/**
+ * Generates a Plotly manhattan plot at the given div element with support for a single input.
+ * @param {string} div_id The id of the div element. If it does not exist, a new div will be created.
+ * @param {number} phenotype_id A phenotype id.
+ * @param {string} sex A sex, which may be "all, "female", or "male".
+ * @param {string} ancestry An ancestry, which may be  "african_american", "east_asian" or "european".
+ * @param {number} p_value_nlog_min A numeric value >= 0 specifying the minimum -log10(p) for variants.
+ * @param {integer} chromosome _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
+ * @param {boolean} to_json _Optional_ If true, returns a stringified JSON object containing traces and layout.
+ * If false, returns a div element containing the Plotly graph.
+ * @returns A div element or a string if 'to_json' is true.
+ * @example 
+ * plco.plot.manhattan()
+ * plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
+*/
+plco.plot.manhattan = async function(
+    div_id,
+    phenotype_id = 3080,
+    sex = 'female',
+    ancestry = 'european',
+    p_value_nlog_min = 2,
+    chromosome,
+    to_json = false
+) {
+
+    // Set up div, in which Plotly graph may be inserted.
+    let div = document.getElementById(div_id)
+    if(div === null && !to_json) {
+        div = document.createElement('div')
+        document.body.appendChild(div)
+    }
+
+    // Retrieve all summary data.
+    let inputData = await plco.api.summary({ phenotype_id, sex, ancestry, p_value_nlog_min });
+
+    // Filter summary data if chromosome number was specified, and set associated variables for later.
+    let chromosomeName;
+    let numberOfChromosomes;
+    if(chromosome) {
+        inputData = inputData.data.filter(x => x.chromosome == "" + chromosome)
+        chromosomeName = 'Chromosome ' + chromosome
+        numberOfChromosomes = 1
+    } else {
+        inputData = inputData.data
+        chromosomeName = 'All Chromosomes'
+        numberOfChromosomes = 22
+    }
+
+    // Retrieve rs number for all SNPs if a chromosome number was passed as an argument.
+    let rsNumbers = [];
+    if(numberOfChromosomes == 1) {
+        let rsNumbers_allData = await plco.api.variants({}, phenotype_id, sex, ancestry, chromosome);
+        rsNumbers_allData.data.map(x => rsNumbers.push(x.snp))
+    }
+
+    // Set up traces
+    let traces = []
+    let currentChromosome;
+    for(i = 1; i <= numberOfChromosomes; i++) {
+        if(numberOfChromosomes == 1) {
+            currentChromosome = chromosome
+        } else {
+            currentChromosome = i
+        }
+        currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        traces.push({
+            x: currentChromosomeData.map(x => parseInt(x.position_abs)),
+            y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                opacity: 0.65,
+                size: 5
+            },
+            name: 'Chromosome ' + currentChromosome, // appears as legend item
+            hovertemplate: currentChromosomeData.map(x =>
+                'absolute position: ' + parseInt(x.position_abs) +
+                '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
+            )
+        })
+    }
+
+   if(numberOfChromosomes == 1) {
+        for(i = 0; i < traces[0].hovertemplate.length; i++) {
+            traces[0].hovertemplate[i] += '<br>snp: ' + rsNumbers[i]
+        }
+    }
+
+    let layout = {
+        title: 'SNPs in ' + chromosomeName,
+        xaxis: {
+            title: 'absolute position'
+        },
+        yaxis: {
+            title: '-log<sub>10</sub>(p)'
+        },
+        hovermode: 'closest'
+    };
+
+    if(!to_json) {
+        Plotly.newPlot(div, traces, layout)
+        return div
+    } else {
+        tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        layoutString = '"layout":' + JSON.stringify(layout) + '}'
+        return tracesString + layoutString
+    }
 }
 
 /*
