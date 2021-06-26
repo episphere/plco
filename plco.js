@@ -459,6 +459,46 @@ plco.api.variants = async (
   return await plco.api.get(cmd = "variants", parms)
 }
 
+/*
+if(location.href.match('localhost')||location.href.match('127.0.0.1')){
+    let scriptHost=location.href.replace(/\/[^\/]*$/,'/')
+    plco.loadScript(`${scriptHost}plcoJonas.js`)
+    plco.loadScript(`${scriptHost}plcoLorena.js`)
+}else{
+    plco.loadScript('https://episphere.github.io/plco/plcoJonas.js')
+    plco.loadScript('https://episphere.github.io/plco/plcoLorena.js')
+}
+*/
+
+/*
+if(typeof(define)!='undefined'){
+
+    define([
+    'https://cdn.plot.ly/plotly-latest.min.js',
+    //'https://episphere.github.io/plco/plco',
+    //'https://episphere.github.io/plco/plcoJonas.js',
+    //'https://episphere.github.io/plco/plcoLorena.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.9.0/localforage.min.js'
+    ],function(Plotly,localforage){
+        plco.localforage=localforage
+        plco.Plotly=Plotly
+        return plco
+    })
+}
+*/
+
+/**
+ * Sub-module grouping plotting methods.
+ * @memberof — plco
+ * @namespace — plco.plot
+ * @prop {Function} manhattan - {@link plco.plot.manhattan} 
+ * The manhattan uses 3, metadata, summary, and variants for the bottom stuff.
+ * @prop {Function} qq - {@link plco.plot.qq}
+ * Only uses two endpoints, metadata and points
+ * The on-hover action of the individual point will use the __variants__ endpoint!
+ * @prop {Function} qq2 - {@link plco.plot.qq2}
+ * Pca plot uses two endpoints, metadata and pca
+ */
 plco.plot = async function () {
 
 }
@@ -570,50 +610,6 @@ plco.plot.manhattan = async function (
     layoutString = '"layout":' + JSON.stringify(layout) + '}'
     return tracesString + layoutString
   }
-}
-
-/*
-if(location.href.match('localhost')||location.href.match('127.0.0.1')){
-    let scriptHost=location.href.replace(/\/[^\/]*$/,'/')
-    plco.loadScript(`${scriptHost}plcoJonas.js`)
-    plco.loadScript(`${scriptHost}plcoLorena.js`)
-}else{
-    plco.loadScript('https://episphere.github.io/plco/plcoJonas.js')
-    plco.loadScript('https://episphere.github.io/plco/plcoLorena.js')
-}
-*/
-
-/*
-if(typeof(define)!='undefined'){
-
-    define([
-    'https://cdn.plot.ly/plotly-latest.min.js',
-    //'https://episphere.github.io/plco/plco',
-    //'https://episphere.github.io/plco/plcoJonas.js',
-    //'https://episphere.github.io/plco/plcoLorena.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.9.0/localforage.min.js'
-    ],function(Plotly,localforage){
-        plco.localforage=localforage
-        plco.Plotly=Plotly
-        return plco
-    })
-}
-*/
-
-/**
- * Sub-module grouping plotting methods.
- * @memberof — plco
- * @namespace — plco.plot
- * @prop {Function} manhattan - {@link plco.plot.manhattan} 
- * The manhattan uses 3, metadata, summary, and variants for the bottom stuff.
- * @prop {Function} qq - {@link plco.plot.qq}
- * Only uses two endpoints, metadata and points
- * The on-hover action of the individual point will use the __variants__ endpoint!
- * @prop {Function} qq2 - {@link plco.plot.qq2}
- * Pca plot uses two endpoints, metadata and pca
- */
-plco.plot = async function () {
-
 }
 
 /**
