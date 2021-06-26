@@ -19,8 +19,10 @@ console.log('plco.js loaded')
  * @property {Function} defineProperties - {@link plco.defineProperties}
  */
 const plco = async function () {
-    plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
-    console.log("plotly.js loaded")
+  plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
+  console.log("plotly.js loaded")
+  plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
+
 }
 
 /**
@@ -33,12 +35,12 @@ const plco = async function () {
  * @returns {HTMLAnchorElement} HTMLAnchorElement.
  */
 plco.saveFile = (url) => {
-    url = url || 'https://downloadgwas-dev.cancer.gov/j_breast_cancer.tsv.gz'
-    let a = document.createElement('a')
-    a.href = url
-    a.target = '_blank'
-    a.click()
-    return a
+  url = url || 'https://downloadgwas-dev.cancer.gov/j_breast_cancer.tsv.gz'
+  let a = document.createElement('a')
+  a.href = url
+  a.target = '_blank'
+  a.click()
+  return a
 }
 
 /**
@@ -48,53 +50,53 @@ plco.saveFile = (url) => {
  * @param {object} [o_fields={}] Optional fields. Same as `m_fields`, but will not add in the key-value pair if value is undefined.
  */
 plco.defineProperties = (obj, m_fields, o_fields = {}) => {
-    Object.keys(m_fields).forEach((key) => {
-        if (typeof obj[key] === 'undefined') {
-            obj[key] = m_fields[key]
-        }
-    })
-    Object.keys(o_fields).forEach((key) => {
-        if (
-            typeof obj[key] === 'undefined' &&
-            typeof o_fields[key] !== 'undefined'
-        ) {
-            obj[key] = o_fields[key]
-        }
-    })
+  Object.keys(m_fields).forEach((key) => {
+    if (typeof obj[key] === 'undefined') {
+      obj[key] = m_fields[key]
+    }
+  })
+  Object.keys(o_fields).forEach((key) => {
+    if (
+      typeof obj[key] === 'undefined' &&
+      typeof o_fields[key] !== 'undefined'
+    ) {
+      obj[key] = o_fields[key]
+    }
+  })
 }
 
 plco.loadScript = async (url, host) => {
-    let s = document.createElement('script')
-    s.src = url
-    return document.head.appendChild(s)
+  let s = document.createElement('script')
+  s.src = url
+  return document.head.appendChild(s)
 }
 
 plco.plotTest = async (
-    chr = 1,
-    div,
-    url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
+  chr = 1,
+  div,
+  url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
         summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true'
 ) => {
-    let xx = await (await fetch(url)).json()
-    div = div || document.createElement('div')
-    let dt = xx.data.filter(x => x[4] == chr)
-    trace = {
-        x: dt.map(d => d[5]),
-        y: dt.map(d => d[6]),
-        mode: 'markers',
-        type: 'scatter'
+  let xx = await (await fetch(url)).json()
+  div = div || document.createElement('div')
+  let dt = xx.data.filter(x => x[4] == chr)
+  trace = {
+    x: dt.map(d => d[5]),
+    y: dt.map(d => d[6]),
+    mode: 'markers',
+    type: 'scatter'
+  }
+  let layout = {
+    title: `Chromosoome ${chr}`,
+    xaxis: {
+      title: 'position'
+    },
+    yaxis: {
+      title: '-log(p)'
     }
-    let layout = {
-        title: `Chromosoome ${chr}`,
-        xaxis: {
-            title: 'position'
-        },
-        yaxis: {
-            title: '-log(p)'
-        }
-    }
-    Plotly.newPlot(div, [trace], layout)
-    return div
+  }
+  Plotly.newPlot(div, [trace], layout)
+  return div
 }
 
 /**
@@ -115,47 +117,47 @@ plco.api = {}
 plco.api.url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/'
 
 plco.api.ping = async () => {
-    return (await fetch(plco.api.url + 'ping')).text()
+  return (await fetch(plco.api.url + 'ping')).text()
 }
 
 plco.api.get = async (cmd = "ping", parms = {}) => {
-    // res = await fetch(...)
-    // content-type = await res.blob().type
-    if (cmd == "ping") {
-        return await (await fetch(plco.api.url + 'ping')).text() == "true" ? true : false
-    } else if (cmd === 'download') {
-        if (parms['get_link_only'] === 'true') {
-            return (
-                await fetch(
-                    plco.api.url + cmd + '?' + plco.api.parms2string(parms)
-                )
-            ).text()
-        } else {
-            plco.saveFile(
-                plco.api.url + cmd + '?' + plco.api.parms2string(parms)
-            )
-            return await new Promise((resolve) => resolve({}))
-        }
+  // res = await fetch(...)
+  // content-type = await res.blob().type
+  if (cmd == "ping") {
+    return await (await fetch(plco.api.url + 'ping')).text() == "true" ? true : false
+  } else if (cmd === 'download') {
+    if (parms['get_link_only'] === 'true') {
+      return (
+        await fetch(
+          plco.api.url + cmd + '?' + plco.api.parms2string(parms)
+        )
+      ).text()
     } else {
-        return (await fetch(plco.api.url + cmd + '?' + plco.api.parms2string(parms))).json()
+      plco.saveFile(
+        plco.api.url + cmd + '?' + plco.api.parms2string(parms)
+      )
+      return await new Promise((resolve) => resolve({}))
     }
+  } else {
+    return (await fetch(plco.api.url + cmd + '?' + plco.api.parms2string(parms))).json()
+  }
 }
 
 plco.api.string2parms = (
-    str = "phenotype_id=3080&sex=all&ancestry=east_asian&p_value_nlog_min=4"
+  str = "phenotype_id=3080&sex=all&ancestry=east_asian&p_value_nlog_min=4"
 ) => {
-    let prm = {}
-    str.split('&').forEach(s => {
-        s = s.split('=')
-        prm[s[0]] = s[1]
-    })
-    return prm
+  let prm = {}
+  str.split('&').forEach(s => {
+    s = s.split('=')
+    prm[s[0]] = s[1]
+  })
+  return prm
 }
 
 plco.api.parms2string = (
-    prm = { phenotype_id: 3080, sex: "all", ancestry: "east_asian", p_value_nlog_min: 4 }
+  prm = { phenotype_id: 3080, sex: "all", ancestry: "east_asian", p_value_nlog_min: 4 }
 ) => {
-    return Object.keys(prm).map(p => `${p}=${prm[p]}`).join('&')
+  return Object.keys(prm).map(p => `${p}=${prm[p]}`).join('&')
 }
 
 /**
@@ -166,21 +168,21 @@ plco.api.parms2string = (
  * @returns Results of the API call.
  */
 plco.api.download = async (
-    parms,
-    phenotype_id = 3080,
-    get_link_only = undefined
+  parms,
+  phenotype_id = 3080,
+  get_link_only = undefined
 ) => {
-    parms =
-        typeof parms === 'string'
-            ? plco.api.string2parms(parms)
-            : Array.isArray(parms)
-                ? Object.fromEntries(parms)
-                : parms
-    parms = parms || {
-        phenotype_id,
-    }
-    plco.defineProperties(parms, { phenotype_id }, { get_link_only })
-    return await plco.api.get((cmd = 'download'), parms)
+  parms =
+    typeof parms === 'string'
+      ? plco.api.string2parms(parms)
+      : Array.isArray(parms)
+        ? Object.fromEntries(parms)
+        : parms
+  parms = parms || {
+    phenotype_id,
+  }
+  plco.defineProperties(parms, { phenotype_id }, { get_link_only })
+  return await plco.api.get((cmd = 'download'), parms)
 }
 
 /**
@@ -199,20 +201,20 @@ plco.api.download = async (
  * plco.api.metadata({}, 3080, "female", "european")
  */
 plco.api.metadata = async (
-    parms,
-    phenotype_id = 3080,
-    sex = "female",
-    ancestry = "european",
-    raw = undefined
+  parms,
+  phenotype_id = 3080,
+  sex = "female",
+  ancestry = "european",
+  raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
-    parms = parms || {
-        phenotype_id,
-        sex,
-        ancestry
-    }
-    plco.defineProperties(parms, { phenotype_id, sex, ancestry }, { raw })
-    return await plco.api.get((cmd = 'metadata'), parms)
+  parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+  parms = parms || {
+    phenotype_id,
+    sex,
+    ancestry
+  }
+  plco.defineProperties(parms, { phenotype_id, sex, ancestry }, { raw })
+  return await plco.api.get((cmd = 'metadata'), parms)
 }
 
 /**
@@ -227,25 +229,25 @@ plco.api.metadata = async (
  * @returns Results of the API call.
  */
 plco.api.participants = async (
-    parms,
-    phenotype_id = 2250,
-    columns = undefined,
-    precision = undefined,
-    raw = undefined
+  parms,
+  phenotype_id = 2250,
+  columns = undefined,
+  precision = undefined,
+  raw = undefined
 ) => {
-    parms =
-        typeof parms === 'string'
-            ? plco.api.string2parms(parms)
-            : Array.isArray(parms)
-                ? Object.fromEntries(parms)
-                : parms
-    parms = parms || {
-        phenotype_id,
-        columns: 'value',
-        precision: 0,
-    }
-    plco.defineProperties(parms, { phenotype_id }, { columns, precision, raw })
-    return await plco.api.get((cmd = 'participants'), parms)
+  parms =
+    typeof parms === 'string'
+      ? plco.api.string2parms(parms)
+      : Array.isArray(parms)
+        ? Object.fromEntries(parms)
+        : parms
+  parms = parms || {
+    phenotype_id,
+    columns: 'value',
+    precision: 0,
+  }
+  plco.defineProperties(parms, { phenotype_id }, { columns, precision, raw })
+  return await plco.api.get((cmd = 'participants'), parms)
 }
 
 
@@ -268,36 +270,36 @@ plco.api.participants = async (
  * plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y",1], ["limit",1000]])
  */
 plco.api.pca = async (
-    parms,
-    phenotype_id = 3080,
-    platform = 'PLCO_GSA',
-    pc_x = 1,
-    pc_y = 2,
-    limit = undefined,
-    raw = undefined
+  parms,
+  phenotype_id = 3080,
+  platform = 'PLCO_GSA',
+  pc_x = 1,
+  pc_y = 2,
+  limit = undefined,
+  raw = undefined
 ) => {
-    parms =
-        typeof parms === 'string'
-            ? plco.api.string2parms(parms)
-            : Array.isArray(parms)
-                ? Object.fromEntries(parms)
-                : parms
-    parms = parms || {
-        phenotype_id,
-        platform,
-        pc_x,
-        pc_y,
-        limit: 10,
-    }
-    plco.defineProperties(parms, { phenotype_id, platform, pc_x, pc_y }, { limit, raw })
+  parms =
+    typeof parms === 'string'
+      ? plco.api.string2parms(parms)
+      : Array.isArray(parms)
+        ? Object.fromEntries(parms)
+        : parms
+  parms = parms || {
+    phenotype_id,
+    platform,
+    pc_x,
+    pc_y,
+    limit: 10,
+  }
+  plco.defineProperties(parms, { phenotype_id, platform, pc_x, pc_y }, { limit, raw })
 
-    if (!Number.isInteger(parms['pc_x']) || parms['pc_x'] < 1 || parms['pc_x'] > 20) {
-        throw new RangeError('pc_x must be an integer between 1 and 20 inclusive.')
-    }
-    if (!Number.isInteger(parms['pc_y']) || parms['pc_y'] < 1 || parms['pc_y'] > 20) {
-        throw new RangeError('pc_y must be an integer between 1 and 20 inclusive.')
-    }
-    return await plco.api.get((cmd = 'pca'), parms)
+  if (!Number.isInteger(parms['pc_x']) || parms['pc_x'] < 1 || parms['pc_x'] > 20) {
+    throw new RangeError('pc_x must be an integer between 1 and 20 inclusive.')
+  }
+  if (!Number.isInteger(parms['pc_y']) || parms['pc_y'] < 1 || parms['pc_y'] > 20) {
+    throw new RangeError('pc_y must be an integer between 1 and 20 inclusive.')
+  }
+  return await plco.api.get((cmd = 'pca'), parms)
 }
 
 /**
@@ -314,15 +316,15 @@ plco.api.pca = async (
  * plco.api.phenotypes({}, "first_ca125_level")
  */
 plco.api.phenotypes = async (
-    parms,
-    q = undefined,
-    raw = undefined
+  parms,
+  q = undefined,
+  raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
-    parms = parms || {
-    }
-    plco.defineProperties(parms, {}, { q, raw })
-    return await plco.api.get(cmd = "phenotypes", parms)
+  parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+  parms = parms || {
+  }
+  plco.defineProperties(parms, {}, { q, raw })
+  return await plco.api.get(cmd = "phenotypes", parms)
 }
 
 /**
@@ -335,25 +337,25 @@ plco.api.phenotypes = async (
  * @returns A dataframe containing variants.
  */
 plco.api.points = async (parms,
-    phenotype_id = 3080,
-    sex = 'female',
-    ancestry = 'european',
-    raw = undefined
+  phenotype_id = 3080,
+  sex = 'female',
+  ancestry = 'european',
+  raw = undefined
 ) => {
-    parms =
-        typeof parms === 'string'
-            ? plco.api.string2parms(parms)
-            : Array.isArray(parms)
-                ? Object.fromEntries(parms)
-                : parms
-    parms = parms || {
-        phenotype_id,
-        sex,
-        ancestry,
-    }
-    plco.defineProperties(parms, { phenotype_id, sex, ancestry }, { raw })
+  parms =
+    typeof parms === 'string'
+      ? plco.api.string2parms(parms)
+      : Array.isArray(parms)
+        ? Object.fromEntries(parms)
+        : parms
+  parms = parms || {
+    phenotype_id,
+    sex,
+    ancestry,
+  }
+  plco.defineProperties(parms, { phenotype_id, sex, ancestry }, { raw })
 
-    return await plco.api.get((cmd = 'points'), parms)
+  return await plco.api.get((cmd = 'points'), parms)
 }
 
 /**
@@ -373,22 +375,22 @@ plco.api.points = async (parms,
  * plco.api.summary({}, 3080, "female", "european", 4)
  */
 plco.api.summary = async (
-    parms,
-    phenotype_id = 3080,
-    sex = "female",
-    ancestry = "european",
-    p_value_nlog_min = 4,
-    raw = undefined
+  parms,
+  phenotype_id = 3080,
+  sex = "female",
+  ancestry = "european",
+  p_value_nlog_min = 4,
+  raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
-    parms = parms || {
-        phenotype_id,
-        sex,
-        ancestry,
-        p_value_nlog_min
-    }
-    plco.defineProperties(parms, { phenotype_id, sex, ancestry, p_value_nlog_min }, { raw })
-    return await plco.api.get(cmd = "summary", parms)
+  parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+  parms = parms || {
+    phenotype_id,
+    sex,
+    ancestry,
+    p_value_nlog_min
+  }
+  plco.defineProperties(parms, { phenotype_id, sex, ancestry, p_value_nlog_min }, { raw })
+  return await plco.api.get(cmd = "summary", parms)
 }
 
 /**
@@ -421,40 +423,153 @@ plco.api.summary = async (
  * plco.api.variants({}, 3080, "female", "european", 8)
  */
 plco.api.variants = async (
-    parms,
-    phenotype_id = 3080,
-    sex = "female",
-    ancestry = "european",
-    chromosome = 8,
-    columns = undefined,
-    snp = undefined,
-    position = undefined,
-    position_min = undefined,
-    position_max = undefined,
-    p_value_nlog_min = undefined,
-    p_value_nlog_max = undefined,
-    p_value_min = undefined,
-    p_value_max = undefined,
-    orderBy = undefined,
-    order = undefined,
-    offset = undefined,
-    limit = undefined,
-    raw = undefined
+  parms,
+  phenotype_id = 3080,
+  sex = "female",
+  ancestry = "european",
+  chromosome = 8,
+  columns = undefined,
+  snp = undefined,
+  position = undefined,
+  position_min = undefined,
+  position_max = undefined,
+  p_value_nlog_min = undefined,
+  p_value_nlog_max = undefined,
+  p_value_min = undefined,
+  p_value_max = undefined,
+  orderBy = undefined,
+  order = undefined,
+  offset = undefined,
+  limit = undefined,
+  raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
-    parms = parms || {
-        phenotype_id,
-        sex,
-        ancestry,
-        chromosome,
-        limit: 10
+  parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+  parms = parms || {
+    phenotype_id,
+    sex,
+    ancestry,
+    chromosome,
+    limit: 10
+  }
+  plco.defineProperties(
+    parms,
+    { phenotype_id, sex, ancestry, chromosome },
+    { columns, snp, position, position_min, position_max, p_value_nlog_min, p_value_nlog_max, p_value_min, p_value_max, orderBy, order, offset, limit, raw }
+  )
+  return await plco.api.get(cmd = "variants", parms)
+}
+
+plco.plot = async function () {
+
+}
+
+/**
+ * Generates a Plotly manhattan plot at the given div element with support for a single input.
+ * @param {string} div_id The id of the div element. If it does not exist, a new div will be created.
+ * @param {number} phenotype_id A phenotype id.
+ * @param {string} sex A sex, which may be "all, "female", or "male".
+ * @param {string} ancestry An ancestry, which may be  "african_american", "east_asian" or "european".
+ * @param {number} p_value_nlog_min A numeric value >= 0 specifying the minimum -log10(p) for variants.
+ * @param {integer} chromosome _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
+ * @param {boolean} to_json _Optional_ If true, returns a stringified JSON object containing traces and layout.
+ * If false, returns a div element containing the Plotly graph.
+ * @returns A div element or a string if 'to_json' is true.
+ * @example 
+ * plco.plot.manhattan()
+ * plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
+*/
+plco.plot.manhattan = async function (
+  div_id,
+  phenotype_id = 3080,
+  sex = 'female',
+  ancestry = 'european',
+  p_value_nlog_min = 2,
+  chromosome,
+  to_json = false
+) {
+
+  // Set up div, in which Plotly graph may be inserted.
+  let div = document.getElementById(div_id)
+  if (div === null && !to_json) {
+    div = document.createElement('div')
+    document.body.appendChild(div)
+  }
+
+  // Retrieve all summary data.
+  let inputData = await plco.api.summary({ phenotype_id, sex, ancestry, p_value_nlog_min })
+
+  // Filter summary data if chromosome number was specified, and set associated variables for later.
+  let chromosomeName
+  let numberOfChromosomes
+  if (chromosome) {
+    inputData = inputData.data.filter(x => x.chromosome == "" + chromosome)
+    chromosomeName = 'Chromosome ' + chromosome
+    numberOfChromosomes = 1
+  } else {
+    inputData = inputData.data
+    chromosomeName = 'All Chromosomes'
+    numberOfChromosomes = 22
+  }
+
+  // Retrieve rs number for all SNPs if a chromosome number was passed as an argument.
+  let rsNumbers = []
+  if (numberOfChromosomes == 1) {
+    let rsNumbers_allData = await plco.api.variants({}, phenotype_id, sex, ancestry, chromosome)
+    rsNumbers_allData.data.map(x => rsNumbers.push(x.snp))
+  }
+
+  // Set up traces
+  let traces = []
+  let currentChromosome
+  for (i = 1; i <= numberOfChromosomes; i++) {
+    if (numberOfChromosomes == 1) {
+      currentChromosome = chromosome
+    } else {
+      currentChromosome = i
     }
-    plco.defineProperties(
-        parms,
-        { phenotype_id, sex, ancestry, chromosome },
-        { columns, snp, position, position_min, position_max, p_value_nlog_min, p_value_nlog_max, p_value_min, p_value_max, orderBy, order, offset, limit, raw }
-    )
-    return await plco.api.get(cmd = "variants", parms)
+    currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+    traces.push({
+      x: currentChromosomeData.map(x => parseInt(x.position_abs)),
+      y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
+      mode: 'markers',
+      type: 'scatter',
+      marker: {
+        opacity: 0.65,
+        size: 5
+      },
+      name: 'Chromosome ' + currentChromosome, // appears as legend item
+      hovertemplate: currentChromosomeData.map(x =>
+        'absolute position: ' + parseInt(x.position_abs) +
+        '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
+      )
+    })
+  }
+
+  if (numberOfChromosomes == 1) {
+    for (i = 0; i < traces[0].hovertemplate.length; i++) {
+      traces[0].hovertemplate[i] += '<br>snp: ' + rsNumbers[i]
+    }
+  }
+
+  let layout = {
+    title: 'SNPs in ' + chromosomeName,
+    xaxis: {
+      title: 'absolute position'
+    },
+    yaxis: {
+      title: '-log<sub>10</sub>(p)'
+    },
+    hovermode: 'closest'
+  }
+
+  if (!to_json) {
+    Plotly.newPlot(div, traces, layout)
+    return div
+  } else {
+    tracesString = '{"traces":' + JSON.stringify(traces) + ','
+    layoutString = '"layout":' + JSON.stringify(layout) + '}'
+    return tracesString + layoutString
+  }
 }
 
 /*
@@ -514,200 +629,200 @@ plco.plot = async function () {
  * await plco.plot.qq('plot', 3080, 'female', 'east_asian')
  */
 plco.plot.qq = async (
-    div_id,
-    phenotype_id = 3080,
-    sex = 'female',
-    ancestry = 'east_asian',
-    to_json = false
+  div_id,
+  phenotype_id = 3080,
+  sex = 'female',
+  ancestry = 'east_asian',
+  to_json = false
 ) => {
-    /**
-     * @type {Array<object>} Each object in the array has the properties defined below.
-     * @prop {integer} id
-     * @prop {integer} phenotype_id
-     * @prop {string} phenotype_name
-     * @prop {string} phenotype_display_name
-     * @prop {string} sex
-     * @prop {string} ancestry
-     * @prop {string} chromosome
-     * @prop {number} lambda_gc
-     * @prop {number} lambda_gc_ld_score
-     * @prop {integer} count
-     */
-    const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
+  /**
+   * @type {Array<object>} Each object in the array has the properties defined below.
+   * @prop {integer} id
+   * @prop {integer} phenotype_id
+   * @prop {string} phenotype_name
+   * @prop {string} phenotype_display_name
+   * @prop {string} sex
+   * @prop {string} ancestry
+   * @prop {string} chromosome
+   * @prop {number} lambda_gc
+   * @prop {number} lambda_gc_ld_score
+   * @prop {integer} count
+   */
+  const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
 
-    if (metadata === undefined || metadata['count'] === null) {
-        throw new Error('No data found for this combination of sex and/or ancestry.')
-    }
+  if (metadata === undefined || metadata['count'] === null) {
+    throw new Error('No data found for this combination of sex and/or ancestry.')
+  }
 
-    /**
-     * @type {object} Object with the following props:
-     * @prop {Array<object>} data
-     * @prop {Array<string>} columns
-     */
-    const points = await plco.api.points({}, phenotype_id, sex, ancestry)
+  /**
+   * @type {object} Object with the following props:
+   * @prop {Array<object>} data
+   * @prop {Array<string>} columns
+   */
+  const points = await plco.api.points({}, phenotype_id, sex, ancestry)
 
-    let div = document.getElementById(div_id)
+  let div = document.getElementById(div_id)
 
-    if (div === null && !to_json) {
-        div = document.createElement('div')
-        div.id = div_id
-        document.body.appendChild(div)
-    }
+  if (div === null && !to_json) {
+    div = document.createElement('div')
+    div.id = div_id
+    document.body.appendChild(div)
+  }
 
-    const trace = {
-        x: points.data.map(p => p.p_value_nlog_expected),
-        y: points.data.map(p => p.p_value_nlog),
-        type: 'scattergl',
-        mode: 'markers',
-        marker: {
-            color: '#A71515',
-            size: 4,
-            opacity: 0.75
-        },
-        // customdata is an array containing more data on each of the individual point corresponding to indices of x
-        // this is useful later with the onClick event
-        customdata: points.data.map((point) => ({
+  const trace = {
+    x: points.data.map(p => p.p_value_nlog_expected),
+    y: points.data.map(p => p.p_value_nlog),
+    type: 'scattergl',
+    mode: 'markers',
+    marker: {
+      color: '#A71515',
+      size: 4,
+      opacity: 0.75
+    },
+    // customdata is an array containing more data on each of the individual point corresponding to indices of x
+    // this is useful later with the onClick event
+    customdata: points.data.map((point) => ({
+      phenotype_id,
+      sex,
+      ancestry,
+      variantId: point['id'],
+      p: Math.pow(10, -point['p_value_nlog']),
+    })),
+    text: points.data.map(point =>
+      'Variant Id: ' + point['id'] +
+      '<br>p-value: ' + Math.pow(10, -point['p_value_nlog']) +
+      '<br>Click to learn more.'),
+    hoverinfo: 'text+x+y+name',
+    name: `${metadata[phenotype_display_name]}, ${sex}, ${ancestry}`,
+  }
+
+  const max = points.data.reduce(
+    (max, cur) => cur.p_value_nlog_expected > max ? cur.p_value_nlog_expected : max, 0)
+
+  const traceLine = {
+    x: [0, max],
+    y: [0, max],
+    type: 'scattergl', // scattergl seems to load faster than scatter, else no major diff
+    mode: 'line',
+    marker: {
+      color: '#BBB',
+      opacity: 0.4,
+      size: 0.1,
+    },
+    hoverinfo: 'none',
+    showlegend: false,
+  }
+
+  const layout = {
+    hoverlabel: {
+      bgcolor: '#FFF',
+      bordercolor: '#BBB',
+      font: {
+        size: 14,
+        color: '#212529',
+      }
+    },
+    width: 750,
+    height: 750,
+    title: {
+      text:
+        `\u03BB (median) = ${metadata['lambda_gc']} <b>|</b>` +
+        `\u03BB (LD score) = ${metadata['lambda_gc_ld_score']} <b>|</b> ` +
+        `Number of variants = ${metadata['count']}`,
+      font: {
+        size: 14,
+        color: 'black'
+      }
+    },
+    xaxis: {
+      automargin: true,
+      rangemode: 'tozero',
+      showgrid: false,
+      fixedrange: false,
+      title: {
+        text: '<b>Expected -log<sub>10</sub>(p)</b>',
+        font: {
+          size: 15,
+          color: 'black'
+        }
+      },
+      ticklen: 10, // Length of the tick marks on the x-axis
+      tickwidth: 1,
+      dtick: 0.5,
+      tickfont: {
+        size: 12,
+        color: 'black'
+      }
+    },
+    yaxis: {
+      automargin: true,
+      rangemode: 'tozero',
+      showgrid: true,
+      fixedrange: false,
+      title: {
+        text: '<b>Observed -log<sub>10</sub>(p)</b>',
+        font: {
+          size: 15,
+          color: 'black'
+        }
+      },
+      ticklen: 10, // Length of the tick marks on the y-axis
+      tickwidth: 1,
+      dtick: 0.5,
+      tickfont: {
+        size: 12,
+        color: 'black'
+      }
+    },
+    clickmode: 'event',
+    hovermode: 'closest', // When a point is hovered, it will display their (x, y) coordinate
+    dragmode: 'pan',
+    showlegend: false,
+  }
+
+  const config = {
+    scrollZoom: true,
+    displaylogo: false,
+    modeBarButtonsToRemove: [
+      'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
+      'hoverCompareCartesian', 'hoverClosestCartesian',
+    ],
+  }
+
+  if (!to_json) {
+    Plotly.newPlot(div, [traceLine, trace], layout, config)
+
+    div.on('plotly_click', async (data) => {
+      console.log(data) // contains the custom data
+
+      // An array
+      const { points } = data
+
+      for (let i = 0; i < points.length; i++) {
+        try {
+          const res = await plco.api.get('variants', {
+            id: points[i].customdata.variantId,
             phenotype_id,
             sex,
             ancestry,
-            variantId: point['id'],
-            p: Math.pow(10, -point['p_value_nlog']),
-        })),
-        text: points.data.map(point =>
-            'Variant Id: ' + point['id'] +
-            '<br>p-value: ' + Math.pow(10, -point['p_value_nlog']) +
-            '<br>Click to learn more.'),
-        hoverinfo: 'text+x+y+name',
-        name: `${metadata[phenotype_display_name]}, ${sex}, ${ancestry}`,
-    }
-
-    const max = points.data.reduce(
-        (max, cur) => cur.p_value_nlog_expected > max ? cur.p_value_nlog_expected : max, 0)
-
-    const traceLine = {
-        x: [0, max],
-        y: [0, max],
-        type: 'scattergl', // scattergl seems to load faster than scatter, else no major diff
-        mode: 'line',
-        marker: {
-            color: '#BBB',
-            opacity: 0.4,
-            size: 0.1,
-        },
-        hoverinfo: 'none',
-        showlegend: false,
-    }
-
-    const layout = {
-        hoverlabel: {
-            bgcolor: '#FFF',
-            bordercolor: '#BBB',
-            font: {
-                size: 14,
-                color: '#212529',
-            }
-        },
-        width: 750,
-        height: 750,
-        title: {
-            text:
-                `\u03BB (median) = ${metadata['lambda_gc']} <b>|</b>` +
-                `\u03BB (LD score) = ${metadata['lambda_gc_ld_score']} <b>|</b> ` +
-                `Number of variants = ${metadata['count']}`,
-            font: {
-                size: 14,
-                color: 'black'
-            }
-        },
-        xaxis: {
-            automargin: true,
-            rangemode: 'tozero',
-            showgrid: false,
-            fixedrange: false,
-            title: {
-                text: '<b>Expected -log<sub>10</sub>(p)</b>',
-                font: {
-                    size: 15,
-                    color: 'black'
-                }
-            },
-            ticklen: 10, // Length of the tick marks on the x-axis
-            tickwidth: 1,
-            dtick: 0.5,
-            tickfont: {
-                size: 12,
-                color: 'black'
-            }
-        },
-        yaxis: {
-            automargin: true,
-            rangemode: 'tozero',
-            showgrid: true,
-            fixedrange: false,
-            title: {
-                text: '<b>Observed -log<sub>10</sub>(p)</b>',
-                font: {
-                    size: 15,
-                    color: 'black'
-                }
-            },
-            ticklen: 10, // Length of the tick marks on the y-axis
-            tickwidth: 1,
-            dtick: 0.5,
-            tickfont: {
-                size: 12,
-                color: 'black'
-            }
-        },
-        clickmode: 'event',
-        hovermode: 'closest', // When a point is hovered, it will display their (x, y) coordinate
-        dragmode: 'pan',
-        showlegend: false,
-    }
-
-    const config = {
-        scrollZoom: true,
-        displaylogo: false,
-        modeBarButtonsToRemove: [
-            'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
-            'hoverCompareCartesian', 'hoverClosestCartesian',
-        ],
-    }
-
-    if (!to_json) {
-        Plotly.newPlot(div, [traceLine, trace], layout, config)
-
-        div.on('plotly_click', async (data) => {
-            console.log(data) // contains the custom data
-
-            // An array
-            const { points } = data
-
-            for (let i = 0; i < points.length; i++) {
-                try {
-                    const res = await plco.api.get('variants', {
-                        id: points[i].customdata.variantId,
-                        phenotype_id,
-                        sex,
-                        ancestry,
-                        columns: 'chromosome,position,snp',
-                    })
-                    const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
-                    let updatedText = points[i].data.text.slice()
-                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
-                        `Position: ${resPosition} <br> SNP: ${resSnp}`
-                    Plotly.restyle(div, { text: [updatedText] }, [1])
-                } catch (e) {
-                    console.error(e)
-                }
-            }
-        })
-        return div
-    } else {
-        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
-        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
-        return tracesString + layoutString
-    }
+            columns: 'chromosome,position,snp',
+          })
+          const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
+          let updatedText = points[i].data.text.slice()
+          updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+            `Position: ${resPosition} <br> SNP: ${resSnp}`
+          Plotly.restyle(div, { text: [updatedText] }, [1])
+        } catch (e) {
+          console.error(e)
+        }
+      }
+    })
+    return div
+  } else {
+    const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
+    const layoutString = '"layout":' + JSON.stringify(layout) + '}'
+    return tracesString + layoutString
+  }
 }
 
 /**
@@ -722,121 +837,121 @@ plco.plot.qq = async (
  * {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
  */
 plco.plot.qq2 = (
-    div_id,
-    arrayOfObjects = [],
-    to_json = false
+  div_id,
+  arrayOfObjects = [],
+  to_json = false
 ) => {
-    const promises = []
-    arrayOfObjects.forEach((obj) => {
-        const { phenotype_id, sex, ancestry } = obj
-        if (!phenotype_id || !sex || !ancestry) {
-            console.error('An object is missing mandatory fields, skipping ...')
-            return
-        } else {
-            promises.push(
-                plco.plot.qq('', phenotype_id, sex, ancestry, true)
-                    .catch(() => {
-                        console.error('Unable to fetch data, skipping...')
-                        return undefined
-                    })
-            )
-        }
-    })
+  const promises = []
+  arrayOfObjects.forEach((obj) => {
+    const { phenotype_id, sex, ancestry } = obj
+    if (!phenotype_id || !sex || !ancestry) {
+      console.error('An object is missing mandatory fields, skipping ...')
+      return
+    } else {
+      promises.push(
+        plco.plot.qq('', phenotype_id, sex, ancestry, true)
+          .catch(() => {
+            console.error('Unable to fetch data, skipping...')
+            return undefined
+          })
+      )
+    }
+  })
 
-    /**
-     * @type {Array<object>} Each object has the following props:
-     * @prop {Array<object>} traces
-     * @prop {object} layout
-     */
-    return Promise.all(promises)
-        .then((_) => _.filter(Boolean)) // Filters out all undefined and null
-        .then((arrayOfJsonStr) => arrayOfJsonStr.map((str) => JSON.parse(str)))
-        .then((arrayOfJson) => {
-            if (arrayOfJson.length === 0) return
+  /**
+   * @type {Array<object>} Each object has the following props:
+   * @prop {Array<object>} traces
+   * @prop {object} layout
+   */
+  return Promise.all(promises)
+    .then((_) => _.filter(Boolean)) // Filters out all undefined and null
+    .then((arrayOfJsonStr) => arrayOfJsonStr.map((str) => JSON.parse(str)))
+    .then((arrayOfJson) => {
+      if (arrayOfJson.length === 0) return
 
-            const colors = ['#01A5E4', '#FFBF65', '#FF5768', '#8DD7C0', '#FF96C6']
+      const colors = ['#01A5E4', '#FFBF65', '#FF5768', '#8DD7C0', '#FF96C6']
 
-            let div = document.getElementById(div_id)
-            if (div === null && !to_json) {
-                div = document.createElement('div')
-                div.id = div_id
-                document.body.appendChild(div)
-            }
+      let div = document.getElementById(div_id)
+      if (div === null && !to_json) {
+        div = document.createElement('div')
+        div.id = div_id
+        document.body.appendChild(div)
+      }
 
-            const traces = [arrayOfJson[0].traces[0]]
+      const traces = [arrayOfJson[0].traces[0]]
 
-            arrayOfJson.forEach((obj, index) => {
-                traces.push({
-                    ...obj.traces[1],
-                    marker: {
-                        color: colors[index % colors.length],
-                        size: 4,
-                        opacity: 0.6
-                    },
-                })
-            })
-
-            const layout = {
-                ...arrayOfJson[0].layout,
-                showlegend: true,
-                width: 900,
-                height: 900,
-                hoverlabel: {
-                },
-                title: {
-                    text: arrayOfJson.reduce((word, cur, index) =>
-                        word + traces[index + 1].name + ' ' + cur.layout.title.text + '<br>', ''),
-                    font: {
-                        size: 12,
-                        color: 'black'
-                    }
-                }
-            }
-
-            const config = {
-                scrollZoom: true,
-                displaylogo: false,
-                modeBarButtonsToRemove: [
-                    'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
-                    'hoverCompareCartesian', 'hoverClosestCartesian',
-                ],
-            }
-
-            if (!to_json) {
-                Plotly.newPlot(div, traces, layout, config)
-                div.on('plotly_click', async (data) => {
-                    console.log(data) // contains the custom data
-
-                    // An array
-                    const { points } = data
-
-                    for (let i = 0; i < points.length; i++) {
-                        try {
-                            const { id, phenotype_id, sex, ancestry } = points[i].customdata
-                            const res = await plco.api.get('variants', {
-                                id,
-                                phenotype_id,
-                                sex,
-                                ancestry,
-                                columns: 'chromosome,position,snp',
-                            })
-                            const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
-                            let updatedText = points[i].data.text.slice()
-                            updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
-                                `Position: ${resPosition} <br> SNP: ${resSnp}`
-                            Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
-                        } catch (e) {
-                            console.error(e)
-                        }
-                    }
-                })
-                return div
-            } else {
-                const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-                const layoutString = '"layout":' + JSON.stringify(layout) + '}'
-                return tracesString + layoutString
-            }
+      arrayOfJson.forEach((obj, index) => {
+        traces.push({
+          ...obj.traces[1],
+          marker: {
+            color: colors[index % colors.length],
+            size: 4,
+            opacity: 0.6
+          },
         })
+      })
+
+      const layout = {
+        ...arrayOfJson[0].layout,
+        showlegend: true,
+        width: 900,
+        height: 900,
+        hoverlabel: {
+        },
+        title: {
+          text: arrayOfJson.reduce((word, cur, index) =>
+            word + traces[index + 1].name + ' ' + cur.layout.title.text + '<br>', ''),
+          font: {
+            size: 12,
+            color: 'black'
+          }
+        }
+      }
+
+      const config = {
+        scrollZoom: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: [
+          'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
+          'hoverCompareCartesian', 'hoverClosestCartesian',
+        ],
+      }
+
+      if (!to_json) {
+        Plotly.newPlot(div, traces, layout, config)
+        div.on('plotly_click', async (data) => {
+          console.log(data) // contains the custom data
+
+          // An array
+          const { points } = data
+
+          for (let i = 0; i < points.length; i++) {
+            try {
+              const { id, phenotype_id, sex, ancestry } = points[i].customdata
+              const res = await plco.api.get('variants', {
+                id,
+                phenotype_id,
+                sex,
+                ancestry,
+                columns: 'chromosome,position,snp',
+              })
+              const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
+              let updatedText = points[i].data.text.slice()
+              updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                `Position: ${resPosition} <br> SNP: ${resSnp}`
+              Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
+            } catch (e) {
+              console.error(e)
+            }
+          }
+        })
+        return div
+      } else {
+        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
+        return tracesString + layoutString
+      }
+    })
 }
 
 /**
@@ -849,141 +964,141 @@ plco.plot.qq2 = (
  * @returns 
  */
 plco.plot.pca = async (
-    div_id,
-    phenotype_id,
-    sex,
-    ancestry,
-    to_json = false
+  div_id,
+  phenotype_id,
+  sex,
+  ancestry,
+  to_json = false
 ) => {
 
-    let pc_x = 1
-    let pc_y = 2
+  let pc_x = 1
+  let pc_y = 2
 
-    /**
-     * Metadata
-     * @type {Array<object>} Each object in the array has the properties defined below.
-     * @prop {integer} id
-     * @prop {integer} phenotype_id
-     * @prop {string} phenotype_name
-     * @prop {string} phenotype_display_name
-     * @prop {string} sex
-     * @prop {string} ancestry
-     * @prop {string} chromosome
-     * @prop {number} lambda_gc
-     * @prop {number} lambda_gc_ld_score
-     * @prop {integer} count
-     */
+  /**
+   * Metadata
+   * @type {Array<object>} Each object in the array has the properties defined below.
+   * @prop {integer} id
+   * @prop {integer} phenotype_id
+   * @prop {string} phenotype_name
+   * @prop {string} phenotype_display_name
+   * @prop {string} sex
+   * @prop {string} ancestry
+   * @prop {string} chromosome
+   * @prop {number} lambda_gc
+   * @prop {number} lambda_gc_ld_score
+   * @prop {integer} count
+   */
 
 
-    /**
-     * PCA
-     * @type {object}
-     * @prop {Array} columns 
-     * @prop {Array} data - `data` is an array of object that has the following props: 
-     * pc_x, pc_y, ancestry, sex, value
-     */
+  /**
+   * PCA
+   * @type {object}
+   * @prop {Array} columns 
+   * @prop {Array} data - `data` is an array of object that has the following props: 
+   * pc_x, pc_y, ancestry, sex, value
+   */
 
-    let div = document.getElementById(div_id)
+  let div = document.getElementById(div_id)
 
-    if (div === null && !to_json) {
-        div = document.createElement('div')
-        div.id = div_id
-        document.body.appendChild(div)
-    }
+  if (div === null && !to_json) {
+    div = document.createElement('div')
+    div.id = div_id
+    document.body.appendChild(div)
+  }
 
-    // Other are the points that do not share the inputted ancestry or sex or value == null
-    // Control are the same ancestry and sex, but value == null or 0
-    // Cases are the same ancestry and sex, but value != null and != 0
+  // Other are the points that do not share the inputted ancestry or sex or value == null
+  // Control are the same ancestry and sex, but value == null or 0
+  // Cases are the same ancestry and sex, but value != null and != 0
 
-    const traces = await plco.plot.helpers.pcaHelper([{ phenotype_id, ancestry, sex }], 'PLCO_GSA', 1, 2)
+  const traces = await plco.plot.helpers.pcaHelper([{ phenotype_id, ancestry, sex }], 'PLCO_GSA', 1, 2)
 
-    const layout = {
-        dragmode: 'pan',
-        clickmode: 'event',
-        width: 800,
-        height: 800,
-        autosize: true,
-        xaxis: {
-            automargin: true,
-            showgrid: false,
-            title: {
-                text: `<b>PC-X ${(pc_x || '1')}</b>`,
-                font: {
-                    size: 14,
-                    color: 'black'
-                }
-            },
-            tick0: 0,
-            ticklen: 10,
-            tickfont: {
-                size: 10,
-                color: 'black'
-            }
-        },
-        yaxis: {
-            automargin: true,
-            showgrid: false,
-            title: {
-                text: `<b>PC-Y ${(pc_y || '2')}</b>`,
-                font: {
-                    size: 14,
-                    color: 'black'
-                }
-            },
-            tick0: 0,
-            ticklen: 10,
-            tickfont: {
-                size: 10,
-                color: 'black'
-            }
-        },
-        showlegend: true,
-        legend: {
-            title: {
-                font: {
-                    size: 12,
-                    color: 'grey'
-                }
-            },
-            itemdoubleclick: false,
-            orientation: 'v',
-            x: 0.0,
-            y: 1.2
+  const layout = {
+    dragmode: 'pan',
+    clickmode: 'event',
+    width: 800,
+    height: 800,
+    autosize: true,
+    xaxis: {
+      automargin: true,
+      showgrid: false,
+      title: {
+        text: `<b>PC-X ${(pc_x || '1')}</b>`,
+        font: {
+          size: 14,
+          color: 'black'
         }
+      },
+      tick0: 0,
+      ticklen: 10,
+      tickfont: {
+        size: 10,
+        color: 'black'
+      }
+    },
+    yaxis: {
+      automargin: true,
+      showgrid: false,
+      title: {
+        text: `<b>PC-Y ${(pc_y || '2')}</b>`,
+        font: {
+          size: 14,
+          color: 'black'
+        }
+      },
+      tick0: 0,
+      ticklen: 10,
+      tickfont: {
+        size: 10,
+        color: 'black'
+      }
+    },
+    showlegend: true,
+    legend: {
+      title: {
+        font: {
+          size: 12,
+          color: 'grey'
+        }
+      },
+      itemdoubleclick: false,
+      orientation: 'v',
+      x: 0.0,
+      y: 1.2
     }
+  }
 
-    const config = {
-        scrollZoom: true,
-        responsive: true,
-        toImageButtonOptions: {
-            format: 'svg',
-            filename: 'pca_plot',
-            height: 1000,
-            width: 1000,
-            scale: 1
-        },
-        displaylogo: false,
-        modeBarButtonsToRemove: [
-            'select2d',
-            'autoScale2d',
-            'hoverClosestCartesian',
-            'hoverCompareCartesian',
-            'lasso2d'
-        ]
-    }
+  const config = {
+    scrollZoom: true,
+    responsive: true,
+    toImageButtonOptions: {
+      format: 'svg',
+      filename: 'pca_plot',
+      height: 1000,
+      width: 1000,
+      scale: 1
+    },
+    displaylogo: false,
+    modeBarButtonsToRemove: [
+      'select2d',
+      'autoScale2d',
+      'hoverClosestCartesian',
+      'hoverCompareCartesian',
+      'lasso2d'
+    ]
+  }
 
-    if (!to_json) {
-        Plotly.newPlot(div, traces, layout, config)
-        return div
-    } else {
-        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
-        return tracesString + layoutString
-    }
+  if (!to_json) {
+    Plotly.newPlot(div, traces, layout, config)
+    return div
+  } else {
+    const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+    const layoutString = '"layout":' + JSON.stringify(layout) + '}'
+    return tracesString + layoutString
+  }
 }
 
 plco.plot.pca2 = async () => {
-    // TODO
+  // TODO
 }
 
 /**
@@ -993,126 +1108,126 @@ plco.plot.pca2 = async () => {
 plco.plot.helpers = {}
 
 plco.plot.helpers.pcaValidate = async (
-    arrayOfObjects = []
+  arrayOfObjects = []
 ) => {
-    const promises = []
-    arrayOfObjects.forEach(({ phenotype_id, sex, ancestry }) => {
-        promises.push(
-            plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
-                .then(array => array[0])
-                .then(metadata => {
-                    if (metadata === undefined || metadata['count'] === null) {
-                        throw new Error('No data found for this combination of sex and/or ancestry.')
-                    } else
-                        return metadata
-                })
-                .catch(() => {
-                    console.error('Unable to fetch data, skipping...')
-                    return undefined
-                })
-        )
-    })
+  const promises = []
+  arrayOfObjects.forEach(({ phenotype_id, sex, ancestry }) => {
+    promises.push(
+      plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
+        .then(array => array[0])
+        .then(metadata => {
+          if (metadata === undefined || metadata['count'] === null) {
+            throw new Error('No data found for this combination of sex and/or ancestry.')
+          } else
+            return metadata
+        })
+        .catch(() => {
+          console.error('Unable to fetch data, skipping...')
+          return undefined
+        })
+    )
+  })
 
-    return (await Promise.all(promises)).filter(Boolean)
+  return (await Promise.all(promises)).filter(Boolean)
 }
 
 plco.plot.helpers.pcaGenerateTraces = async (
-    validArray,
-    platform,
-    pc_x,
-    pc_y
+  validArray,
+  platform,
+  pc_x,
+  pc_y
 ) => {
-    // [light, dark]
-    const colors = [['#D4A8E2', '#A482AF'], ['#FFD5A6', '#CCAA84'],
-    ['#8DD7C0', '#6BA392'], ['#01A7FF', '#0085CC']]
+  // [light, dark]
+  const colors = [['#D4A8E2', '#A482AF'], ['#FFD5A6', '#CCAA84'],
+  ['#8DD7C0', '#6BA392'], ['#01A7FF', '#0085CC']]
 
-    const pcaPromises = []
-    validArray.forEach((obj) =>
-        pcaPromises.push(
-            plco.api.pca({}, obj.phenotype_id, platform, pc_x, pc_y)
-        )
+  const pcaPromises = []
+  validArray.forEach((obj) =>
+    pcaPromises.push(
+      plco.api.pca({}, obj.phenotype_id, platform, pc_x, pc_y)
     )
-    // Pca [] should have a one-to-one correspondence with validArray []
-    const pcadatas = await Promise.all(pcaPromises)
+  )
+  // Pca [] should have a one-to-one correspondence with validArray []
+  const pcadatas = await Promise.all(pcaPromises)
 
-    const baseTrace = {
-        type: 'scattergl',
-        hoverinfo: 'none',
-        showlegend: true,
-        mode: 'markers',
-    }
-    const traces = []
-    const otherTraces = []
+  const baseTrace = {
+    type: 'scattergl',
+    hoverinfo: 'none',
+    showlegend: true,
+    mode: 'markers',
+  }
+  const traces = []
+  const otherTraces = []
 
-    pcadatas.forEach((item, index) => {
-        // Create the other traces first
-        const others = item.data.filter(obj =>
-            obj.ancestry !== validArray[index].ancestry ||
-            obj.sex !== validArray[index].sex || obj.value === null
-        )
-        otherTraces.push({
-            ...baseTrace,
-            x: others.map(obj => obj.pc_x),
-            y: others.map(obj => obj.pc_y),
-            marker: {
-                color: '#A6A6A6',
-                size: 4,
-                opacity: 0.3
-            },
-            name: 'Other'
-        })
-
-        const controls = item.data.filter(obj =>
-            obj.ancestry === validArray[index].ancestry &&
-            obj.sex === validArray[index].sex && (obj.value === null || obj.value === 0)
-        )
-        const cases = item.data.filter(obj =>
-            obj.ancestry === validArray[index].ancestry &&
-            obj.sex === validArray[index].sex && (obj.value !== null && obj.value !== 0)
-        )
-        const controlsTrace = {
-            ...baseTrace,
-            x: controls.map(obj => obj.pc_x),
-            y: controls.map(obj => obj.pc_y),
-            marker: {
-                color: colors[index % colors.length][1],
-                size: 5,
-                opacity: 0.65
-            },
-            name: `'Controls' ${index}`
-        }
-        const casesTrace = {
-            ...baseTrace,
-            x: cases.map(obj => obj.pc_x),
-            y: cases.map(obj => obj.pc_y),
-            marker: {
-                color: colors[index % colors.length][0],
-                size: 5,
-                opacity: 0.65
-            },
-            name: `Cases ${index}`
-        }
-
-        traces.push(controlsTrace, casesTrace)
+  pcadatas.forEach((item, index) => {
+    // Create the other traces first
+    const others = item.data.filter(obj =>
+      obj.ancestry !== validArray[index].ancestry ||
+      obj.sex !== validArray[index].sex || obj.value === null
+    )
+    otherTraces.push({
+      ...baseTrace,
+      x: others.map(obj => obj.pc_x),
+      y: others.map(obj => obj.pc_y),
+      marker: {
+        color: '#A6A6A6',
+        size: 4,
+        opacity: 0.3
+      },
+      name: 'Other'
     })
 
-    return otherTraces.concat(traces)
+    const controls = item.data.filter(obj =>
+      obj.ancestry === validArray[index].ancestry &&
+      obj.sex === validArray[index].sex && (obj.value === null || obj.value === 0)
+    )
+    const cases = item.data.filter(obj =>
+      obj.ancestry === validArray[index].ancestry &&
+      obj.sex === validArray[index].sex && (obj.value !== null && obj.value !== 0)
+    )
+    const controlsTrace = {
+      ...baseTrace,
+      x: controls.map(obj => obj.pc_x),
+      y: controls.map(obj => obj.pc_y),
+      marker: {
+        color: colors[index % colors.length][1],
+        size: 5,
+        opacity: 0.65
+      },
+      name: `'Controls' ${index}`
+    }
+    const casesTrace = {
+      ...baseTrace,
+      x: cases.map(obj => obj.pc_x),
+      y: cases.map(obj => obj.pc_y),
+      marker: {
+        color: colors[index % colors.length][0],
+        size: 5,
+        opacity: 0.65
+      },
+      name: `Cases ${index}`
+    }
+
+    traces.push(controlsTrace, casesTrace)
+  })
+
+  return otherTraces.concat(traces)
 }
 
 plco.plot.helpers.pcaHelper = async (
-    arrayOfObjects,
-    platform,
-    pc_x,
-    pc_y
+  arrayOfObjects,
+  platform,
+  pc_x,
+  pc_y
 ) => {
-    const metadatas = await plco.plot.helpers.pcaValidate(arrayOfObjects)
-    const traces = await plco.plot.helpers.pcaGenerateTraces(metadatas, platform, pc_x, pc_y)
-    // TODO Create the selectors
-    return traces
+  const metadatas = await plco.plot.helpers.pcaValidate(arrayOfObjects)
+  const traces = await plco.plot.helpers.pcaGenerateTraces(metadatas, platform, pc_x, pc_y)
+  // TODO Create the selectors
+  return traces
 }
 
 plco()
 
 if (typeof (define) != 'undefined') {
-    define(plco)
+  define(plco)
 }
