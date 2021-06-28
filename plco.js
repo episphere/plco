@@ -1167,6 +1167,8 @@ plco.plot.helpers.pcaGenerateTraces = async (
     // Pca [] should have a one-to-one correspondence with validArray []
     const pcadatas = await Promise.all(pcaPromises)
 
+    if (pcadatas.length === 0) return
+
     const baseTrace = {
         type: 'scattergl',
         hoverinfo: 'x+y',
@@ -1246,23 +1248,25 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
     // https://plotly.com/javascript/dropdowns/
     const layout = {
         updatemenus: [{
-            y: 0.8,
+            y: 1.2,
             yanchor: 'top',
             buttons: [],
         }]
     }
 
-    const platforms = ['PLCO_GSA', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX']
+    const platforms = ['PLCO_GSA', 'PLCO_Omni5', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX']
     const promises = []
+    const metadatas = await plco.plot.helpers.pcaValidate(validArray)
+
 
     for (let i = 0; i < platforms.length; i++) {
         promises.push(
-            plco.plot.helpers.pcaGenerateTraces(validArray, platform_id, pc_x, pc_y)
+            plco.plot.helpers.pcaGenerateTraces(metadatas, platforms[i], pc_x, pc_y)
                 .then((traces) => {
                     layout.updatemenus[0].buttons.push({
                         method: 'restyle',
-                        args: [{ x: [traces.map(t => t.x)], y: [traces.map(t => t.y)] }],
-                        label: platform_id,
+                        args: [{ x: traces.map(t => t.x), y: traces.map(t => t.y) }],
+                        label: platforms[i],
                     })
                 })
         )
