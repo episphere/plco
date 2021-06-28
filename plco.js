@@ -98,20 +98,20 @@ plco.plotTest = async (
     return div
 }
 
-plco.typeCheckAttributes = (obj = {}) => {
-    const typeKey = {
-        phenotype_id: 'integer',
-        raw: 'string'
-    }
-    Object.keys(obj).forEach((key) => {
-        if (typeKey[key] === 'string' && typeof obj[key] !== 'string') {
-            throw new TypeError(`${key} is not of type ${typeKey[key]}`)
-        } else if (typeKey[key] === 'integer' && !Number.isInteger(obj[key])) {
-            throw new TypeError(`${key} is not of type ${typeKey[key]}`)
-        }
-    })
+// plco.typeCheckAttributes = (obj = {}) => {
+//     const typeKey = {
+//         phenotype_id: 'integer',
+//         raw: 'string'
+//     }
+//     Object.keys(obj).forEach((key) => {
+//         if (typeKey[key] === 'string' && typeof obj[key] !== 'string') {
+//             throw new TypeError(`${key} is not of type ${typeKey[key]}`)
+//         } else if (typeKey[key] === 'integer' && !Number.isInteger(obj[key])) {
+//             throw new TypeError(`${key} is not of type ${typeKey[key]}`)
+//         }
+//     })
 
-}
+// }
 
 plco.explorePhenotypes = (graph = false) => {
     return 'WIP'
@@ -1193,7 +1193,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 4,
                 opacity: 0.4
             },
-            name: 'Other'
+            name: 'Other, Count: ' + others.length
         })
 
         const controls = item.data.filter(obj =>
@@ -1213,7 +1213,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 5,
                 opacity: 0.65
             },
-            name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry},` +
+            name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
                 `${validArray[index].sex[0]}, Count: ${controls.length}`
         }
         const casesTrace = {
@@ -1225,7 +1225,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 5,
                 opacity: 0.65
             },
-            name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry},` +
+            name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
                 `${validArray[index].sex[0]}, Count: ${cases.length}`
         }
 
@@ -1277,18 +1277,31 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
     return layout
 }
 
-plco.plot.helpers.pcaGenerateXYInputs = (div_id, layout, config) => {
+plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config) => {
     const xSelector = document.createElement('select')
     const ySelector = document.createElement('select')
 
     for (let i = 1; i <= 20; i++) {
         const opt = document.createElement('option')
-        opt.value = i
+        opt.text = i
         xSelector.appendChild(opt)
         ySelector.appendChild(opt)
     }
 
-    xSelector.addEventListener('change', () => { }, false)
+    xSelector.addEventListener('change', async () => {
+        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xSelector.value, ySelector.value)
+        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xSelector.value, ySelector.value)
+        Plotly.newPlot(div_id, traces, Object.assign(layout, dropdownLayout), config)
+    }, false)
+
+    ySelector.addEventListener('change', async () => {
+        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xSelector.value, ySelector.value)
+        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xSelector.value, ySelector.value)
+        Plotly.newPlot(div_id, traces, Object.assign(layout, dropdownLayout), config)
+    }, false)
+
+    document.getElementById(div_id).appendChild(xSelector)
+    document.getElementById(div_id).appendChild(ySelector)
 }
 
 plco()
