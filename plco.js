@@ -1106,6 +1106,7 @@ plco.plot.pca = async (
 
     if (!to_json) {
         Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
+        plco.plot.helpers.pcaGenerateXYInputs(div_id, [{ phenotype_id, ancestry, sex }], layout, config)
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
