@@ -1027,7 +1027,7 @@ plco.plot.pca = async (
     const traces = await plco.plot.helpers.pcaHelper([{ phenotype_id, ancestry, sex }], 'PLCO_GSA', 1, 2)
 
     const layout = {
-        hovermode: 'cloest',
+        hovermode: 'closest',
         dragmode: 'pan',
         clickmode: 'event',
         width: 800,
@@ -1167,7 +1167,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
     // Pca [] should have a one-to-one correspondence with validArray []
     const pcadatas = await Promise.all(pcaPromises)
 
-    if (pcadatas.length === 0) return
+    if (pcadatas.length === 0) return []
 
     const baseTrace = {
         type: 'scattergl',
@@ -1191,7 +1191,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
             marker: {
                 color: '#A6A6A6',
                 size: 4,
-                opacity: 0.3
+                opacity: 0.4
             },
             name: 'Other'
         })
@@ -1213,7 +1213,8 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 5,
                 opacity: 0.65
             },
-            name: `'Controls' ${index}`
+            name: `'Controls' ${validArray[index].phenotype_display_name},
+                ${validArray[index].ancestry}, ${validArray[index].sex[0]}`
         }
         const casesTrace = {
             ...baseTrace,
@@ -1224,7 +1225,8 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 5,
                 opacity: 0.65
             },
-            name: `Cases ${index}`
+            name: `Cases ${validArray[index].phenotype_display_name},
+                ${validArray[index].ancestry}, ${validArray[index].sex[0]}`
         }
 
         traces.push(controlsTrace, casesTrace)
@@ -1257,7 +1259,6 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
     const platforms = ['PLCO_GSA', 'PLCO_Omni5', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX']
     const promises = []
     const metadatas = await plco.plot.helpers.pcaValidate(validArray)
-
 
     for (let i = 0; i < platforms.length; i++) {
         promises.push(
