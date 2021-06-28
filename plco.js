@@ -1213,8 +1213,8 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 5,
                 opacity: 0.65
             },
-            name: `'Controls' ${validArray[index].phenotype_display_name},
-                ${validArray[index].ancestry}, ${validArray[index].sex[0]}`
+            name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry},` +
+                `${validArray[index].sex[0]}, Count: ${controls.length}`
         }
         const casesTrace = {
             ...baseTrace,
@@ -1225,8 +1225,8 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 size: 5,
                 opacity: 0.65
             },
-            name: `Cases ${validArray[index].phenotype_display_name},
-                ${validArray[index].ancestry}, ${validArray[index].sex[0]}`
+            name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry},` +
+                `${validArray[index].sex[0]}, Count: ${cases.length}`
         }
 
         traces.push(controlsTrace, casesTrace)
