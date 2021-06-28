@@ -22,7 +22,6 @@ const plco = async function () {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
-
 }
 
 /**
@@ -1103,8 +1102,10 @@ plco.plot.pca = async (
         ]
     }
 
+    const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout([{ phenotype_id, ancestry, sex }], 1, 2)
+
     if (!to_json) {
-        Plotly.newPlot(div, traces, layout, config)
+        Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -1241,16 +1242,39 @@ plco.plot.helpers.pcaHelper = async (
     return traces
 }
 
-plco.plot.helpers.pcaCreateDOMElements = (div) => {
-    // TODO Create the selectors
-    const dropdown = document.createElement('select')
+plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
+    // https://plotly.com/javascript/dropdowns/
+    const layout = {
+        updatemenus: [{
+            y: 0.8,
+            yanchor: 'top',
+            buttons: [],
+        }]
+    }
     ['PLCO_GSA', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX'].forEach((platform_id) => {
-        const option = document.createElement('option')
-        option.value = platform_id
-        option.innerHTML = platform_id
-        dropdown.appendChild(option)
+        const traces = await plco.plot.helpers.pcaGenerateTraces(validArray, platform_id, pc_x, pc_y)
+
+        layout.updatemenus.buttons.push({
+            method: 'restyle',
+            args: [{ x: [traces.map(t => t.x)], y: [traces.map(t => t.y)] }],
+            label: platform_id,
+        })
     })
-    div.appendChild(dropdown)
+    return layout
+}
+
+plco.plot.helpers.pcaGenerateXYInputs = (div_id, layout, config) => {
+    const xSelector = document.createElement('select')
+    const ySelector = document.createElement('select')
+
+    for (let i = 1; i <= 20; i++) {
+        const opt = document.createElement('option')
+        opt.value = i
+        xSelector.appendChild(opt)
+        ySelector.appendChild(opt)
+    }
+
+    xSelector.addEventListener('change', () => { }, false)
 }
 
 plco()
