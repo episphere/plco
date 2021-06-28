@@ -1166,7 +1166,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
         )
     )
     // Pca [] should have a one-to-one correspondence with validArray []
-    const pcadatas = await Promise.all(pcaPromises)
+    const pcadatas = await Promise.all(pcaPromises).catch(() => [])
 
     if (pcadatas.length === 0) return []
 
@@ -1280,29 +1280,65 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 
 plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config) => {
     const xSelector = document.createElement('select')
+    xSelector.id = div_id + 'xSelector'
     const ySelector = document.createElement('select')
+    ySelector.id = div_id + 'ySelector'
+
+    const xLabel = document.createElement('label')
+    xLabel.for = div_id + 'xSelector'
+    xLabel.innerHTML = 'PC_X: '
+
+    const yLabel = document.createElement('label')
+    yLabel.for = div_id + 'ySelector'
+    yLabel.innerHTML = 'PC_Y: '
+
 
     for (let i = 1; i <= 20; i++) {
         const opt = document.createElement('option')
         opt.text = i
         xSelector.appendChild(opt)
-        ySelector.appendChild(opt)
+
+        if (i === 1) continue
+        const opt2 = document.createElement('option')
+        opt2.text = i
+        ySelector.appendChild(opt2)
     }
 
+    const opt3 = document.createElement('option')
+    opt3.text = 1
+    ySelector.appendChild(opt3)
+
     xSelector.addEventListener('change', async () => {
-        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xSelector.value, ySelector.value)
-        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xSelector.value, ySelector.value)
-        Plotly.newPlot(div_id, traces, Object.assign(layout, dropdownLayout), config)
+        const xVal = Number.parseFloat(xSelector.value)
+        const yVal = Number.parseFloat(ySelector.value)
+
+        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xVal, yVal)
+        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xVal, yVal)
+        Plotly.newPlot(div_id, traces, Object.assign({
+            ...layout,
+            xaxis: { ...layout.xaxis, title: { text: `<b>PC-X ${(xVal || '2')}</b>` } },
+            yaxis: { ...layout.yaxis, title: { text: `<b>PC-Y ${(yVal || '2')}</b>` } },
+        }, dropdownLayout), config)
     }, false)
 
     ySelector.addEventListener('change', async () => {
-        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xSelector.value, ySelector.value)
-        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xSelector.value, ySelector.value)
-        Plotly.newPlot(div_id, traces, Object.assign(layout, dropdownLayout), config)
+        const xVal = Number.parseFloat(xSelector.value)
+        const yVal = Number.parseFloat(ySelector.value)
+
+        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xVal, yVal)
+        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xVal, yVal)
+        Plotly.newPlot(div_id, traces, Object.assign({
+            ...layout,
+            xaxis: { ...layout.xaxis, title: { text: `<b>PC-X ${(xVal || '2')}</b>` } },
+            yaxis: { ...layout.yaxis, title: { text: `<b>PC-Y ${(yVal || '2')}</b>` } },
+        }, dropdownLayout), config)
     }, false)
 
-    document.getElementById(div_id).appendChild(xSelector)
-    document.getElementById(div_id).appendChild(ySelector)
+    const div = document.getElementById(div_id)
+    div.appendChild(xLabel)
+    div.appendChild(xSelector)
+    div.appendChild(yLabel)
+    div.appendChild(ySelector)
 }
 
 plco()
