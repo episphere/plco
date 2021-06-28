@@ -1251,15 +1251,24 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
             buttons: [],
         }]
     }
-    ['PLCO_GSA', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX'].forEach((platform_id) => {
-        const traces = await plco.plot.helpers.pcaGenerateTraces(validArray, platform_id, pc_x, pc_y)
 
-        layout.updatemenus.buttons.push({
-            method: 'restyle',
-            args: [{ x: [traces.map(t => t.x)], y: [traces.map(t => t.y)] }],
-            label: platform_id,
-        })
-    })
+    const platforms = ['PLCO_GSA', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX']
+    const promises = []
+
+    for (let i = 0; i < platforms.length; i++) {
+        promises.push(
+            plco.plot.helpers.pcaGenerateTraces(validArray, platform_id, pc_x, pc_y)
+                .then((traces) => {
+                    layout.updatemenus[0].buttons.push({
+                        method: 'restyle',
+                        args: [{ x: [traces.map(t => t.x)], y: [traces.map(t => t.y)] }],
+                        label: platform_id,
+                    })
+                })
+        )
+    }
+
+    await Promise.all(promises)
     return layout
 }
 
