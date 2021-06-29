@@ -21,6 +21,6 @@ jobs:
         run: |
           git config --global user.name "Eric Ruan"
           git config --global user.email "eric.ruan.130@gmail.com"
-          git add out/
+          git add docs/
           git commit -am 'Updated docs.'
           git push
