@@ -286,7 +286,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line102">line 102</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line121">line 121</a>
     </li></ul></dd>
     
 
@@ -325,7 +325,7 @@
     
 
     
-    <h4 class="name" id=".download"><span class="type-signature">(static) </span>download<span class="signature">(parms, phenotype_id, get_link_only)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".download"><span class="type-signature">(static) </span>download<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, get_link_only<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -357,7 +357,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -388,7 +392,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -411,7 +427,23 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3080
+                
+                </td>
             
 
             <td class="description last"><p>A numeric phenotype id.</p></td>
@@ -434,7 +466,21 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If set to 'true', returns the download link instead of redirecting automatically to the file.</p></td>
@@ -478,7 +524,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line170">line 170</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line189">line 189</a>
     </li></ul></dd>
     
 
@@ -524,7 +570,7 @@
     
 
     
-    <h4 class="name" id=".metadata"><span class="type-signature">(static) </span>metadata<span class="signature">(parms, phenotype_id, sex, ancestry, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".metadata"><span class="type-signature">(static) </span>metadata<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -556,7 +602,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -587,7 +637,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -603,14 +665,30 @@
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3080
+                
+                </td>
             
 
             <td class="description last"><p>A phenotype id.</p></td>
@@ -633,7 +711,23 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    female
+                
+                </td>
             
 
             <td class="description last"><p>A sex, which may be &quot;all&quot;, &quot;female&quot;, or &quot;male&quot;.</p></td>
@@ -656,10 +750,26 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last"><p>An ancestry, which may be  &quot;african_american&quot;, &quot;east_asian&quot; or &quot;european&quot;.</p></td>
+            
+                <td class="default">
+                
+                    european
+                
+                </td>
+            
+
+            <td class="description last"><p>A character vector specifying ancestries to retrieve data for.</p></td>
         </tr>
 
     
@@ -679,7 +789,21 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns data in an array of arrays instead of an array of objects.</p></td>
@@ -723,7 +847,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line203">line 203</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line222">line 222</a>
     </li></ul></dd>
     
 
@@ -778,7 +902,7 @@ plco.api.metadata({}, 3080, "female", "european")</code></pre>
     
 
     
-    <h4 class="name" id=".participants"><span class="type-signature">(static) </span>participants<span class="signature">(parms, phenotype_id, columns, precision, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".participants"><span class="type-signature">(static) </span>participants<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, columns<span class="signature-attributes">opt</span>, precision<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -810,7 +934,11 @@ plco.api.metadata({}, 3080, "female", "european")</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -841,7 +969,19 @@ plco.api.metadata({}, 3080, "female", "european")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -864,7 +1004,23 @@ plco.api.metadata({}, 3080, "female", "european")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    2250
+                
+                </td>
             
 
             <td class="description last"><p>A numeric phenotype id.</p></td>
@@ -887,7 +1043,21 @@ plco.api.metadata({}, 3080, "female", "european")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. A character vector specifying properties for which to retrieve counts for.
@@ -911,7 +1081,21 @@ Valid properties are: value, ancestry, genetic_ancestry, sex, and age.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. For continuous phenotypes, a numeric value specifying the -log10(precision)
@@ -935,7 +1119,21 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns data in an array of arrays instead of an array of objects.</p></td>
@@ -979,7 +1177,7 @@ to which values should be rounded to.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line231">line 231</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line250">line 250</a>
     </li></ul></dd>
     
 
@@ -1025,7 +1223,7 @@ to which values should be rounded to.</p></td>
     
 
     
-    <h4 class="name" id=".pca"><span class="type-signature">(static) </span>pca<span class="signature">(parms, phenotype_id, platform, pc_x, pc_y, limit, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".pca"><span class="type-signature">(static) </span>pca<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, platform<span class="signature-attributes">opt</span>, pc_x<span class="signature-attributes">opt</span>, pc_y<span class="signature-attributes">opt</span>, limit<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1057,7 +1255,11 @@ to which values should be rounded to.</p></td>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1088,7 +1290,19 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -1111,7 +1325,23 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3080
+                
+                </td>
             
 
             <td class="description last"><p>A numeric phenotype id.</p></td>
@@ -1134,7 +1364,23 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    PLCO_GSA
+                
+                </td>
             
 
             <td class="description last"><p>A character vector specifying the platform to retrieve data for.</p></td>
@@ -1157,7 +1403,23 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
             
 
             <td class="description last"><p>A numeric value (1-20) specifying the x axis's principal component.</p></td>
@@ -1180,7 +1442,23 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    2
+                
+                </td>
             
 
             <td class="description last"><p>A numeric value (1-20) specifying the y axis's principal component.</p></td>
@@ -1203,7 +1481,21 @@ to which values should be rounded to.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. A numeric value to limit the number of variants returned (used for pagination).
@@ -1227,7 +1519,21 @@ Capped at 1 million.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns data in an array of arrays instead of an array of objects.</p></td>
@@ -1271,7 +1577,7 @@ Capped at 1 million.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line272">line 272</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line291">line 291</a>
     </li></ul></dd>
     
 
@@ -1326,7 +1632,7 @@ plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y
     
 
     
-    <h4 class="name" id=".phenotypes"><span class="type-signature">(static) </span>phenotypes<span class="signature">(parms, q, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".phenotypes"><span class="type-signature">(static) </span>phenotypes<span class="signature">(parms, q<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1357,6 +1663,8 @@ plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -1389,6 +1697,14 @@ plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -1412,6 +1728,16 @@ plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -1434,6 +1760,16 @@ plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y
             
             </td>
 
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -1479,7 +1815,7 @@ plco.api.pca([["phenotype_id",3080], ["platform","PLCO_GSA"], ["pc_x",1], ["pc_y
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line318">line 318</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line337">line 337</a>
     </li></ul></dd>
     
 
@@ -1534,7 +1870,7 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
     
 
     
-    <h4 class="name" id=".points"><span class="type-signature">(static) </span>points<span class="signature">(parms, phenotype_id, sex, ancestry, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".points"><span class="type-signature">(static) </span>points<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1566,7 +1902,11 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1597,7 +1937,19 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -1620,7 +1972,23 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3080
+                
+                </td>
             
 
             <td class="description last"><p>A numeric phenotype id.</p></td>
@@ -1643,7 +2011,23 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    female
+                
+                </td>
             
 
             <td class="description last"><p>A character vector specifying a sex to retrieve data for.</p></td>
@@ -1666,7 +2050,23 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    european
+                
+                </td>
             
 
             <td class="description last"><p>A character vector specifying ancestries to retrieve data for.</p></td>
@@ -1689,7 +2089,21 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns data in an array of arrays instead of an array of objects.</p></td>
@@ -1733,7 +2147,7 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line339">line 339</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line358">line 358</a>
     </li></ul></dd>
     
 
@@ -1779,7 +2193,7 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
     
 
     
-    <h4 class="name" id=".summary"><span class="type-signature">(static) </span>summary<span class="signature">(parms, phenotype_id, sex, ancestry, p_value_nlog_min, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".summary"><span class="type-signature">(static) </span>summary<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, p_value_nlog_min<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1811,7 +2225,11 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1842,7 +2260,19 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -1858,14 +2288,30 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3080
+                
+                </td>
             
 
             <td class="description last"><p>A phenotype id.</p></td>
@@ -1888,7 +2334,23 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    female
+                
+                </td>
             
 
             <td class="description last"><p>A sex, which may be &quot;all&quot;, &quot;female&quot;, or &quot;male&quot;.</p></td>
@@ -1911,10 +2373,26 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last"><p>An ancestry, which may be  &quot;african_american&quot;, &quot;east_asian&quot; or &quot;european&quot;.</p></td>
+            
+                <td class="default">
+                
+                    european
+                
+                </td>
+            
+
+            <td class="description last"><p>A character vector specifying ancestries to retrieve data for.</p></td>
         </tr>
 
     
@@ -1934,7 +2412,23 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    4
+                
+                </td>
             
 
             <td class="description last"><p>A numeric value &gt;= 0 specifying the minimum -log10(p) for variants.</p></td>
@@ -1957,7 +2451,21 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns data in an array of arrays instead of an array of objects.</p></td>
@@ -2001,7 +2509,7 @@ plco.api.phenotypes({}, "first_ca125_level")</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line377">line 377</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line396">line 396</a>
     </li></ul></dd>
     
 
@@ -2056,7 +2564,7 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
     
 
     
-    <h4 class="name" id=".variants"><span class="type-signature">(static) </span>variants<span class="signature">(parms, phenotype_id, sex, ancestry, chromosome, columns, snp, position, position_min, position_max, p_value_nlog_min, p_value_nlog_max, p_value_min, p_value_max, orderBy, order, offset, limit, raw)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".variants"><span class="type-signature">(static) </span>variants<span class="signature">(parms, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, chromosome<span class="signature-attributes">opt</span>, columns<span class="signature-attributes">opt</span>, snp<span class="signature-attributes">opt</span>, position<span class="signature-attributes">opt</span>, position_min<span class="signature-attributes">opt</span>, position_max<span class="signature-attributes">opt</span>, p_value_nlog_min<span class="signature-attributes">opt</span>, p_value_nlog_max<span class="signature-attributes">opt</span>, p_value_min<span class="signature-attributes">opt</span>, p_value_max<span class="signature-attributes">opt</span>, orderBy<span class="signature-attributes">opt</span>, order<span class="signature-attributes">opt</span>, offset<span class="signature-attributes">opt</span>, limit<span class="signature-attributes">opt</span>, raw<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -2088,7 +2596,11 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -2119,7 +2631,19 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A JSON object, query string, or 2-d array containing the query parameters.</p></td>
@@ -2135,14 +2659,30 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    3080
+                
+                </td>
             
 
             <td class="description last"><p>Phenotype id(s)</p></td>
@@ -2165,7 +2705,23 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    female
+                
+                </td>
             
 
             <td class="description last"><p>A sex, which may be &quot;all&quot;, &quot;female&quot;, or &quot;male&quot;.</p></td>
@@ -2188,7 +2744,23 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    european
+                
+                </td>
             
 
             <td class="description last"><p>An ancestry, which may be &quot;african_american&quot;, &quot;east_asian&quot;, or &quot;european&quot;.</p></td>
@@ -2204,14 +2776,30 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    8
+                
+                </td>
             
 
             <td class="description last"><p>A chromosome number.</p></td>
@@ -2234,7 +2822,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> Properties for each variant. Default: all properties.</p></td>
@@ -2257,7 +2859,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> Snps.</p></td>
@@ -2273,14 +2889,28 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The exact position of the variant within a chromosome.</p></td>
@@ -2296,14 +2926,28 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The minimum chromosome position for variants.</p></td>
@@ -2319,14 +2963,28 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The maximum chromosome position for variants.</p></td>
@@ -2349,7 +3007,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The minimum -log10(p) of variants in the chromosome.</p></td>
@@ -2372,7 +3044,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The maximum -log10(p) of variants in the chromosome.</p></td>
@@ -2395,7 +3081,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The minimum p-value of variants in the chromosome.</p></td>
@@ -2418,7 +3118,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The maximum p-value of variants in the chromosome.</p></td>
@@ -2441,7 +3155,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> A property to order variants by. May be &quot;id&quot;, &quot;snp&quot;, &quot;chromosome&quot;, &quot;position&quot;, &quot;p_value&quot;, or &quot;p_value_nlog&quot;.</p></td>
@@ -2464,7 +3192,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> An order in which to sort variants. May be &quot;asc&quot; or &quot;desc&quot;.</p></td>
@@ -2480,14 +3222,28 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The number of records by which to offset the variants (for pagination)</p></td>
@@ -2503,14 +3259,28 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             <td class="type">
             
                 
-<span class="param-type">integer</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em> The maximum number of variants to return (for pagination). Highest allowed value is 1 million.</p></td>
@@ -2533,7 +3303,21 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns data in an array of arrays instead of an array of objects.</p></td>
@@ -2577,7 +3361,7 @@ plco.api.summary({}, 3080, "female", "european", 4)</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line425">line 425</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line444">line 444</a>
     </li></ul></dd>
     
 
@@ -2642,13 +3426,13 @@ plco.api.variants({}, 3080, "female", "european", 8)</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="plco.html">plco</a></li><li><a href="plco.api.html">api</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="plco.html">plco</a></li><li><a href="plco.api.html">api</a></li><li><a href="plco.plot.html">plot</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sat Jun 26 2021 13:13:23 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jun 29 2021 15:09:19 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
