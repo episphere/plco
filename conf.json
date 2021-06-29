@@ -15,6 +15,6 @@
       "monospaceLinks": true
   },
   "opts": {
-    "destination": "./out/"
+    "destination": "./docs/"
   }
 }
