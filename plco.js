@@ -114,6 +114,7 @@ plco.plotTest = async (
 // }
 
 plco.explorePhenotypes = (graph = false) => {
+    // TODO
     return 'WIP'
 }
 
@@ -507,15 +508,13 @@ if(typeof(define)!='undefined'){
 
 /**
  * Sub-module grouping plotting methods.
- * @memberof — plco
- * @namespace — plco.plot
- * @prop {Function} manhattan - {@link plco.plot.manhattan} 
- * The manhattan uses 3, metadata, summary, and variants for the bottom stuff.
+ * @memberof plco
+ * @namespace plco.plot
+ * @prop {Function} manhattan - {@link plco.plot.manhattan}  
  * @prop {Function} qq - {@link plco.plot.qq}
- * Only uses two endpoints, metadata and points
- * The on-hover action of the individual point will use the __variants__ endpoint!
  * @prop {Function} qq2 - {@link plco.plot.qq2}
- * Pca plot uses two endpoints, metadata and pca
+ * @prop {Function} pca - {@link plco.plot.pca}
+ * @prop {Function} pca2 - {@link plco.plot.pca2}
  */
 plco.plot = async function () {
 
@@ -524,12 +523,12 @@ plco.plot = async function () {
 /**
  * Generates a Plotly manhattan plot at the given div element with support for a single input.
  * @param {string} div_id The id of the div element. If it does not exist, a new div will be created.
- * @param {number} phenotype_id A phenotype id.
- * @param {string} sex A sex, which may be "all, "female", or "male".
- * @param {string} ancestry An ancestry, which may be  "african_american", "east_asian" or "european".
- * @param {number} p_value_nlog_min A numeric value >= 0 specifying the minimum -log10(p) for variants.
- * @param {integer} chromosome _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
- * @param {boolean} to_json _Optional_ If true, returns a stringified JSON object containing traces and layout.
+ * @param {number} [phenotype_id=3080] A phenotype id.
+ * @param {string} [sex=female] A sex, which may be "all, "female", or "male".
+ * @param {string} [ancestry=european] An ancestry, which may be  "african_american", "east_asian" or "european".
+ * @param {number} [p_value_nlog_min=2] A numeric value >= 0 specifying the minimum -log10(p) for variants.
+ * @param {integer} [chromosome] _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
+ * @param {boolean} [to_json=false] _Optional_ If true, returns a stringified JSON object containing traces and layout.
  * If false, returns a div element containing the Plotly graph.
  * @returns A div element or a string if 'to_json' is true.
  * @example 
@@ -798,8 +797,12 @@ plco.plot.qq = async (
         scrollZoom: true,
         displaylogo: false,
         modeBarButtonsToRemove: [
-            'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
-            'hoverCompareCartesian', 'hoverClosestCartesian',
+            'lasso2d',
+            'select2d',
+            'toggleSpikelines',
+            'autoScale2d',
+            'hoverCompareCartesian',
+            'hoverClosestCartesian',
         ],
     }
 
@@ -833,9 +836,10 @@ plco.plot.qq = async (
         })
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
-        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
-        return tracesString + layoutString
+        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        const layoutString = '"layout":' + JSON.stringify(layout) + ','
+        const configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
     }
 }
 
@@ -926,8 +930,12 @@ plco.plot.qq2 = (
                 scrollZoom: true,
                 displaylogo: false,
                 modeBarButtonsToRemove: [
-                    'lasso2d', 'select2d', 'toggleSpikelines', 'autoScale2d',
-                    'hoverCompareCartesian', 'hoverClosestCartesian',
+                    'lasso2d',
+                    'select2d',
+                    'toggleSpikelines',
+                    'autoScale2d',
+                    'hoverCompareCartesian',
+                    'hoverClosestCartesian',
                 ],
             }
 
@@ -962,20 +970,24 @@ plco.plot.qq2 = (
                 return div
             } else {
                 const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-                const layoutString = '"layout":' + JSON.stringify(layout) + '}'
-                return tracesString + layoutString
+                const layoutString = '"layout":' + JSON.stringify(layout) + ','
+                const configString = '"config":' + JSON.stringify(config) + '}'
+                return tracesString + layoutString + configString
             }
         })
 }
 
 /**
- * 
- * @param {string} div_id 
- * @param {number} phenotype_id 
- * @param {string} sex 
- * @param {string} ancestry 
- * @param {boolean} to_json 
- * @returns 
+ * Generates a Plotly PCA plot at the given div element with support for a single input.
+ * @param {string} div_id The id of the div element, if it does not exist, a new div will be created.
+ * @param {number} phenotype_id A phenotype id.
+ * @param {string} sex A sex, which may be "all", "female", or "male".
+ * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
+ * @param {boolean} to_json _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * Else, returns a div element containing the Plotly graph.
+ * @returns A div element or a string if `to_json` is true.
+ * @example
+ * await plco.plot.pca('plot', 3080, 'female', 'east_asian')
  */
 plco.plot.pca = async (
     div_id,
@@ -984,7 +996,22 @@ plco.plot.pca = async (
     ancestry,
     to_json = false
 ) => {
+    return await plco.plot.pca2(div_id, [{ phenotype_id, sex, ancestry }], to_json)
+}
 
+/**
+ * Generates a Plotly PCA plot at the given div element with support for multiple inputs.
+ * @param {*} div_id The id of the div element, if it does not exist, a new div will be created.
+ * @param {*} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
+ * @param {*} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * Else, returns a div element containing the Plotly graph.
+ * @returns A div element or a string if `to_json` is true.
+ */
+plco.plot.pca2 = async (
+    div_id,
+    arrayOfObjects,
+    to_json = false
+) => {
     let pc_x = 1
     let pc_y = 2
 
@@ -1024,7 +1051,7 @@ plco.plot.pca = async (
     // Control are the same ancestry and sex, but value == null or 0
     // Cases are the same ancestry and sex, but value != null and != 0
 
-    const traces = await plco.plot.helpers.pcaHelper([{ phenotype_id, ancestry, sex }], 'PLCO_GSA', 1, 2)
+    const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', 1, 2)
 
     const layout = {
         hovermode: 'closest',
@@ -1098,25 +1125,23 @@ plco.plot.pca = async (
             'autoScale2d',
             'hoverClosestCartesian',
             'hoverCompareCartesian',
-            'lasso2d'
+            'lasso2d',
+            'toggleSpikelines',
         ]
     }
 
-    const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout([{ phenotype_id, ancestry, sex }], 1, 2)
+    const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, 1, 2)
 
     if (!to_json) {
         Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
-        plco.plot.helpers.pcaGenerateXYInputs(div_id, [{ phenotype_id, ancestry, sex }], layout, config)
+        plco.plot.helpers.pcaGenerateXYInputs(div_id, arrayOfObjects, layout, config)
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        const layoutString = '"layout":' + JSON.stringify(layout) + '}'
-        return tracesString + layoutString
+        const layoutString = '"layout":' + JSON.stringify(Object.assign(layout, dropdownLayout)) + ','
+        const configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
     }
-}
-
-plco.plot.pca2 = async () => {
-    // TODO
 }
 
 /**
