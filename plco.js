@@ -34,7 +34,8 @@ const plco = async function () {
  * @returns {HTMLAnchorElement} HTMLAnchorElement.
  */
 plco.saveFile = (url) => {
-    url = url || 'https://downloadgwas-dev.cancer.gov/j_breast_cancer.tsv.gz'
+    // TODO downloadgwas is not up yet, so i will make change later once its fixed
+    url = url || 'https://downloadgwas.cancer.gov/j_breast_cancer.tsv.gz'
     let a = document.createElement('a')
     a.href = url
     a.target = '_blank'
@@ -113,9 +114,87 @@ plco.plotTest = async (
 
 // }
 
-plco.explorePhenotypes = (graph = false) => {
-    // TODO
-    return 'WIP'
+plco.explorePhenotypes = async (
+    flatten = false,
+    mini = false,
+    graph = false,
+) => {
+    // TODO BFS using a queue
+    let phenotypes_json = await plco.api.phenotypes()
+
+    if (flatten) {
+        let queue = []
+        let r = []
+        for (let i = 0; i < phenotypes_json.length; i++) {
+            let root = phenotypes_json[i]
+            queue.push(root)
+
+            while (true) {
+                let removed = queue.splice(0, 1)[0]
+
+                if (removed === undefined) break
+                r.push(removed)
+
+                if (removed.children === undefined) continue
+                else {
+                    if (Array.isArray(removed.children)) {
+                        for (let j = 0; j < removed.children.length; j++) {
+                            queue.push(removed.children[j])
+                        }
+                    } else {
+                        queue.push(removed.children)
+                    }
+                }
+            }
+
+        }
+        phenotypes_json = r
+    }
+
+    if (flatten && mini) {
+        for (let i = 0; i < phenotypes_json.length; i++) {
+            let obj = phenotypes_json[i]
+            delete obj.color
+            delete obj.import_date
+            delete obj.type
+            delete obj.age_name
+            delete obj.parent_id
+            delete obj.import_count
+        }
+    }
+
+    if (mini) {
+        let queue = []
+        for (let i = 0; i < phenotypes_json.length; i++) {
+            let root = phenotypes_json[i]
+            queue.push(root)
+
+            while (true) {
+                let removed = queue.splice(0, 1)[0]
+
+                if (removed === undefined) break
+                delete removed.color
+                delete removed.import_date
+                delete removed.type
+                delete removed.age_name
+                delete removed.import_count
+                delete removed.parent_id
+                if (removed.children === undefined) continue
+                else {
+                    if (Array.isArray(removed.children)) {
+                        for (let j = 0; j < removed.children.length; j++) {
+                            queue.push(removed.children[j])
+                        }
+                    } else {
+                        queue.push(removed.children)
+                    }
+                }
+            }
+
+        }
+    }
+
+    return phenotypes_json
 }
 
 /**
@@ -133,7 +212,7 @@ plco.explorePhenotypes = (graph = false) => {
  */
 plco.api = {}
 
-plco.api.url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/'
+plco.api.url = 'https://exploregwas.cancer.gov/plco-atlas/api/'
 
 plco.api.ping = async () => {
     return (await fetch(plco.api.url + 'ping')).text()
@@ -544,7 +623,7 @@ plco.plot.manhattan = async function (
     chromosome,
     to_json = false
 ) {
-
+    // TODO
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
     if (div === null && !to_json) {
@@ -616,7 +695,9 @@ plco.plot.manhattan = async function (
         yaxis: {
             title: '-log<sub>10</sub>(p)'
         },
-        hovermode: 'closest'
+        hovermode: 'closest',
+        height: 700,
+        width: 1200,
     }
 
     if (!to_json) {
@@ -706,7 +787,7 @@ plco.plot.qq = async (
             '<br>p-value: ' + Math.pow(10, -point['p_value_nlog']) +
             '<br>Click to learn more.'),
         hoverinfo: 'text+x+y+name',
-        name: `${metadata[phenotype_display_name]}, ${sex}, ${ancestry}`,
+        name: `${metadata.phenotype_display_name}, ${sex}, ${ancestry}`,
     }
 
     const max = points.data.reduce(
@@ -836,7 +917,7 @@ plco.plot.qq = async (
         })
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
         const layoutString = '"layout":' + JSON.stringify(layout) + ','
         const configString = '"config":' + JSON.stringify(config) + '}'
         return tracesString + layoutString + configString
@@ -851,8 +932,7 @@ plco.plot.qq = async (
  * Else, returns a div element containing the Plotly graph.
  * @returns A div element or a string if `to_json` is true.
  * @example
- * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, 
- * {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
+ * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
  */
 plco.plot.qq2 = (
     div_id,
@@ -949,7 +1029,7 @@ plco.plot.qq2 = (
 
                     for (let i = 0; i < points.length; i++) {
                         try {
-                            const { id, phenotype_id, sex, ancestry } = points[i].customdata
+                            const { variantId: id, phenotype_id, sex, ancestry } = points[i].customdata
                             const res = await plco.api.get('variants', {
                                 id,
                                 phenotype_id,
@@ -1001,9 +1081,9 @@ plco.plot.pca = async (
 
 /**
  * Generates a Plotly PCA plot at the given div element with support for multiple inputs.
- * @param {*} div_id The id of the div element, if it does not exist, a new div will be created.
- * @param {*} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
- * @param {*} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * @param {string} div_id The id of the div element, if it does not exist, a new div will be created.
+ * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
  * @returns A div element or a string if `to_json` is true.
  */
@@ -1029,7 +1109,6 @@ plco.plot.pca2 = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-
 
     /**
      * PCA
@@ -1205,57 +1284,62 @@ plco.plot.helpers.pcaGenerateTraces = async (
     const otherTraces = []
 
     pcadatas.forEach((item, index) => {
-        // Create the other traces first
-        const others = item.data.filter(obj =>
-            obj.ancestry !== validArray[index].ancestry ||
-            obj.sex !== validArray[index].sex || obj.value === null
-        )
-        otherTraces.push({
-            ...baseTrace,
-            x: others.map(obj => obj.pc_x),
-            y: others.map(obj => obj.pc_y),
-            marker: {
-                color: '#A6A6A6',
-                size: 4,
-                opacity: 0.4
-            },
-            name: 'Other, Count: ' + others.length
-        })
+        try {
+            // Create the other traces first
+            const others = item.data.filter(obj =>
+                obj.ancestry !== validArray[index].ancestry ||
+                obj.sex !== validArray[index].sex || obj.value === null
+            )
+            otherTraces.push({
+                ...baseTrace,
+                x: others.map(obj => obj.pc_x),
+                y: others.map(obj => obj.pc_y),
+                marker: {
+                    color: '#A6A6A6',
+                    size: 4,
+                    opacity: 0.4
+                },
+                name: 'Other, Count: ' + others.length
+            })
 
-        const controls = item.data.filter(obj =>
-            obj.ancestry === validArray[index].ancestry &&
-            obj.sex === validArray[index].sex && (obj.value === null || obj.value === 0)
-        )
-        const cases = item.data.filter(obj =>
-            obj.ancestry === validArray[index].ancestry &&
-            obj.sex === validArray[index].sex && (obj.value !== null && obj.value !== 0)
-        )
-        const controlsTrace = {
-            ...baseTrace,
-            x: controls.map(obj => obj.pc_x),
-            y: controls.map(obj => obj.pc_y),
-            marker: {
-                color: colors[index % colors.length][1],
-                size: 5,
-                opacity: 0.65
-            },
-            name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
-                `${validArray[index].sex[0]}, Count: ${controls.length}`
-        }
-        const casesTrace = {
-            ...baseTrace,
-            x: cases.map(obj => obj.pc_x),
-            y: cases.map(obj => obj.pc_y),
-            marker: {
-                color: colors[index % colors.length][0],
-                size: 5,
-                opacity: 0.65
-            },
-            name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
-                `${validArray[index].sex[0]}, Count: ${cases.length}`
-        }
+            const controls = item.data.filter(obj =>
+                obj.ancestry === validArray[index].ancestry &&
+                obj.sex === validArray[index].sex && (obj.value === null || obj.value === 0)
+            )
+            const cases = item.data.filter(obj =>
+                obj.ancestry === validArray[index].ancestry &&
+                obj.sex === validArray[index].sex && (obj.value !== null && obj.value !== 0)
+            )
+            const controlsTrace = {
+                ...baseTrace,
+                x: controls.map(obj => obj.pc_x),
+                y: controls.map(obj => obj.pc_y),
+                marker: {
+                    color: colors[index % colors.length][1],
+                    size: 5,
+                    opacity: 0.65
+                },
+                name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
+                    `${validArray[index].sex[0]}, Count: ${controls.length}`
+            }
+            const casesTrace = {
+                ...baseTrace,
+                x: cases.map(obj => obj.pc_x),
+                y: cases.map(obj => obj.pc_y),
+                marker: {
+                    color: colors[index % colors.length][0],
+                    size: 5,
+                    opacity: 0.65
+                },
+                name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
+                    `${validArray[index].sex[0]}, Count: ${cases.length}`
+            }
 
-        traces.push(controlsTrace, casesTrace)
+            traces.push(controlsTrace, casesTrace)
+        }
+        catch (_) {
+            console.error('PC_X and PC_Y cannot be equal.')
+        }
     })
 
     return otherTraces.concat(traces)
