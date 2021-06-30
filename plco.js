@@ -114,12 +114,19 @@ plco.plotTest = async (
 
 // }
 
+/**
+ * Provides a way to explore all the available phenotypes.
+ * @param {boolean} flatten If 'true', returns an array of objects instead of a tree.
+ * @param {boolean} mini If 'true', removes keys from the objects to provide a condensed view.
+ * @param {boolean} graph If 'true', returns a Plotly chart instead of an array of objects.
+ * @returns An array of objects.
+ */
 plco.explorePhenotypes = async (
     flatten = false,
     mini = false,
     graph = false,
 ) => {
-    // TODO BFS using a queue
+    // TODO plotly chart
     let phenotypes_json = await plco.api.phenotypes()
 
     if (flatten) {
@@ -149,17 +156,10 @@ plco.explorePhenotypes = async (
 
         }
         phenotypes_json = r
-    }
 
-    if (flatten && mini) {
         for (let i = 0; i < phenotypes_json.length; i++) {
             let obj = phenotypes_json[i]
-            delete obj.color
-            delete obj.import_date
-            delete obj.type
-            delete obj.age_name
-            delete obj.parent_id
-            delete obj.import_count
+            delete obj.children
         }
     }
 
@@ -305,7 +305,12 @@ plco.api.metadata = async (
     ancestry = "european",
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
         phenotype_id,
         sex,
@@ -418,7 +423,12 @@ plco.api.phenotypes = async (
     q = undefined,
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
     }
     plco.defineProperties(parms, {}, { q, raw })
@@ -480,7 +490,12 @@ plco.api.summary = async (
     p_value_nlog_min = 4,
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
         phenotype_id,
         sex,
@@ -541,7 +556,12 @@ plco.api.variants = async (
     limit = undefined,
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
         phenotype_id,
         sex,
