@@ -15,8 +15,10 @@ console.log('plco.js loaded')
 /**
  * Main global portable module.
  * @namespace plco
- * @property {Function} saveFile - {@link plco.saveFile}
  * @property {Function} defineProperties - {@link plco.defineProperties}
+ * @property {Function} explorePhenotypes - {@link plco.explorePhenotypes}
+ * @property {Function} loadScript - {@link plco.loadScript}
+ * @property {Function} saveFile - {@link plco.saveFile}
  */
 const plco = async () => {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
@@ -122,9 +124,9 @@ plco.plotTest = async (
 
 /**
  * Provides a way to explore all the available phenotypes.
- * @param {boolean} flatten If 'true', returns an array of objects instead of a tree.
- * @param {boolean} mini If 'true', removes keys from the objects to provide a condensed view.
- * @param {boolean} graph If 'true', returns a Plotly chart instead of an array of objects.
+ * @param {boolean} [flatten=false] If 'true', returns an array of objects instead of a tree.
+ * @param {boolean} [mini=false] If 'true', removes keys from the objects to provide a condensed view.
+ * @param {boolean} [graph=false] If 'true', returns a Plotly chart instead of an array of objects.
  * @returns An array of objects.
  */
 plco.explorePhenotypes = async (
@@ -229,6 +231,15 @@ plco.explorePhenotypes = async (
         }
 
         Plotly.newPlot(div, data, layout)
+        div.on('plotly_click', async ({ event, points }) => {
+            if (event.altKey) {
+                console.dir(event)
+                await plco.api.participants({}, 3830, 'value,ancestry,genetic_ancestry,sex,age', 0, true)
+            } else {
+                alert('Tip: Hold ALT while clicking on a slice to learn more!')
+                pressed = true
+            }
+        })
         return phenotypes_json
     }
     return phenotypes_json
@@ -246,6 +257,7 @@ plco.explorePhenotypes = async (
  * @property {Function} points - {@link plco.api.points}
  * @property {Function} summary - {@link plco.api.summary}
  * @property {Function} variants - {@link plco.api.variants}
+ * @property {Function} ping - {@link plco.api.ping}
  */
 plco.api = {}
 
@@ -484,7 +496,8 @@ plco.api.phenotypes = async (
  * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @returns A dataframe containing variants.
  */
-plco.api.points = async (parms,
+plco.api.points = async (
+    parms,
     phenotype_id = 3080,
     sex = 'female',
     ancestry = 'european',
@@ -650,6 +663,7 @@ if(typeof(define)!='undefined'){
  * @memberof plco
  * @namespace plco.plot
  * @prop {Function} manhattan - {@link plco.plot.manhattan}  
+ * @prop {Function} manhattan2 - {@link plco.plot.manhattan2}  
  * @prop {Function} qq - {@link plco.plot.qq}
  * @prop {Function} qq2 - {@link plco.plot.qq2}
  * @prop {Function} pca - {@link plco.plot.pca}
@@ -669,6 +683,8 @@ plco.plot = async () => {
  * @param {integer} [chromosome] _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
  * @param {boolean} [to_json=false] _Optional_ If true, returns a stringified JSON object containing traces and layout.
  * If false, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if 'to_json' is true.
  * @example 
  * plco.plot.manhattan()
@@ -681,7 +697,9 @@ plco.plot.manhattan = async (
     ancestry = 'european',
     p_value_nlog_min = 2,
     chromosome,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
@@ -758,15 +776,22 @@ plco.plot.manhattan = async (
         hovermode: 'closest',
         height: 700,
         width: 1200,
+        ...customLayout,
+    }
+
+    let config = {
+        scrollZoom: true,
+        ...customConfig
     }
 
     if (!to_json) {
-        Plotly.newPlot(div, traces, layout)
+        Plotly.newPlot(div, traces, layout, config)
         return div
     } else {
-        tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        layoutString = '"layout":' + JSON.stringify(layout) + '}'
-        return tracesString + layoutString
+        let tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        let layoutString = '"layout":' + JSON.stringify(layout) + ','
+        let configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
     }
 }
 
@@ -774,14 +799,18 @@ plco.plot.manhattan = async (
  * 
  * @param {string} div_id 
  * @param {Array} arrayOfObjects 
- * @param {boolean} to_json 
+ * @param {boolean} [to_json=false]
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  */
 plco.plot.manhattan2 = async (
     div_id,
     arrayOfObjects,
     p_value_nlog_min = 2,
     chromosome,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     // TODO something with the variants endpoint
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
@@ -822,6 +851,8 @@ plco.plot.manhattan2 = async (
  * @param {string} [ancestry=east_asian] A character vector specifying ancestries to retrieve data for.
  * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.qq('plot', 3080, 'female', 'east_asian')
@@ -831,7 +862,9 @@ plco.plot.qq = async (
     phenotype_id = 3080,
     sex = 'female',
     ancestry = 'east_asian',
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     /**
      * @type {Array<object>} Each object in the array has the properties defined below.
@@ -976,6 +1009,7 @@ plco.plot.qq = async (
         hovermode: 'closest', // When a point is hovered, it will display their (x, y) coordinate
         dragmode: 'pan',
         showlegend: false,
+        ...customLayout
     }
 
     const config = {
@@ -989,6 +1023,7 @@ plco.plot.qq = async (
             'hoverCompareCartesian',
             'hoverClosestCartesian',
         ],
+        ...customConfig
     }
 
     if (!to_json) {
@@ -1034,6 +1069,8 @@ plco.plot.qq = async (
  * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
  * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
@@ -1041,7 +1078,9 @@ plco.plot.qq = async (
 plco.plot.qq2 = (
     div_id,
     arrayOfObjects = [],
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     const promises = []
     arrayOfObjects.forEach((obj) => {
@@ -1107,7 +1146,8 @@ plco.plot.qq2 = (
                         size: 12,
                         color: 'black'
                     }
-                }
+                },
+                ...customLayout
             }
 
             const config = {
@@ -1121,6 +1161,7 @@ plco.plot.qq2 = (
                     'hoverCompareCartesian',
                     'hoverClosestCartesian',
                 ],
+                ...customConfig
             }
 
             if (!to_json) {
@@ -1167,8 +1208,10 @@ plco.plot.qq2 = (
  * @param {number} phenotype_id A phenotype id.
  * @param {string} sex A sex, which may be "all", "female", or "male".
  * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
- * @param {boolean} to_json _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.pca('plot', 3080, 'female', 'east_asian')
@@ -1178,9 +1221,11 @@ plco.plot.pca = async (
     phenotype_id,
     sex,
     ancestry,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {}
 ) => {
-    return await plco.plot.pca2(div_id, [{ phenotype_id, sex, ancestry }], to_json)
+    return await plco.plot.pca2(div_id, [{ phenotype_id, sex, ancestry }], to_json, customLayout, customConfig)
 }
 
 /**
@@ -1189,12 +1234,18 @@ plco.plot.pca = async (
  * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
  * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
+ * @example
+ * await plco.plot.pca2('plot', [{phenotype_id: 3080, sex: 'female', ancestry: 'east_asian'}, {phenotype_id: 3080, sex: 'female', ancestry: 'european'}])
  */
 plco.plot.pca2 = async (
     div_id,
     arrayOfObjects,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {}
 ) => {
     let pc_x = 1
     let pc_y = 2
@@ -1289,7 +1340,8 @@ plco.plot.pca2 = async (
             orientation: 'v',
             x: 0.0,
             y: 1.2
-        }
+        },
+        ...customLayout,
     }
 
     const config = {
@@ -1310,7 +1362,8 @@ plco.plot.pca2 = async (
             'hoverCompareCartesian',
             'lasso2d',
             'toggleSpikelines',
-        ]
+        ],
+        ...customConfig,
     }
 
     const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, 1, 2)
