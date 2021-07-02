@@ -201,6 +201,7 @@ plco.explorePhenotypes = async (
 
     if (graph) {
         // https://plotly.com/javascript/sunburst-charts/
+        // TODO partipicants endpoint, perhaps like a table
         const div = document.createElement('div')
         div.id = 'sunburst'
         document.body.appendChild(div)
@@ -682,11 +683,11 @@ plco.plot.manhattan = async (
     chromosome,
     to_json = false
 ) => {
-    // TODO
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
     if (div === null && !to_json) {
         div = document.createElement('div')
+        div.id = div_id
         document.body.appendChild(div)
     }
 
@@ -768,6 +769,50 @@ plco.plot.manhattan = async (
         return tracesString + layoutString
     }
 }
+
+/**
+ * 
+ * @param {string} div_id 
+ * @param {Array} arrayOfObjects 
+ * @param {boolean} to_json 
+ */
+plco.plot.manhattan2 = async (
+    div_id,
+    arrayOfObjects,
+    p_value_nlog_min = 2,
+    chromosome,
+    to_json = false
+) => {
+    // TODO something with the variants endpoint
+    const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
+
+    if (validObjects.length < 2) throw new Error('Incorrect number of arguments.')
+
+    let div = document.getElementById(div_id)
+    if (div === null && !to_json) {
+        div = document.createElement('div')
+        div.id = div_id
+        document.body.appendChild(div)
+    }
+
+    let inputData1 = await plco.api.summary(Object.assign(validObjects[0], { p_value_nlog_min }))
+    let inputData2 = await plco.api.summary(Object.assign(validObjects[1], { p_value_nlog_min }))
+
+    let chromosomeName
+    let numberOfChromosomes
+    if (chromosome) {
+        inputData1 = inputData1.data.filter(x => x.chromosome == "" + chromosome)
+        inputData2 = inputData2.data.filter(x => x.chromosome == "" + chromosome)
+        chromosomeName = 'Chromosome ' + chromosome
+        numberOfChromosomes = 1
+    } else {
+        inputData1 = inputData1.data
+        inputData2 = inputData2.data
+        chromosomeName = 'All Chromosomes'
+        numberOfChromosomes = 22
+    }
+}
+
 
 /**
  * Generates a Plotly quartile-quartile plot at the given div element with support for a single input.
