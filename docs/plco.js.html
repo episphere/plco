@@ -46,7 +46,7 @@ console.log('plco.js loaded')
  * @property {Function} saveFile - {@link plco.saveFile}
  * @property {Function} defineProperties - {@link plco.defineProperties}
  */
-const plco = async function () {
+const plco = async () => {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
@@ -62,7 +62,8 @@ const plco = async function () {
  * @returns {HTMLAnchorElement} HTMLAnchorElement.
  */
 plco.saveFile = (url) => {
-    url = url || 'https://downloadgwas-dev.cancer.gov/j_breast_cancer.tsv.gz'
+    // TODO downloadgwas is not up yet, so i will make change later once its fixed
+    url = url || 'https://downloadgwas.cancer.gov/j_breast_cancer.tsv.gz'
     let a = document.createElement('a')
     a.href = url
     a.target = '_blank'
@@ -92,6 +93,12 @@ plco.defineProperties = (obj, m_fields, o_fields = {}) => {
     })
 }
 
+/**
+ * Creates and attaches a new script tag to head with script src pointing at `url`.
+ * @param {string} url 
+ * @param {string} host 
+ * @returns {HTMLScriptElement} HTMLScriptElement
+ */
 plco.loadScript = async (url, host) => {
     let s = document.createElement('script')
     s.src = url
@@ -141,9 +148,118 @@ plco.plotTest = async (
 
 // }
 
-plco.explorePhenotypes = (graph = false) => {
-    // TODO
-    return 'WIP'
+/**
+ * Provides a way to explore all the available phenotypes.
+ * @param {boolean} flatten If 'true', returns an array of objects instead of a tree.
+ * @param {boolean} mini If 'true', removes keys from the objects to provide a condensed view.
+ * @param {boolean} graph If 'true', returns a Plotly chart instead of an array of objects.
+ * @returns An array of objects.
+ */
+plco.explorePhenotypes = async (
+    flatten = false,
+    mini = false,
+    graph = false,
+) => {
+    let phenotypes_json = await plco.api.phenotypes()
+
+    if (flatten) {
+        let queue = []
+        let r = []
+        for (let i = 0; i &lt; phenotypes_json.length; i++) {
+            let root = phenotypes_json[i]
+            queue.push(root)
+
+            while (true) {
+                let removed = queue.splice(0, 1)[0]
+
+                if (removed === undefined) break
+                r.push(removed)
+
+                if (removed.children === undefined) continue
+                else {
+                    if (Array.isArray(removed.children)) {
+                        for (let j = 0; j &lt; removed.children.length; j++) {
+                            queue.push(removed.children[j])
+                        }
+                    } else {
+                        queue.push(removed.children)
+                    }
+                }
+            }
+
+        }
+        phenotypes_json = r
+
+        for (let i = 0; i &lt; phenotypes_json.length; i++) {
+            let obj = phenotypes_json[i]
+            delete obj.children
+        }
+    }
+
+    if (mini) {
+        let queue = []
+        for (let i = 0; i &lt; phenotypes_json.length; i++) {
+            let root = phenotypes_json[i]
+            queue.push(root)
+
+            while (true) {
+                let removed = queue.splice(0, 1)[0]
+
+                if (removed === undefined) break
+                delete removed.color
+                delete removed.import_date
+                delete removed.type
+                delete removed.age_name
+                delete removed.import_count
+                delete removed.parent_id
+                if (removed.children === undefined) continue
+                else {
+                    if (Array.isArray(removed.children)) {
+                        for (let j = 0; j &lt; removed.children.length; j++) {
+                            queue.push(removed.children[j])
+                        }
+                    } else {
+                        queue.push(removed.children)
+                    }
+                }
+            }
+
+        }
+    }
+
+    if (graph) {
+        // https://plotly.com/javascript/sunburst-charts/
+        // TODO partipicants endpoint, perhaps like a table
+        const div = document.createElement('div')
+        div.id = 'sunburst'
+        document.body.appendChild(div)
+
+        phenotypes_json = await plco.explorePhenotypes(true, false, false)
+
+        const data = [{
+            type: "sunburst",
+            ids: phenotypes_json.map(phenotype => phenotype.id),
+            labels: phenotypes_json.map(phenotype => phenotype.display_name),
+            parents: phenotypes_json.map(phenotype => phenotype.parent_id ? phenotype.parent_id : ''),
+            values: phenotypes_json.map(phenotype => phenotype.participant_count ? phenotype.participant_count : 0),
+            outsidetextfont: { size: 20, color: "#377eb8" },
+            leaf: { opacity: 0.6 },
+            marker: { line: { width: 2 } },
+            hovertext: phenotypes_json.map(phenotype => 'phenotype_id: ' + phenotype.id),
+            hoverinfo: 'label+text+value'
+        }]
+
+        const layout = {
+            margin: { l: 0, r: 0, b: 0, t: 0 },
+            width: 800,
+            height: 800,
+            sunburstcolorway: phenotypes_json.map(phenotype => phenotype.color).filter(Boolean),
+        }
+
+        Plotly.newPlot(div, data, layout)
+        return phenotypes_json
+    }
+    return phenotypes_json
 }
 
 /**
@@ -161,8 +277,11 @@ plco.explorePhenotypes = (graph = false) => {
  */
 plco.api = {}
 
-plco.api.url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/'
+plco.api.url = 'https://exploregwas.cancer.gov/plco-atlas/api/'
 
+/**
+ * Returns the status of the PLCO API.
+ */
 plco.api.ping = async () => {
     return (await fetch(plco.api.url + 'ping')).text()
 }
@@ -170,8 +289,8 @@ plco.api.ping = async () => {
 plco.api.get = async (cmd = "ping", parms = {}) => {
     // res = await fetch(...)
     // content-type = await res.blob().type
-    if (cmd == "ping") {
-        return await (await fetch(plco.api.url + 'ping')).text() == "true" ? true : false
+    if (cmd === "ping") {
+        return await (await fetch(plco.api.url + 'ping')).text() === "true"
     } else if (cmd === 'download') {
         if (parms['get_link_only'] === 'true') {
             return (
@@ -254,7 +373,12 @@ plco.api.metadata = async (
     ancestry = "european",
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
         phenotype_id,
         sex,
@@ -367,7 +491,12 @@ plco.api.phenotypes = async (
     q = undefined,
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
     }
     plco.defineProperties(parms, {}, { q, raw })
@@ -429,7 +558,12 @@ plco.api.summary = async (
     p_value_nlog_min = 4,
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
         phenotype_id,
         sex,
@@ -490,7 +624,12 @@ plco.api.variants = async (
     limit = undefined,
     raw = undefined
 ) => {
-    parms = typeof parms == 'string' ? plco.api.string2parms(parms) : Array.isArray(parms) ? Object.fromEntries(parms) : parms
+    parms =
+        typeof parms === 'string'
+            ? plco.api.string2parms(parms)
+            : Array.isArray(parms)
+                ? Object.fromEntries(parms)
+                : parms
     parms = parms || {
         phenotype_id,
         sex,
@@ -544,7 +683,7 @@ if(typeof(define)!='undefined'){
  * @prop {Function} pca - {@link plco.plot.pca}
  * @prop {Function} pca2 - {@link plco.plot.pca2}
  */
-plco.plot = async function () {
+plco.plot = async () => {
 
 }
 
@@ -563,7 +702,7 @@ plco.plot = async function () {
  * plco.plot.manhattan()
  * plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
 */
-plco.plot.manhattan = async function (
+plco.plot.manhattan = async (
     div_id,
     phenotype_id = 3080,
     sex = 'female',
@@ -571,12 +710,12 @@ plco.plot.manhattan = async function (
     p_value_nlog_min = 2,
     chromosome,
     to_json = false
-) {
-
+) => {
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
     if (div === null &amp;&amp; !to_json) {
         div = document.createElement('div')
+        div.id = div_id
         document.body.appendChild(div)
     }
 
@@ -644,7 +783,9 @@ plco.plot.manhattan = async function (
         yaxis: {
             title: '-log&lt;sub>10&lt;/sub>(p)'
         },
-        hovermode: 'closest'
+        hovermode: 'closest',
+        height: 700,
+        width: 1200,
     }
 
     if (!to_json) {
@@ -656,6 +797,50 @@ plco.plot.manhattan = async function (
         return tracesString + layoutString
     }
 }
+
+/**
+ * 
+ * @param {string} div_id 
+ * @param {Array} arrayOfObjects 
+ * @param {boolean} to_json 
+ */
+plco.plot.manhattan2 = async (
+    div_id,
+    arrayOfObjects,
+    p_value_nlog_min = 2,
+    chromosome,
+    to_json = false
+) => {
+    // TODO something with the variants endpoint
+    const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
+
+    if (validObjects.length &lt; 2) throw new Error('Incorrect number of arguments.')
+
+    let div = document.getElementById(div_id)
+    if (div === null &amp;&amp; !to_json) {
+        div = document.createElement('div')
+        div.id = div_id
+        document.body.appendChild(div)
+    }
+
+    let inputData1 = await plco.api.summary(Object.assign(validObjects[0], { p_value_nlog_min }))
+    let inputData2 = await plco.api.summary(Object.assign(validObjects[1], { p_value_nlog_min }))
+
+    let chromosomeName
+    let numberOfChromosomes
+    if (chromosome) {
+        inputData1 = inputData1.data.filter(x => x.chromosome == "" + chromosome)
+        inputData2 = inputData2.data.filter(x => x.chromosome == "" + chromosome)
+        chromosomeName = 'Chromosome ' + chromosome
+        numberOfChromosomes = 1
+    } else {
+        inputData1 = inputData1.data
+        inputData2 = inputData2.data
+        chromosomeName = 'All Chromosomes'
+        numberOfChromosomes = 22
+    }
+}
+
 
 /**
  * Generates a Plotly quartile-quartile plot at the given div element with support for a single input.
@@ -689,7 +874,7 @@ plco.plot.qq = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-    const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
+    const metadata = (await plco.plot.helpers.validateInputs([{ phenotype_id, sex, ancestry }]))[0]
 
     if (metadata === undefined || metadata['count'] === null) {
         throw new Error('No data found for this combination of sex and/or ancestry.')
@@ -734,7 +919,7 @@ plco.plot.qq = async (
             '&lt;br>p-value: ' + Math.pow(10, -point['p_value_nlog']) +
             '&lt;br>Click to learn more.'),
         hoverinfo: 'text+x+y+name',
-        name: `${metadata[phenotype_display_name]}, ${sex}, ${ancestry}`,
+        name: `${metadata.phenotype_display_name}, ${sex}, ${ancestry}`,
     }
 
     const max = points.data.reduce(
@@ -864,7 +1049,7 @@ plco.plot.qq = async (
         })
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
         const layoutString = '"layout":' + JSON.stringify(layout) + ','
         const configString = '"config":' + JSON.stringify(config) + '}'
         return tracesString + layoutString + configString
@@ -879,8 +1064,7 @@ plco.plot.qq = async (
  * Else, returns a div element containing the Plotly graph.
  * @returns A div element or a string if `to_json` is true.
  * @example
- * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, 
- * {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
+ * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
  */
 plco.plot.qq2 = (
     div_id,
@@ -977,7 +1161,7 @@ plco.plot.qq2 = (
 
                     for (let i = 0; i &lt; points.length; i++) {
                         try {
-                            const { id, phenotype_id, sex, ancestry } = points[i].customdata
+                            const { variantId: id, phenotype_id, sex, ancestry } = points[i].customdata
                             const res = await plco.api.get('variants', {
                                 id,
                                 phenotype_id,
@@ -1029,9 +1213,9 @@ plco.plot.pca = async (
 
 /**
  * Generates a Plotly PCA plot at the given div element with support for multiple inputs.
- * @param {*} div_id The id of the div element, if it does not exist, a new div will be created.
- * @param {*} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
- * @param {*} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * @param {string} div_id The id of the div element, if it does not exist, a new div will be created.
+ * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
  * @returns A div element or a string if `to_json` is true.
  */
@@ -1057,7 +1241,6 @@ plco.plot.pca2 = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-
 
     /**
      * PCA
@@ -1178,25 +1361,27 @@ plco.plot.pca2 = async (
  */
 plco.plot.helpers = {}
 
-plco.plot.helpers.pcaValidate = async (
+plco.plot.helpers.validateInputs = async (
     arrayOfObjects = []
 ) => {
     const promises = []
     arrayOfObjects.forEach(({ phenotype_id, sex, ancestry }) => {
-        promises.push(
-            plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
-                .then(array => array[0])
-                .then(metadata => {
-                    if (metadata === undefined || metadata['count'] === null) {
-                        throw new Error('No data found for this combination of sex and/or ancestry.')
-                    } else
-                        return metadata
-                })
-                .catch(() => {
-                    console.error('Unable to fetch data, skipping...')
-                    return undefined
-                })
-        )
+        if (phenotype_id &amp;&amp; sex &amp;&amp; ancestry) {
+            promises.push(
+                plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
+                    .then(array => array[0])
+                    .then(metadata => {
+                        if (metadata === undefined || metadata['count'] === null) {
+                            throw new Error('No data found for this combination of sex and/or ancestry.')
+                        } else
+                            return metadata
+                    })
+                    .catch(() => {
+                        console.error('Unable to fetch data, skipping...')
+                        return undefined
+                    })
+            )
+        }
     })
 
     return (await Promise.all(promises)).filter(Boolean)
@@ -1209,7 +1394,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
     pc_y
 ) => {
     // [light, dark]
-    const colors = [['#D4A8E2', '#A482AF'], ['#FFD5A6', '#CCAA84'],
+    const colors = [['#FF626F', '#B2444D'], ['#FFD5A6', '#CCAA84'],
     ['#8DD7C0', '#6BA392'], ['#01A7FF', '#0085CC']]
 
     const pcaPromises = []
@@ -1233,57 +1418,62 @@ plco.plot.helpers.pcaGenerateTraces = async (
     const otherTraces = []
 
     pcadatas.forEach((item, index) => {
-        // Create the other traces first
-        const others = item.data.filter(obj =>
-            obj.ancestry !== validArray[index].ancestry ||
-            obj.sex !== validArray[index].sex || obj.value === null
-        )
-        otherTraces.push({
-            ...baseTrace,
-            x: others.map(obj => obj.pc_x),
-            y: others.map(obj => obj.pc_y),
-            marker: {
-                color: '#A6A6A6',
-                size: 4,
-                opacity: 0.4
-            },
-            name: 'Other, Count: ' + others.length
-        })
+        try {
+            // Create the other traces first
+            const others = item.data.filter(obj =>
+                obj.ancestry !== validArray[index].ancestry ||
+                obj.sex !== validArray[index].sex || obj.value === null
+            )
+            otherTraces.push({
+                ...baseTrace,
+                x: others.map(obj => obj.pc_x),
+                y: others.map(obj => obj.pc_y),
+                marker: {
+                    color: '#A6A6A6',
+                    size: 4,
+                    opacity: 0.35
+                },
+                name: 'Other, Count: ' + others.length
+            })
 
-        const controls = item.data.filter(obj =>
-            obj.ancestry === validArray[index].ancestry &amp;&amp;
-            obj.sex === validArray[index].sex &amp;&amp; (obj.value === null || obj.value === 0)
-        )
-        const cases = item.data.filter(obj =>
-            obj.ancestry === validArray[index].ancestry &amp;&amp;
-            obj.sex === validArray[index].sex &amp;&amp; (obj.value !== null &amp;&amp; obj.value !== 0)
-        )
-        const controlsTrace = {
-            ...baseTrace,
-            x: controls.map(obj => obj.pc_x),
-            y: controls.map(obj => obj.pc_y),
-            marker: {
-                color: colors[index % colors.length][1],
-                size: 5,
-                opacity: 0.65
-            },
-            name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
-                `${validArray[index].sex[0]}, Count: ${controls.length}`
-        }
-        const casesTrace = {
-            ...baseTrace,
-            x: cases.map(obj => obj.pc_x),
-            y: cases.map(obj => obj.pc_y),
-            marker: {
-                color: colors[index % colors.length][0],
-                size: 5,
-                opacity: 0.65
-            },
-            name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
-                `${validArray[index].sex[0]}, Count: ${cases.length}`
-        }
+            const controls = item.data.filter(obj =>
+                obj.ancestry === validArray[index].ancestry &amp;&amp;
+                obj.sex === validArray[index].sex &amp;&amp; (obj.value === null || obj.value === 0)
+            )
+            const cases = item.data.filter(obj =>
+                obj.ancestry === validArray[index].ancestry &amp;&amp;
+                obj.sex === validArray[index].sex &amp;&amp; (obj.value !== null &amp;&amp; obj.value !== 0)
+            )
+            const controlsTrace = {
+                ...baseTrace,
+                x: controls.map(obj => obj.pc_x),
+                y: controls.map(obj => obj.pc_y),
+                marker: {
+                    color: colors[index % colors.length][1],
+                    size: 5,
+                    opacity: 0.65
+                },
+                name: `Controls ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
+                    `${validArray[index].sex[0]}, Count: ${controls.length}`
+            }
+            const casesTrace = {
+                ...baseTrace,
+                x: cases.map(obj => obj.pc_x),
+                y: cases.map(obj => obj.pc_y),
+                marker: {
+                    color: colors[index % colors.length][0],
+                    size: 5,
+                    opacity: 0.65
+                },
+                name: `Cases ${validArray[index].phenotype_display_name}, ${validArray[index].ancestry}, ` +
+                    `${validArray[index].sex[0]}, Count: ${cases.length}`
+            }
 
-        traces.push(controlsTrace, casesTrace)
+            traces.push(controlsTrace, casesTrace)
+        }
+        catch (_) {
+            console.error('PC_X and PC_Y cannot be equal.')
+        }
     })
 
     return otherTraces.concat(traces)
@@ -1295,7 +1485,7 @@ plco.plot.helpers.pcaHelper = async (
     pc_x,
     pc_y
 ) => {
-    const metadatas = await plco.plot.helpers.pcaValidate(arrayOfObjects)
+    const metadatas = await plco.plot.helpers.validateInputs(arrayOfObjects)
     const traces = await plco.plot.helpers.pcaGenerateTraces(metadatas, platform, pc_x, pc_y)
     return traces
 }
@@ -1312,7 +1502,7 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 
     const platforms = ['PLCO_GSA', 'PLCO_Omni5', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX']
     const promises = []
-    const metadatas = await plco.plot.helpers.pcaValidate(validArray)
+    const metadatas = await plco.plot.helpers.validateInputs(validArray)
 
     for (let i = 0; i &lt; platforms.length; i++) {
         promises.push(
@@ -1361,7 +1551,7 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
     opt3.text = 1
     ySelector.appendChild(opt3)
 
-    xSelector.addEventListener('change', async () => {
+    async function eventListener() {
         const xVal = Number.parseFloat(xSelector.value)
         const yVal = Number.parseFloat(ySelector.value)
 
@@ -1372,20 +1562,10 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
             xaxis: { ...layout.xaxis, title: { text: `&lt;b>PC-X ${(xVal || '2')}&lt;/b>` } },
             yaxis: { ...layout.yaxis, title: { text: `&lt;b>PC-Y ${(yVal || '2')}&lt;/b>` } },
         }, dropdownLayout), config)
-    }, false)
+    }
 
-    ySelector.addEventListener('change', async () => {
-        const xVal = Number.parseFloat(xSelector.value)
-        const yVal = Number.parseFloat(ySelector.value)
-
-        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xVal, yVal)
-        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xVal, yVal)
-        Plotly.newPlot(div_id, traces, Object.assign({
-            ...layout,
-            xaxis: { ...layout.xaxis, title: { text: `&lt;b>PC-X ${(xVal || '2')}&lt;/b>` } },
-            yaxis: { ...layout.yaxis, title: { text: `&lt;b>PC-Y ${(yVal || '2')}&lt;/b>` } },
-        }, dropdownLayout), config)
-    }, false)
+    xSelector.addEventListener('change', eventListener, false)
+    ySelector.addEventListener('change', eventListener, false)
 
     const div = document.getElementById(div_id)
     div.appendChild(xLabel)
@@ -1415,7 +1595,7 @@ if (typeof (define) != 'undefined') {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jun 29 2021 15:11:26 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 02 2021 17:35:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
