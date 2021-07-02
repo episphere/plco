@@ -18,7 +18,7 @@ console.log('plco.js loaded')
  * @property {Function} saveFile - {@link plco.saveFile}
  * @property {Function} defineProperties - {@link plco.defineProperties}
  */
-const plco = async function () {
+const plco = async () => {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
@@ -65,6 +65,12 @@ plco.defineProperties = (obj, m_fields, o_fields = {}) => {
     })
 }
 
+/**
+ * Creates and attaches a new script tag to head with script src pointing at `url`.
+ * @param {string} url 
+ * @param {string} host 
+ * @returns {HTMLScriptElement} HTMLScriptElement
+ */
 plco.loadScript = async (url, host) => {
     let s = document.createElement('script')
     s.src = url
@@ -126,7 +132,6 @@ plco.explorePhenotypes = async (
     mini = false,
     graph = false,
 ) => {
-    // TODO plotly chart
     let phenotypes_json = await plco.api.phenotypes()
 
     if (flatten) {
@@ -194,6 +199,37 @@ plco.explorePhenotypes = async (
         }
     }
 
+    if (graph) {
+        // https://plotly.com/javascript/sunburst-charts/
+        const div = document.createElement('div')
+        div.id = 'sunburst'
+        document.body.appendChild(div)
+
+        phenotypes_json = await plco.explorePhenotypes(true, false, false)
+
+        const data = [{
+            type: "sunburst",
+            ids: phenotypes_json.map(phenotype => phenotype.id),
+            labels: phenotypes_json.map(phenotype => phenotype.display_name),
+            parents: phenotypes_json.map(phenotype => phenotype.parent_id ? phenotype.parent_id : ''),
+            values: phenotypes_json.map(phenotype => phenotype.participant_count ? phenotype.participant_count : 0),
+            outsidetextfont: { size: 20, color: "#377eb8" },
+            leaf: { opacity: 0.6 },
+            marker: { line: { width: 2 } },
+            hovertext: phenotypes_json.map(phenotype => 'phenotype_id: ' + phenotype.id),
+            hoverinfo: 'label+text+value'
+        }]
+
+        const layout = {
+            margin: { l: 0, r: 0, b: 0, t: 0 },
+            width: 800,
+            height: 800,
+            sunburstcolorway: phenotypes_json.map(phenotype => phenotype.color).filter(Boolean),
+        }
+
+        Plotly.newPlot(div, data, layout)
+        return phenotypes_json
+    }
     return phenotypes_json
 }
 
@@ -214,6 +250,9 @@ plco.api = {}
 
 plco.api.url = 'https://exploregwas.cancer.gov/plco-atlas/api/'
 
+/**
+ * Returns the status of the PLCO API.
+ */
 plco.api.ping = async () => {
     return (await fetch(plco.api.url + 'ping')).text()
 }
@@ -221,8 +260,8 @@ plco.api.ping = async () => {
 plco.api.get = async (cmd = "ping", parms = {}) => {
     // res = await fetch(...)
     // content-type = await res.blob().type
-    if (cmd == "ping") {
-        return await (await fetch(plco.api.url + 'ping')).text() == "true" ? true : false
+    if (cmd === "ping") {
+        return await (await fetch(plco.api.url + 'ping')).text() === "true"
     } else if (cmd === 'download') {
         if (parms['get_link_only'] === 'true') {
             return (
@@ -615,7 +654,7 @@ if(typeof(define)!='undefined'){
  * @prop {Function} pca - {@link plco.plot.pca}
  * @prop {Function} pca2 - {@link plco.plot.pca2}
  */
-plco.plot = async function () {
+plco.plot = async () => {
 
 }
 
@@ -634,7 +673,7 @@ plco.plot = async function () {
  * plco.plot.manhattan()
  * plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)
 */
-plco.plot.manhattan = async function (
+plco.plot.manhattan = async (
     div_id,
     phenotype_id = 3080,
     sex = 'female',
@@ -642,7 +681,7 @@ plco.plot.manhattan = async function (
     p_value_nlog_min = 2,
     chromosome,
     to_json = false
-) {
+) => {
     // TODO
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
@@ -762,7 +801,7 @@ plco.plot.qq = async (
      * @prop {number} lambda_gc_ld_score
      * @prop {integer} count
      */
-    const metadata = (await plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry))[0]
+    const metadata = (await plco.plot.helpers.validateInputs([{ phenotype_id, sex, ancestry }]))[0]
 
     if (metadata === undefined || metadata['count'] === null) {
         throw new Error('No data found for this combination of sex and/or ancestry.')
@@ -1249,25 +1288,27 @@ plco.plot.pca2 = async (
  */
 plco.plot.helpers = {}
 
-plco.plot.helpers.pcaValidate = async (
+plco.plot.helpers.validateInputs = async (
     arrayOfObjects = []
 ) => {
     const promises = []
     arrayOfObjects.forEach(({ phenotype_id, sex, ancestry }) => {
-        promises.push(
-            plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
-                .then(array => array[0])
-                .then(metadata => {
-                    if (metadata === undefined || metadata['count'] === null) {
-                        throw new Error('No data found for this combination of sex and/or ancestry.')
-                    } else
-                        return metadata
-                })
-                .catch(() => {
-                    console.error('Unable to fetch data, skipping...')
-                    return undefined
-                })
-        )
+        if (phenotype_id && sex && ancestry) {
+            promises.push(
+                plco.api.metadata({ chromosome: 'all' }, phenotype_id, sex, ancestry)
+                    .then(array => array[0])
+                    .then(metadata => {
+                        if (metadata === undefined || metadata['count'] === null) {
+                            throw new Error('No data found for this combination of sex and/or ancestry.')
+                        } else
+                            return metadata
+                    })
+                    .catch(() => {
+                        console.error('Unable to fetch data, skipping...')
+                        return undefined
+                    })
+            )
+        }
     })
 
     return (await Promise.all(promises)).filter(Boolean)
@@ -1280,7 +1321,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
     pc_y
 ) => {
     // [light, dark]
-    const colors = [['#D4A8E2', '#A482AF'], ['#FFD5A6', '#CCAA84'],
+    const colors = [['#FF626F', '#B2444D'], ['#FFD5A6', '#CCAA84'],
     ['#8DD7C0', '#6BA392'], ['#01A7FF', '#0085CC']]
 
     const pcaPromises = []
@@ -1317,7 +1358,7 @@ plco.plot.helpers.pcaGenerateTraces = async (
                 marker: {
                     color: '#A6A6A6',
                     size: 4,
-                    opacity: 0.4
+                    opacity: 0.35
                 },
                 name: 'Other, Count: ' + others.length
             })
@@ -1371,7 +1412,7 @@ plco.plot.helpers.pcaHelper = async (
     pc_x,
     pc_y
 ) => {
-    const metadatas = await plco.plot.helpers.pcaValidate(arrayOfObjects)
+    const metadatas = await plco.plot.helpers.validateInputs(arrayOfObjects)
     const traces = await plco.plot.helpers.pcaGenerateTraces(metadatas, platform, pc_x, pc_y)
     return traces
 }
@@ -1388,7 +1429,7 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 
     const platforms = ['PLCO_GSA', 'PLCO_Omni5', 'PLCO_Omni25', 'PLCO_Oncoarray', 'PLCO_OmniX']
     const promises = []
-    const metadatas = await plco.plot.helpers.pcaValidate(validArray)
+    const metadatas = await plco.plot.helpers.validateInputs(validArray)
 
     for (let i = 0; i < platforms.length; i++) {
         promises.push(
@@ -1437,7 +1478,7 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
     opt3.text = 1
     ySelector.appendChild(opt3)
 
-    xSelector.addEventListener('change', async () => {
+    async function eventListener() {
         const xVal = Number.parseFloat(xSelector.value)
         const yVal = Number.parseFloat(ySelector.value)
 
@@ -1448,20 +1489,10 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
             xaxis: { ...layout.xaxis, title: { text: `<b>PC-X ${(xVal || '2')}</b>` } },
             yaxis: { ...layout.yaxis, title: { text: `<b>PC-Y ${(yVal || '2')}</b>` } },
         }, dropdownLayout), config)
-    }, false)
+    }
 
-    ySelector.addEventListener('change', async () => {
-        const xVal = Number.parseFloat(xSelector.value)
-        const yVal = Number.parseFloat(ySelector.value)
-
-        const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xVal, yVal)
-        const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xVal, yVal)
-        Plotly.newPlot(div_id, traces, Object.assign({
-            ...layout,
-            xaxis: { ...layout.xaxis, title: { text: `<b>PC-X ${(xVal || '2')}</b>` } },
-            yaxis: { ...layout.yaxis, title: { text: `<b>PC-Y ${(yVal || '2')}</b>` } },
-        }, dropdownLayout), config)
-    }, false)
+    xSelector.addEventListener('change', eventListener, false)
+    ySelector.addEventListener('change', eventListener, false)
 
     const div = document.getElementById(div_id)
     div.appendChild(xLabel)
