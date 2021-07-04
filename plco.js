@@ -220,7 +220,9 @@ plco.explorePhenotypes = async (
             leaf: { opacity: 0.6 },
             marker: { line: { width: 2 } },
             hovertext: phenotypes_json.map(phenotype => 'phenotype_id: ' + phenotype.id),
-            hoverinfo: 'label+text+value'
+            hoverinfo: 'label+text+value',
+            textposition: 'inside',
+            insidetextorientation: 'radial',
         }]
 
         const layout = {
@@ -233,11 +235,115 @@ plco.explorePhenotypes = async (
         Plotly.newPlot(div, data, layout)
         div.on('plotly_click', async ({ event, points }) => {
             if (event.altKey) {
-                console.dir(event)
-                await plco.api.participants({}, 3830, 'value,ancestry,genetic_ancestry,sex,age', 0, true)
-            } else {
-                alert('Tip: Hold ALT while clicking on a slice to learn more!')
-                pressed = true
+                const part = await plco.api.participants({}, points[0].id, 'value,ancestry,sex', 0)
+
+                function helper(totalObject, cur, property) {
+                    if (!totalObject['count_' + cur[property]] && cur[property] != null) {
+                        const num = Number.parseInt(cur.counts)
+                        if (isNaN(num))
+                            totalObject['count_' + cur[property]] = 4
+                        else
+                            totalObject['count_' + cur[property]] = num
+                    } else if (cur[property] != null) {
+                        const num = Number.parseInt(cur.counts)
+                        if (isNaN(num))
+                            totalObject['count_' + cur[property]] = totalObject['count_' + cur[property]] + 4
+                        else
+                            totalObject['count_' + cur[property]] = totalObject['count_' + cur[property]] + num
+                    }
+                }
+
+                function convertRowMajortoColMajor(numOfRows, numOfCols, arrays) {
+                    let matrix = []
+                    for (let i = 0; i < numOfCols; i++) {
+                        matrix.push([])
+                        for (let j = 0; j < numOfRows; j++) {
+                            matrix[i].push(arrays[j][i])
+                        }
+                    }
+                    return matrix
+                }
+
+                const data =
+                    part.data.reduce((prev, cur) => {
+                        const found = prev.find(obj => obj.value === cur.value)
+                        if (!found) {
+                            let addToArray = {
+                                value: cur.value,
+                                count: isNaN(Number.parseInt(cur.counts)) ? 4 : Number.parseInt(cur.counts),
+                            }
+                            helper(addToArray, cur, 'sex')
+                            helper(addToArray, cur, 'ancestry')
+                            prev.push(addToArray)
+                        } else {
+                            found.count = found.count +
+                                (isNaN(Number.parseInt(cur.counts)) ? 4 : Number.parseInt(cur.counts))
+                            helper(found, cur, 'sex')
+                            helper(found, cur, 'ancestry')
+                        }
+                        return prev
+                    }, [])
+
+                console.table(data)
+
+                const cellsVal = data.map(obj => Object.values(obj))
+                const cellsValPercent = data.map(obj => {
+                    const newObj = {}
+                    const keys = Object.keys(obj)
+                    for (let i = 0; i < keys.length; i++) {
+                        let k = keys[i]
+                        if (k === 'count') {
+                            const totalCount = data.reduce((total, cur) => total + cur.count, 0)
+                            newObj[k] = Math.round(Number.parseInt(obj[k]) / Number.parseInt(totalCount) * 100) + '%'
+                        } else if (k === 'value')
+                            newObj[k] = obj[k]
+                        else
+                            newObj[k] = Math.round(Number.parseInt(obj[k]) / Number.parseInt(obj.count) * 100) + '%'
+                    }
+                    return Object.values(newObj)
+                })
+                const headerVal = Object.keys(data[0])
+                const trace = [{
+                    type: 'table',
+                    columnwidth: headerVal.map((_) => 150),
+                    header: {
+                        values: headerVal,
+                        fill: { color: "grey" },
+                    }, cells: {
+                        values: convertRowMajortoColMajor(
+                            cellsVal.length, cellsVal[0].length || 0, cellsVal)
+                    }
+                }]
+                const layout = {
+                    updatemenus: [{
+                        y: 1.0,
+                        yanchor: 'top',
+                        buttons: [{
+                            method: 'restyle',
+                            args: [{
+                                cells: {
+                                    values: convertRowMajortoColMajor(
+                                        cellsVal.length, cellsVal[0].length || 0, cellsVal)
+                                }
+                            }],
+                            label: 'Normal',
+                        }, {
+                            method: 'restyle',
+                            args: [{
+                                cells: {
+                                    values: convertRowMajortoColMajor(
+                                        cellsVal.length, cellsVal[0].length || 0, cellsValPercent)
+                                }
+                            }],
+                            label: 'Percentage',
+                        }],
+                    }]
+                }
+                const div2 = document.createElement('div')
+                div2.id = 'table' + Math.floor(Math.random() * 20)
+                document.body.appendChild(div2)
+
+                Plotly.newPlot(div2, trace, layout)
             }
         })
         return phenotypes_json
