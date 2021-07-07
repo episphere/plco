@@ -840,7 +840,9 @@ plco.plot.manhattan = async (
 
     // Set up traces
     let traces = []
+    let chromosomeTraces = []
     let currentChromosome
+
     for (i = 1; i <= numberOfChromosomes; i++) {
         if (numberOfChromosomes == 1) {
             currentChromosome = chromosome
@@ -848,7 +850,7 @@ plco.plot.manhattan = async (
             currentChromosome = i
         }
         currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
-        traces.push({
+        const traceInfo = {
             x: currentChromosomeData.map(x => parseInt(x.position_abs)),
             y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
             mode: 'markers',
@@ -862,6 +864,22 @@ plco.plot.manhattan = async (
                 'absolute position: ' + parseInt(x.position_abs) +
                 '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
             )
+        }
+        traces.push(traceInfo)
+        chromosomeTraces.push({
+            x: [traceInfo.x.reduce((smallest, cur) => cur > smallest ? smallest : cur, Number.MAX_SAFE_INTEGER)],
+            y: [p_value_nlog_min],
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 0,
+                opacity: 0,
+                color: '#FFFFFF',
+            },
+            hoverinfo: 'none',
+            xaxis: 'x2',
+            showlegend: false,
+            name: 'Chromosome ' + currentChromosome,
         })
     }
 
@@ -871,13 +889,31 @@ plco.plot.manhattan = async (
         }
     }
 
+    traces = traces.concat(chromosomeTraces)
+
     let layout = {
         title: 'SNPs in ' + chromosomeName,
         xaxis: {
-            title: 'absolute position'
+            title: 'absolute position',
+            position: '0.1',
+            showgrid: false,
+            tickfont: {
+                color: 'black',
+                size: 15
+            },
+        },
+        xaxis2: {
+            title: '',
+            overlaying: 'x',
+            anchor: 'free',
+            position: '0.0',
+            tickmode: 'array',
+            tickvals: chromosomeTraces.map(trace => trace.x[0]),
+            ticktext: chromosomeTraces.map(trace => trace.name),
         },
         yaxis: {
-            title: '-log<sub>10</sub>(p)'
+            title: '-log<sub>10</sub>(p)',
+            fixedrange: true,
         },
         hovermode: 'closest',
         height: 700,
