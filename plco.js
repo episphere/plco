@@ -854,7 +854,7 @@ plco.plot.manhattan = async (
             x: currentChromosomeData.map(x => parseInt(x.position_abs)),
             y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
             mode: 'markers',
-            type: 'scatter',
+            type: 'scattergl',
             marker: {
                 opacity: 0.65,
                 size: 5
@@ -870,7 +870,7 @@ plco.plot.manhattan = async (
             x: [traceInfo.x.reduce((smallest, cur) => cur > smallest ? smallest : cur, Number.MAX_SAFE_INTEGER)],
             y: [p_value_nlog_min],
             mode: 'markers',
-            type: 'scatter',
+            type: 'scattergl',
             marker: {
                 size: 0,
                 opacity: 0,
@@ -895,7 +895,7 @@ plco.plot.manhattan = async (
         title: 'SNPs in ' + chromosomeName,
         xaxis: {
             title: 'absolute position',
-            position: '0.1',
+            position: '0.0',
             showgrid: false,
             tickfont: {
                 color: 'black',
@@ -906,7 +906,7 @@ plco.plot.manhattan = async (
             title: '',
             overlaying: 'x',
             anchor: 'free',
-            position: '0.0',
+            position: '1.0',
             tickmode: 'array',
             tickvals: chromosomeTraces.map(trace => trace.x[0]),
             ticktext: chromosomeTraces.map(trace => trace.name),
@@ -926,8 +926,41 @@ plco.plot.manhattan = async (
         ...customConfig
     }
 
+    // experimental
+    const chromosomeAbsPos =
+        chromosomeTraces.map(trace => ({
+            val: trace.x[0],
+            chromosomeNum: Number.parseInt(trace.name.split(' ')[1])
+        }))
+
+
     if (!to_json) {
         Plotly.newPlot(div, traces, layout, config)
+
+        const oldCheckbox = document.getElementById(div_id + 'checkbox')
+        if (oldCheckbox) {
+            oldCheckbox.remove()
+        }
+
+        const checkbox = document.createElement('input')
+        checkbox.type = 'checkbox'
+        checkbox.id = div_id + 'checkbox'
+        const label = document.createElement('label')
+        label.for = div_id + 'checkbox'
+        label.innerHTML = 'allow graph to update on zoom: '
+        div.appendChild(checkbox)
+        div.appendChild(label)
+
+        div.on('plotly_relayout', async (eventdata) => {
+            // TODO Add an loader class
+            if (checkbox.checked && eventdata['xaxis2.range[0]'] && eventdata['xaxis2.range[1]']) {
+                const findStart = chromosomeAbsPos.find(({ val }) => val >= eventdata['xaxis2.range[0]'])
+                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum)
+            }
+            else if (checkbox.checked) {
+                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined)
+            } else { return }
+        })
         return div
     } else {
         let tracesString = '{"traces":' + JSON.stringify(traces) + ','
