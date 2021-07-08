@@ -24,6 +24,7 @@ const plco = async () => {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
+    plco.addStyle()
 }
 
 /**
@@ -43,6 +44,35 @@ plco.saveFile = (url) => {
     a.target = '_blank'
     a.click()
     return a
+}
+
+/**
+ * Adds a style tag containing css for some plot elements.
+ */
+plco.addStyle = () => {
+    const style = document.createElement('style')
+    style.innerHTML = `
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            position: absolute;
+            z-index: 10;
+            top: 50%;
+            left: 40%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `
+    window.onload = (_) => {
+        document.head.appendChild(style)
+    }
 }
 
 /**
@@ -913,7 +943,7 @@ plco.plot.manhattan = async (
         },
         yaxis: {
             title: '-log<sub>10</sub>(p)',
-            fixedrange: true,
+            fixedrange: numberOfChromosomes !== 1,
         },
         hovermode: 'closest',
         height: 700,
@@ -941,11 +971,16 @@ plco.plot.manhattan = async (
         if (oldCheckbox) {
             oldCheckbox.remove()
         }
+        const oldLabel = document.getElementById(div_id + 'label')
+        if (oldLabel) {
+            oldLabel.remove()
+        }
 
         const checkbox = document.createElement('input')
         checkbox.type = 'checkbox'
         checkbox.id = div_id + 'checkbox'
         const label = document.createElement('label')
+        label.id = div_id + 'label'
         label.for = div_id + 'checkbox'
         label.innerHTML = 'allow graph to update on zoom: '
         div.appendChild(checkbox)
@@ -954,11 +989,23 @@ plco.plot.manhattan = async (
         div.on('plotly_relayout', async (eventdata) => {
             // TODO Add an loader class
             if (checkbox.checked && eventdata['xaxis2.range[0]'] && eventdata['xaxis2.range[1]']) {
+                const tempDiv = document.createElement('div')
+                tempDiv.classList.add('loader')
+                document.body.appendChild(tempDiv)
+                div.style = 'display: none;'
                 const findStart = chromosomeAbsPos.find(({ val }) => val >= eventdata['xaxis2.range[0]'])
                 await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum)
+                tempDiv.remove()
+                div.style = ''
             }
             else if (checkbox.checked) {
+                const tempDiv = document.createElement('div')
+                tempDiv.classList.add('loader')
+                document.body.appendChild(tempDiv)
+                div.style = 'display: none;'
                 await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined)
+                tempDiv.remove()
+                div.style = ''
             } else { return }
         })
         return div
