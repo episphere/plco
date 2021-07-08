@@ -1824,5 +1824,5 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
 plco()
 
 if (typeof (define) != 'undefined') {
-    define(plco())
+    define({ proto: plco })
 }
