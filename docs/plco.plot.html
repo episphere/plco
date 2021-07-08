@@ -93,6 +93,29 @@
 
         <tr>
             
+                <td class="name"><code>manhattan2</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="plco.plot.html#.manhattan2"><code>plco.plot.manhattan2</code></a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>qq</code></td>
             
 
@@ -217,7 +240,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line648">line 648</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line797">line 797</a>
     </li></ul></dd>
     
 
@@ -294,7 +317,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1334">line 1334</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1609">line 1609</a>
     </li></ul></dd>
     
 
@@ -322,7 +345,7 @@
     
 
     
-    <h4 class="name" id=".manhattan"><span class="type-signature">(static) </span>manhattan<span class="signature">(div_id, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, p_value_nlog_min<span class="signature-attributes">opt</span>, chromosome<span class="signature-attributes">opt</span>, to_json<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".manhattan"><span class="type-signature">(static) </span>manhattan<span class="signature">(div_id, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, p_value_nlog_min<span class="signature-attributes">opt</span>, chromosome<span class="signature-attributes">opt</span>, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -635,6 +658,84 @@ If false, returns a div element containing the Plotly graph.</p></td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -672,7 +773,7 @@ If false, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line677">line 677</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line829">line 829</a>
     </li></ul></dd>
     
 
@@ -724,7 +825,7 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
     
 
     
-    <h4 class="name" id=".manhattan2"><span class="type-signature">(static) </span>manhattan2<span class="signature">(div_id, arrayOfObjects, to_json)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".manhattan2"><span class="type-signature">(static) </span>manhattan2<span class="signature">(div_id, arrayOfObjects, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -752,7 +853,11 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -777,7 +882,19 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -800,7 +917,19 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -823,10 +952,104 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
             
 
             <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
         </tr>
 
     
@@ -867,7 +1090,7 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line779">line 779</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1028">line 1028</a>
     </li></ul></dd>
     
 
@@ -903,7 +1126,7 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
     
 
     
-    <h4 class="name" id=".pca"><span class="type-signature">(static) </span>pca<span class="signature">(div_id, phenotype_id, sex, ancestry, to_json)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".pca"><span class="type-signature">(static) </span>pca<span class="signature">(div_id, phenotype_id, sex, ancestry, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -935,7 +1158,11 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -960,7 +1187,19 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>The id of the div element, if it does not exist, a new div will be created.</p></td>
@@ -983,7 +1222,19 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A phenotype id.</p></td>
@@ -1006,7 +1257,19 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A sex, which may be &quot;all&quot;, &quot;female&quot;, or &quot;male&quot;.</p></td>
@@ -1029,7 +1292,19 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>A character vector specifying ancestries to retrieve data for.</p></td>
@@ -1052,11 +1327,105 @@ plco.plot.manhattan('plot', 3080, "female", "european", 2, 18)</code></pre>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
             
 
             <td class="description last"><p><em>Optional</em>. If true, returns a stringified JSON object containing traces and layout.
 Else, returns a div element containing the Plotly graph.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
         </tr>
 
     
@@ -1097,7 +1466,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1176">line 1176</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1441">line 1441</a>
     </li></ul></dd>
     
 
@@ -1148,7 +1517,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
 
     
-    <h4 class="name" id=".pca2"><span class="type-signature">(static) </span>pca2<span class="signature">(div_id, arrayOfObjects, to_json<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".pca2"><span class="type-signature">(static) </span>pca2<span class="signature">(div_id, arrayOfObjects, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1303,6 +1672,84 @@ Else, returns a div element containing the Plotly graph.</p></td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1340,7 +1787,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1194">line 1194</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1465">line 1465</a>
     </li></ul></dd>
     
 
@@ -1379,6 +1826,11 @@ Else, returns a div element containing the Plotly graph.</p></td>
 
 
 
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>await plco.plot.pca2('plot', [{phenotype_id: 3080, sex: 'female', ancestry: 'east_asian'}, {phenotype_id: 3080, sex: 'female', ancestry: 'european'}])</code></pre>
+
+
 
         
             
@@ -1386,7 +1838,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
 
     
-    <h4 class="name" id=".qq"><span class="type-signature">(static) </span>qq<span class="signature">(div_id, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, to_json<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".qq"><span class="type-signature">(static) </span>qq<span class="signature">(div_id, phenotype_id<span class="signature-attributes">opt</span>, sex<span class="signature-attributes">opt</span>, ancestry<span class="signature-attributes">opt</span>, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1623,6 +2075,84 @@ Else, returns a div element containing the Plotly graph.</p></td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1660,7 +2190,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line829">line 829</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1082">line 1082</a>
     </li></ul></dd>
     
 
@@ -1711,7 +2241,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
 
     
-    <h4 class="name" id=".qq2"><span class="type-signature">(static) </span>qq2<span class="signature">(div_id, arrayOfObjects, to_json<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".qq2"><span class="type-signature">(static) </span>qq2<span class="signature">(div_id, arrayOfObjects, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1866,6 +2396,84 @@ Else, returns a div element containing the Plotly graph.</p></td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1903,7 +2511,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1041">line 1041</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1300">line 1300</a>
     </li></ul></dd>
     
 
@@ -1970,7 +2578,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 02 2021 17:35:45 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Jul 08 2021 21:22:16 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
