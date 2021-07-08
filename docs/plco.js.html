@@ -43,13 +43,16 @@ console.log('plco.js loaded')
 /**
  * Main global portable module.
  * @namespace plco
- * @property {Function} saveFile - {@link plco.saveFile}
  * @property {Function} defineProperties - {@link plco.defineProperties}
+ * @property {Function} explorePhenotypes - {@link plco.explorePhenotypes}
+ * @property {Function} loadScript - {@link plco.loadScript}
+ * @property {Function} saveFile - {@link plco.saveFile}
  */
 const plco = async () => {
     plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
+    plco.addStyle()
 }
 
 /**
@@ -69,6 +72,35 @@ plco.saveFile = (url) => {
     a.target = '_blank'
     a.click()
     return a
+}
+
+/**
+ * Adds a style tag containing css for some plot elements.
+ */
+plco.addStyle = () => {
+    const style = document.createElement('style')
+    style.innerHTML = `
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            position: absolute;
+            z-index: 10;
+            top: 50%;
+            left: 40%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `
+    window.onload = (_) => {
+        document.head.appendChild(style)
+    }
 }
 
 /**
@@ -150,9 +182,9 @@ plco.plotTest = async (
 
 /**
  * Provides a way to explore all the available phenotypes.
- * @param {boolean} flatten If 'true', returns an array of objects instead of a tree.
- * @param {boolean} mini If 'true', removes keys from the objects to provide a condensed view.
- * @param {boolean} graph If 'true', returns a Plotly chart instead of an array of objects.
+ * @param {boolean} [flatten=false] If 'true', returns an array of objects instead of a tree.
+ * @param {boolean} [mini=false] If 'true', removes keys from the objects to provide a condensed view.
+ * @param {boolean} [graph=false] If 'true', returns a Plotly chart instead of an array of objects.
  * @returns An array of objects.
  */
 plco.explorePhenotypes = async (
@@ -246,7 +278,9 @@ plco.explorePhenotypes = async (
             leaf: { opacity: 0.6 },
             marker: { line: { width: 2 } },
             hovertext: phenotypes_json.map(phenotype => 'phenotype_id: ' + phenotype.id),
-            hoverinfo: 'label+text+value'
+            hoverinfo: 'label+text+value',
+            textposition: 'inside',
+            insidetextorientation: 'radial',
         }]
 
         const layout = {
@@ -257,6 +291,119 @@ plco.explorePhenotypes = async (
         }
 
         Plotly.newPlot(div, data, layout)
+        div.on('plotly_click', async ({ event, points }) => {
+            if (event.altKey) {
+                const part = await plco.api.participants({}, points[0].id, 'value,ancestry,sex', 0)
+
+                function helper(totalObject, cur, property) {
+                    if (!totalObject['count_' + cur[property]] &amp;&amp; cur[property] != null) {
+                        const num = Number.parseInt(cur.counts)
+                        if (isNaN(num))
+                            totalObject['count_' + cur[property]] = 4
+                        else
+                            totalObject['count_' + cur[property]] = num
+                    } else if (cur[property] != null) {
+                        const num = Number.parseInt(cur.counts)
+                        if (isNaN(num))
+                            totalObject['count_' + cur[property]] = totalObject['count_' + cur[property]] + 4
+                        else
+                            totalObject['count_' + cur[property]] = totalObject['count_' + cur[property]] + num
+                    }
+                }
+
+                function convertRowMajortoColMajor(numOfRows, numOfCols, arrays) {
+                    let matrix = []
+                    for (let i = 0; i &lt; numOfCols; i++) {
+                        matrix.push([])
+                        for (let j = 0; j &lt; numOfRows; j++) {
+                            matrix[i].push(arrays[j][i])
+                        }
+                    }
+                    return matrix
+                }
+
+                const data =
+                    part.data.reduce((prev, cur) => {
+                        const found = prev.find(obj => obj.value === cur.value)
+                        if (!found) {
+                            let addToArray = {
+                                value: cur.value,
+                                count: isNaN(Number.parseInt(cur.counts)) ? 4 : Number.parseInt(cur.counts),
+                            }
+                            helper(addToArray, cur, 'sex')
+                            helper(addToArray, cur, 'ancestry')
+                            prev.push(addToArray)
+                        } else {
+                            found.count = found.count +
+                                (isNaN(Number.parseInt(cur.counts)) ? 4 : Number.parseInt(cur.counts))
+                            helper(found, cur, 'sex')
+                            helper(found, cur, 'ancestry')
+                        }
+                        return prev
+                    }, [])
+
+                console.table(data)
+
+                const cellsVal = data.map(obj => Object.values(obj))
+                const cellsValPercent = data.map(obj => {
+                    const newObj = {}
+                    const keys = Object.keys(obj)
+                    for (let i = 0; i &lt; keys.length; i++) {
+                        let k = keys[i]
+                        if (k === 'count') {
+                            const totalCount = data.reduce((total, cur) => total + cur.count, 0)
+                            newObj[k] = Math.round(Number.parseInt(obj[k]) / Number.parseInt(totalCount) * 100) + '%'
+                        } else if (k === 'value')
+                            newObj[k] = obj[k]
+                        else
+                            newObj[k] = Math.round(Number.parseInt(obj[k]) / Number.parseInt(obj.count) * 100) + '%'
+                    }
+                    return Object.values(newObj)
+                })
+                const headerVal = Object.keys(data[0])
+                const trace = [{
+                    type: 'table',
+                    columnwidth: headerVal.map((_) => 150),
+                    header: {
+                        values: headerVal,
+                        fill: { color: "grey" },
+                    }, cells: {
+                        values: convertRowMajortoColMajor(
+                            cellsVal.length, cellsVal[0].length || 0, cellsVal)
+                    }
+                }]
+                const layout = {
+                    updatemenus: [{
+                        y: 1.0,
+                        yanchor: 'top',
+                        buttons: [{
+                            method: 'restyle',
+                            args: [{
+                                cells: {
+                                    values: convertRowMajortoColMajor(
+                                        cellsVal.length, cellsVal[0].length || 0, cellsVal)
+                                }
+                            }],
+                            label: 'Normal',
+                        }, {
+                            method: 'restyle',
+                            args: [{
+                                cells: {
+                                    values: convertRowMajortoColMajor(
+                                        cellsVal.length, cellsVal[0].length || 0, cellsValPercent)
+                                }
+                            }],
+                            label: 'Percentage',
+                        }],
+                    }]
+                }
+                const div2 = document.createElement('div')
+                div2.id = 'table' + Math.floor(Math.random() * 20)
+                document.body.appendChild(div2)
+
+                Plotly.newPlot(div2, trace, layout)
+            }
+        })
         return phenotypes_json
     }
     return phenotypes_json
@@ -274,6 +421,7 @@ plco.explorePhenotypes = async (
  * @property {Function} points - {@link plco.api.points}
  * @property {Function} summary - {@link plco.api.summary}
  * @property {Function} variants - {@link plco.api.variants}
+ * @property {Function} ping - {@link plco.api.ping}
  */
 plco.api = {}
 
@@ -512,7 +660,8 @@ plco.api.phenotypes = async (
  * @param {string} [raw] _Optional_. If true, returns data in an array of arrays instead of an array of objects.
  * @returns A dataframe containing variants.
  */
-plco.api.points = async (parms,
+plco.api.points = async (
+    parms,
     phenotype_id = 3080,
     sex = 'female',
     ancestry = 'european',
@@ -678,6 +827,7 @@ if(typeof(define)!='undefined'){
  * @memberof plco
  * @namespace plco.plot
  * @prop {Function} manhattan - {@link plco.plot.manhattan}  
+ * @prop {Function} manhattan2 - {@link plco.plot.manhattan2}  
  * @prop {Function} qq - {@link plco.plot.qq}
  * @prop {Function} qq2 - {@link plco.plot.qq2}
  * @prop {Function} pca - {@link plco.plot.pca}
@@ -697,6 +847,8 @@ plco.plot = async () => {
  * @param {integer} [chromosome] _Optional_ A single chromosome. If no chromosome argument is passed, then assume all chromosomes.
  * @param {boolean} [to_json=false] _Optional_ If true, returns a stringified JSON object containing traces and layout.
  * If false, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if 'to_json' is true.
  * @example 
  * plco.plot.manhattan()
@@ -709,7 +861,9 @@ plco.plot.manhattan = async (
     ancestry = 'european',
     p_value_nlog_min = 2,
     chromosome,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
@@ -744,7 +898,9 @@ plco.plot.manhattan = async (
 
     // Set up traces
     let traces = []
+    let chromosomeTraces = []
     let currentChromosome
+
     for (i = 1; i &lt;= numberOfChromosomes; i++) {
         if (numberOfChromosomes == 1) {
             currentChromosome = chromosome
@@ -752,11 +908,11 @@ plco.plot.manhattan = async (
             currentChromosome = i
         }
         currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
-        traces.push({
+        const traceInfo = {
             x: currentChromosomeData.map(x => parseInt(x.position_abs)),
             y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
             mode: 'markers',
-            type: 'scatter',
+            type: 'scattergl',
             marker: {
                 opacity: 0.65,
                 size: 5
@@ -766,6 +922,22 @@ plco.plot.manhattan = async (
                 'absolute position: ' + parseInt(x.position_abs) +
                 '&lt;br>p-value: ' + Math.pow(10, -x.p_value_nlog)
             )
+        }
+        traces.push(traceInfo)
+        chromosomeTraces.push({
+            x: [traceInfo.x.reduce((smallest, cur) => cur > smallest ? smallest : cur, Number.MAX_SAFE_INTEGER)],
+            y: [p_value_nlog_min],
+            mode: 'markers',
+            type: 'scattergl',
+            marker: {
+                size: 0,
+                opacity: 0,
+                color: '#FFFFFF',
+            },
+            hoverinfo: 'none',
+            xaxis: 'x2',
+            showlegend: false,
+            name: 'Chromosome ' + currentChromosome,
         })
     }
 
@@ -775,26 +947,101 @@ plco.plot.manhattan = async (
         }
     }
 
+    traces = traces.concat(chromosomeTraces)
+
     let layout = {
         title: 'SNPs in ' + chromosomeName,
         xaxis: {
-            title: 'absolute position'
+            title: 'absolute position',
+            position: '0.0',
+            showgrid: false,
+            tickfont: {
+                color: 'black',
+                size: 15
+            },
+        },
+        xaxis2: {
+            title: '',
+            overlaying: 'x',
+            anchor: 'free',
+            position: '1.0',
+            tickmode: 'array',
+            tickvals: chromosomeTraces.map(trace => trace.x[0]),
+            ticktext: chromosomeTraces.map(trace => trace.name),
         },
         yaxis: {
-            title: '-log&lt;sub>10&lt;/sub>(p)'
+            title: '-log&lt;sub>10&lt;/sub>(p)',
+            fixedrange: numberOfChromosomes !== 1,
         },
         hovermode: 'closest',
         height: 700,
         width: 1200,
+        ...customLayout,
     }
 
+    let config = {
+        scrollZoom: true,
+        ...customConfig
+    }
+
+    // experimental
+    const chromosomeAbsPos =
+        chromosomeTraces.map(trace => ({
+            val: trace.x[0],
+            chromosomeNum: Number.parseInt(trace.name.split(' ')[1])
+        }))
+
+
     if (!to_json) {
-        Plotly.newPlot(div, traces, layout)
+        Plotly.newPlot(div, traces, layout, config)
+
+        const oldCheckbox = document.getElementById(div_id + 'checkbox')
+        if (oldCheckbox) {
+            oldCheckbox.remove()
+        }
+        const oldLabel = document.getElementById(div_id + 'label')
+        if (oldLabel) {
+            oldLabel.remove()
+        }
+
+        const checkbox = document.createElement('input')
+        checkbox.type = 'checkbox'
+        checkbox.id = div_id + 'checkbox'
+        const label = document.createElement('label')
+        label.id = div_id + 'label'
+        label.for = div_id + 'checkbox'
+        label.innerHTML = 'allow graph to update on zoom: '
+        div.appendChild(checkbox)
+        div.appendChild(label)
+
+        div.on('plotly_relayout', async (eventdata) => {
+            // TODO Add an loader class
+            if (checkbox.checked &amp;&amp; eventdata['xaxis2.range[0]'] &amp;&amp; eventdata['xaxis2.range[1]']) {
+                const tempDiv = document.createElement('div')
+                tempDiv.classList.add('loader')
+                document.body.appendChild(tempDiv)
+                div.style = 'display: none;'
+                const findStart = chromosomeAbsPos.find(({ val }) => val >= eventdata['xaxis2.range[0]'])
+                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum)
+                tempDiv.remove()
+                div.style = ''
+            }
+            else if (checkbox.checked) {
+                const tempDiv = document.createElement('div')
+                tempDiv.classList.add('loader')
+                document.body.appendChild(tempDiv)
+                div.style = 'display: none;'
+                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined)
+                tempDiv.remove()
+                div.style = ''
+            } else { return }
+        })
         return div
     } else {
-        tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        layoutString = '"layout":' + JSON.stringify(layout) + '}'
-        return tracesString + layoutString
+        let tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        let layoutString = '"layout":' + JSON.stringify(layout) + ','
+        let configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
     }
 }
 
@@ -802,14 +1049,18 @@ plco.plot.manhattan = async (
  * 
  * @param {string} div_id 
  * @param {Array} arrayOfObjects 
- * @param {boolean} to_json 
+ * @param {boolean} [to_json=false]
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  */
 plco.plot.manhattan2 = async (
     div_id,
     arrayOfObjects,
     p_value_nlog_min = 2,
     chromosome,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     // TODO something with the variants endpoint
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
@@ -850,6 +1101,8 @@ plco.plot.manhattan2 = async (
  * @param {string} [ancestry=east_asian] A character vector specifying ancestries to retrieve data for.
  * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.qq('plot', 3080, 'female', 'east_asian')
@@ -859,7 +1112,9 @@ plco.plot.qq = async (
     phenotype_id = 3080,
     sex = 'female',
     ancestry = 'east_asian',
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     /**
      * @type {Array&lt;object>} Each object in the array has the properties defined below.
@@ -1004,6 +1259,7 @@ plco.plot.qq = async (
         hovermode: 'closest', // When a point is hovered, it will display their (x, y) coordinate
         dragmode: 'pan',
         showlegend: false,
+        ...customLayout
     }
 
     const config = {
@@ -1017,6 +1273,7 @@ plco.plot.qq = async (
             'hoverCompareCartesian',
             'hoverClosestCartesian',
         ],
+        ...customConfig
     }
 
     if (!to_json) {
@@ -1062,6 +1319,8 @@ plco.plot.qq = async (
  * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
  * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.qq2('plot', [{phenotype_id:3080, sex:'female', ancestry:'east_asian'}, {phenotype_id:3080, sex:'female', ancestry:'european'}, {phenotype_id: 3550, sex:'all', ancestry:'east_asian'}]) 
@@ -1069,7 +1328,9 @@ plco.plot.qq = async (
 plco.plot.qq2 = (
     div_id,
     arrayOfObjects = [],
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {},
 ) => {
     const promises = []
     arrayOfObjects.forEach((obj) => {
@@ -1135,7 +1396,8 @@ plco.plot.qq2 = (
                         size: 12,
                         color: 'black'
                     }
-                }
+                },
+                ...customLayout
             }
 
             const config = {
@@ -1149,6 +1411,7 @@ plco.plot.qq2 = (
                     'hoverCompareCartesian',
                     'hoverClosestCartesian',
                 ],
+                ...customConfig
             }
 
             if (!to_json) {
@@ -1195,8 +1458,10 @@ plco.plot.qq2 = (
  * @param {number} phenotype_id A phenotype id.
  * @param {string} sex A sex, which may be "all", "female", or "male".
  * @param {string} ancestry A character vector specifying ancestries to retrieve data for.
- * @param {boolean} to_json _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
  * @example
  * await plco.plot.pca('plot', 3080, 'female', 'east_asian')
@@ -1206,9 +1471,11 @@ plco.plot.pca = async (
     phenotype_id,
     sex,
     ancestry,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {}
 ) => {
-    return await plco.plot.pca2(div_id, [{ phenotype_id, sex, ancestry }], to_json)
+    return await plco.plot.pca2(div_id, [{ phenotype_id, sex, ancestry }], to_json, customLayout, customConfig)
 }
 
 /**
@@ -1217,12 +1484,18 @@ plco.plot.pca = async (
  * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
  * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
  * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns A div element or a string if `to_json` is true.
+ * @example
+ * await plco.plot.pca2('plot', [{phenotype_id: 3080, sex: 'female', ancestry: 'east_asian'}, {phenotype_id: 3080, sex: 'female', ancestry: 'european'}])
  */
 plco.plot.pca2 = async (
     div_id,
     arrayOfObjects,
-    to_json = false
+    to_json = false,
+    customLayout = {},
+    customConfig = {}
 ) => {
     let pc_x = 1
     let pc_y = 2
@@ -1317,7 +1590,8 @@ plco.plot.pca2 = async (
             orientation: 'v',
             x: 0.0,
             y: 1.2
-        }
+        },
+        ...customLayout,
     }
 
     const config = {
@@ -1338,7 +1612,8 @@ plco.plot.pca2 = async (
             'hoverCompareCartesian',
             'lasso2d',
             'toggleSpikelines',
-        ]
+        ],
+        ...customConfig,
     }
 
     const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, 1, 2)
@@ -1577,7 +1852,7 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
 plco()
 
 if (typeof (define) != 'undefined') {
-    define(plco)
+    define(plco())
 }
 </code></pre>
         </article>
@@ -1595,7 +1870,7 @@ if (typeof (define) != 'undefined') {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 02 2021 17:35:45 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Jul 08 2021 21:22:15 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
