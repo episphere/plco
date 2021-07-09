@@ -1277,7 +1277,7 @@ plco.plot.qq = async (
                         div_id,
                         filteredText + `Chromosome: ${resChromosome} <br>` +
                         `Position: ${resPosition} <br> SNP: ${resSnp}` +
-                        '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>' +
+                        '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + 'Learn more at dbSNP: ' + resSnp + '</a>' +
                         `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
                         ['#d3d3d3']
                     )
@@ -1640,7 +1640,32 @@ plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber =
     }
     hoverDiv.innerHTML = text
     hoverDiv.style =
-        `position:absolute;top:${100};right:${300};z-index:10;background-color:${colors[curveNumber - 1 % colors.length]};`
+        `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[curveNumber - 1 % colors.length]};` +
+        `text-align:center; border: 1 px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
+
+    hoverDiv.addEventListener('mousedown', e => {
+        down = true
+        startX = e.clientX // global vars
+        startY = e.clientY // global vars
+    })
+
+    hoverDiv.addEventListener('mouseup', e => {
+        down = false
+    })
+
+    hoverDiv.addEventListener('mousemove', e => {
+        try {
+            if (down) {
+                hoverDiv.style.left = hoverDiv.offsetLeft - (startX - e.clientX) + 'px'
+                hoverDiv.style.top = hoverDiv.offsetTop - (startY - e.clientY) + 'px'
+
+                startX = e.clientX // global vars
+                startY = e.clientY // global vars
+            }
+        } catch (e) {
+            down = false
+        }
+    })
 }
 
 plco.plot.helpers.validateInputs = async (
