@@ -1268,8 +1268,19 @@ plco.plot.qq = async (
                     })
                     const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
                     let updatedText = points[i].data.text.slice()
-                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                    let filteredText = updatedText[points[i].pointIndex].substring(0, updatedText[points[i].pointIndex].indexOf('Click'))
+                    updatedText[points[i].pointIndex] = filteredText + `<br>Chromosome: ${resChromosome} <br>` +
                         `Position: ${resPosition} <br> SNP: ${resSnp}`
+
+                    plco.plot.helpers.qqplotHoverTooltip(
+                        div,
+                        div_id,
+                        filteredText + `Chromosome: ${resChromosome} <br>` +
+                        `Position: ${resPosition} <br> SNP: ${resSnp}` +
+                        '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>' +
+                        `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
+                        ['#d3d3d3']
+                    )
                     Plotly.restyle(div, { text: [updatedText] }, [1])
                 } catch (e) {
                     console.error(e)
@@ -1406,8 +1417,20 @@ plco.plot.qq2 = (
                             })
                             const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
                             let updatedText = points[i].data.text.slice()
-                            updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} <br>` +
+                            let filteredText = updatedText[points[i].pointIndex].substring(0, updatedText[points[i].pointIndex].indexOf('Click'))
+                            updatedText[points[i].pointIndex] = filteredText + `<br>Chromosome: ${resChromosome} <br>` +
                                 `Position: ${resPosition} <br> SNP: ${resSnp}`
+
+                            plco.plot.helpers.qqplotHoverTooltip(
+                                div,
+                                div_id,
+                                filteredText + `Chromosome: ${resChromosome} <br>` +
+                                `Position: ${resPosition} <br> SNP: ${resSnp}` +
+                                '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>' +
+                                `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
+                                colors,
+                                points[i].curveNumber
+                            )
                             Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
                         } catch (e) {
                             console.error(e)
@@ -1607,6 +1630,18 @@ plco.plot.pca2 = async (
  * @memberof plco.plot
  */
 plco.plot.helpers = {}
+
+plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber = 1) => {
+    let hoverDiv = document.getElementById(div_id + 'hoverdiv')
+    if (!hoverDiv) {
+        hoverDiv = document.createElement('div')
+        hoverDiv.id = div_id + 'hoverdiv'
+        div.appendChild(hoverDiv)
+    }
+    hoverDiv.innerHTML = text
+    hoverDiv.style =
+        `position:absolute;top:${100};right:${300};z-index:10;background-color:${colors[curveNumber - 1 % colors.length]};`
+}
 
 plco.plot.helpers.validateInputs = async (
     arrayOfObjects = []
