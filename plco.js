@@ -1008,6 +1008,19 @@ plco.plot.manhattan = async (
                 div.style = ''
             } else { return }
         })
+
+        if (numberOfChromosomes === 1) {
+            div.on('plotly_click', eventdata => {
+                let resSnp = eventdata.points[0].hovertemplate.split(' ')[4]
+                plco.plot.helpers.qqplotHoverTooltip(
+                    div,
+                    div_id,
+                    eventdata.points[0].hovertemplate + '<br>Info:<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>' +
+                    `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
+                    ['#9BC4DE']
+                )
+            })
+        }
         return div
     } else {
         let tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -1640,7 +1653,7 @@ plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber =
     }
     hoverDiv.innerHTML = text
     hoverDiv.style =
-        `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[curveNumber - 1 % colors.length]};` +
+        `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
         `text-align:center; border: 1 px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
 
     hoverDiv.addEventListener('mousedown', e => {
