@@ -1065,7 +1065,10 @@ plco.plot.manhattan2 = async (
         div = document.createElement('div')
         div.id = div_id
         document.body.appendChild(div)
+    }
 
+    let div2 = document.getElementById(div_id + '2')
+    if (div2 === null && !to_json) {
         // Here lays the reversed plot
         div2 = document.createElement('div')
         div2.id = div_id + '2'
@@ -1112,6 +1115,7 @@ plco.plot.manhattan2 = async (
     let traces = []
     let traces2nd = []
     let currentChromosome
+    let maxYInTraces = p_value_nlog_min
 
     const createTrace = (inputData, isFirst, currentChromosome) => {
         let index = isFirst ? 0 : 1
@@ -1133,6 +1137,7 @@ plco.plot.manhattan2 = async (
                 '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
             )
         }
+        maxYInTraces = traceInfo.y.reduce((max, cur) => cur > max ? cur : max, maxYInTraces)
         return traceInfo
     }
 
@@ -1149,7 +1154,10 @@ plco.plot.manhattan2 = async (
     if (numberOfChromosomes == 1) {
         for (let tracesNum = 0; tracesNum <= 1; i++) {
             for (i = 0; i < traces[tracesNum].hovertemplate.length; i++) {
-                traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers1[i]
+                if (tracesNum === 0)
+                    traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers1[i]
+                else
+                    traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers2[i]
             }
         }
     }
@@ -1166,7 +1174,6 @@ plco.plot.manhattan2 = async (
         },
         yaxis: {
             title: '-log<sub>10</sub>(p)',
-            fixedrange: numberOfChromosomes !== 1,
         },
         hovermode: 'closest',
         height: 700,
@@ -1178,7 +1185,7 @@ plco.plot.manhattan2 = async (
         ...layout,
         yaxis: {
             ...layout.yaxis,
-            autorange: 'reversed',
+            range: [maxYInTraces, p_value_nlog_min],
         },
         title: '',
         xaxis: {
@@ -1190,13 +1197,46 @@ plco.plot.manhattan2 = async (
     }
 
     let config = {
-        scrollZoom: true,
-        ...customConfig
+        ...customConfig,
+    }
+
+    let config2 = {
+        ...config,
+        displayModeBar: false,
     }
 
     if (!to_json) {
         Plotly.newPlot(div, traces, layout, config)
-        Plotly.newPlot(div2, traces2nd, layout2nd, config)
+        Plotly.newPlot(div2, traces2nd, layout2nd, config2)
+
+        // zoom listeners
+        div.on('plotly_relayout', eventdata => {
+            if (eventdata['yaxis.range[0]'] && eventdata['yaxis.range[1]']) {
+                if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
+                    Plotly.relayout(div2, {
+                        xaxis: { range: [eventdata['xaxis.range[0]'], eventdata['xaxis.range[1]']] },
+                        yaxis: {
+                            range: [eventdata['yaxis.range[1]'], eventdata['yaxis.range[0]']]
+                        },
+                    })
+                } else {
+                    Plotly.relayout(div2, {
+                        yaxis: {
+                            range: [eventdata['yaxis.range[1]'], eventdata['yaxis.range[0]']]
+                        },
+                    })
+                }
+            } else if (eventdata['xaxis.autorange'] && eventdata['yaxis.autorange']) {
+                Plotly.relayout(div2, {
+                    xaxis: { autorange: true },
+                    yaxis: { range: [maxYInTraces, p_value_nlog_min] },
+                })
+            } else {
+                Plotly.relayout(div2, {
+                    ...eventdata,
+                })
+            }
+        })
         return [div, div2]
     } else {
         let tracesString = '[{"traces":' + JSON.stringify(traces) + ','
@@ -1205,7 +1245,7 @@ plco.plot.manhattan2 = async (
 
         let tracesString2 = '{"traces":' + JSON.stringify(traces2nd) + ','
         let layoutString2 = '"layout":' + JSON.stringify(layout2nd) + ','
-        let configString2 = '"config":' + JSON.stringify(config) + '}]'
+        let configString2 = '"config":' + JSON.stringify(config2) + '}]'
 
         return tracesString + layoutString + configString + tracesString2 + layoutString2 + configString2
     }
