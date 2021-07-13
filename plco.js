@@ -868,8 +868,9 @@ plco.plot.manhattan = async (
     // Retrieve rs number for all SNPs if a chromosome number was passed as an argument.
     let rsNumbers = []
     if (numberOfChromosomes == 1) {
-        let rsNumbers_allData = await plco.api.variants({}, phenotype_id, sex, ancestry, chromosome)
-        rsNumbers_allData.data.map(x => rsNumbers.push(x.snp))
+        let rsNumbers_allData = await plco.api.variants(
+            { p_value_nlog_min, orderBy: 'id', order: 'asc' }, phenotype_id, sex, ancestry, chromosome)
+        rsNumbers_allData.data.map(x => rsNumbers.push({ snp: x.snp }))
     }
 
     // Set up traces
@@ -919,7 +920,7 @@ plco.plot.manhattan = async (
 
     if (numberOfChromosomes == 1) {
         for (i = 0; i < traces[0].hovertemplate.length; i++) {
-            traces[0].hovertemplate[i] += '<br>snp: ' + rsNumbers[i]
+            traces[0].hovertemplate[i] += '<br>snp: ' + rsNumbers[i].snp
         }
     }
 
@@ -991,25 +992,12 @@ plco.plot.manhattan = async (
         div.appendChild(label)
 
         div.on('plotly_relayout', async (eventdata) => {
-            // TODO Add an loader class
             if (checkbox.checked && eventdata['xaxis2.range[0]'] && eventdata['xaxis2.range[1]']) {
-                const tempDiv = document.createElement('div')
-                tempDiv.classList.add('loader')
-                document.body.appendChild(tempDiv)
-                div.style = 'display: none;'
                 const findStart = chromosomeAbsPos.find(({ val }) => val >= eventdata['xaxis2.range[0]'])
-                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum)
-                tempDiv.remove()
-                div.style = ''
+                plco.plot.helpers.addLoaderDiv(div, async () => await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum))
             }
             else if (checkbox.checked) {
-                const tempDiv = document.createElement('div')
-                tempDiv.classList.add('loader')
-                document.body.appendChild(tempDiv)
-                div.style = 'display: none;'
-                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined)
-                tempDiv.remove()
-                div.style = ''
+                plco.plot.helpers.addLoaderDiv(div, async () => await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined))
             } else { return }
         })
 
@@ -1090,10 +1078,11 @@ plco.plot.manhattan2 = async (
     let rsNumbers2 = []
     if (numberOfChromosomes === 1) {
         const promises = []
-        for (let metadataObj in validObjects) {
+        validObjects.forEach((metadataObj) => {
             const { phenotype_id, sex, ancestry } = metadataObj
-            promises.push(plco.api.variants({}, phenotype_id, sex, ancestry, chromosome))
-        }
+            promises.push(plco.api.variants(
+                { p_value_nlog_min, orderBy: 'id', order: 'asc' }, phenotype_id, sex, ancestry, chromosome))
+        })
         const resultsOfPromises = await Promise.all(promises) // huge bottleneck
         resultsOfPromises.forEach((arr, index) => {
             if (index === 0)
@@ -1163,8 +1152,10 @@ plco.plot.manhattan2 = async (
         })
     }
 
+    traces = traces.concat(traces2nd)
+
     if (numberOfChromosomes == 1) {
-        for (let tracesNum = 0; tracesNum <= 1; i++) {
+        for (let tracesNum = 0; tracesNum <= 1; tracesNum++) {
             for (i = 0; i < traces[tracesNum].hovertemplate.length; i++) {
                 if (tracesNum === 0)
                     traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers1[i]
@@ -1173,8 +1164,6 @@ plco.plot.manhattan2 = async (
             }
         }
     }
-
-    traces = traces.concat(traces2nd)
 
     let layout = {
         title: 'SNPs in ' + chromosomeName,
@@ -1215,6 +1204,42 @@ plco.plot.manhattan2 = async (
 
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, layout, config)
+
+        const selector = document.createElement('select')
+        selector.id = div_id + 'selector'
+        const label = document.createElement('label')
+        label.for = div_id + 'selector'
+        label.id = div_id + 'label'
+        label.innerHTML = 'View a single chromosome'
+
+        selector.onchange = async (event) => {
+            label.remove()
+            selector.remove()
+            plco.plot.helpers.addLoaderDiv(div, async () =>
+                await plco.plot.manhattan2(div_id, arrayOfObjects, p_value_nlog_min, event.target.value,
+                    to_json, customLayout, customConfig))
+        }
+        for (let i = 0; i <= 22; i++) {
+            if (i === 0) {
+                const optblank = document.createElement('option')
+                optblank.value = undefined
+                optblank.innerHTML = ' '
+                selector.appendChild(optblank)
+
+                const opt = document.createElement('option')
+                opt.value = undefined
+                opt.innerHTML = 'All'
+                selector.appendChild(opt)
+            } else {
+                const opt = document.createElement('option')
+                opt.value = i
+                opt.innerHTML = i
+                selector.appendChild(opt)
+            }
+        }
+        div.appendChild(selector)
+        div.appendChild(label)
+
         return div
     } else {
         let tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -1790,6 +1815,16 @@ plco.plot.pca2 = async (
  * @memberof plco.plot
  */
 plco.plot.helpers = {}
+
+plco.plot.helpers.addLoaderDiv = async (div, f) => {
+    const tempDiv = document.createElement('div')
+    tempDiv.classList.add('loader')
+    document.body.appendChild(tempDiv)
+    div.style = 'display: none;'
+    await (f())
+    tempDiv.remove()
+    div.style = ''
+}
 
 plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber = 1) => {
     let hoverDiv = document.getElementById(div_id + 'hoverdiv')
