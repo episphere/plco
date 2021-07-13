@@ -1,2 +1,15 @@
 <script src="plcoMod.js"></script>
-<p>Testing module loading ...</p>
+<p>Testing module loading ...
+<br>See how Plotly was retrieved as a dependency, i.e. as <i>plcoMod.Plotly</i></p>
+<script>
+window.onload=function(){
+  let div = document.createElement("div");
+  let x = [...Array(100)].map((a, i) => i);
+  let trace = {
+    x: x,
+    y: x.map((xi) => (Math.sin(xi / 10) + (Math.random() - 0.5)) / 5)
+  };
+  plcoMod.Plotly.newPlot(div, [trace]);
+  document.body.appendChild(div)
+}
+</script>
