@@ -381,6 +381,28 @@ plco.explorePhenotypes = async (
     return phenotypes_json
 }
 
+plco.fetch = async (url) => {
+    try {
+        const value = await plco.localForage.getItem(url)
+        if (!value || (value && !value.data)) {
+            const apiResult = await (await fetch(url)).json()
+            plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
+            return apiResult
+        } else if (value && value.date) {
+            if (Math.floor(new Date().getTime() / 1000.0) - value.date > 604800) {
+                const apiResult = await (await fetch(url)).json()
+                plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
+                return apiResult
+            } else {
+                return value.data
+            }
+        }
+        return value.data
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 /**
  * Sub-module grouping API methods.
  * @memberof plco
@@ -425,7 +447,7 @@ plco.api.get = async (cmd = "ping", parms = {}) => {
             return await new Promise((resolve) => resolve({}))
         }
     } else {
-        return (await fetch(plco.api.url + cmd + '?' + plco.api.parms2string(parms))).json()
+        return await plco.fetch(plco.api.url + cmd + '?' + plco.api.parms2string(parms))
     }
 }
 
@@ -1007,8 +1029,8 @@ plco.plot.manhattan = async (
                 plco.plot.helpers.qqplotHoverTooltip(
                     div,
                     div_id,
-                    eventdata.points[0].hovertemplate + '<br>Info:<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>' +
-                    `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
+                    eventdata.points[0].hovertemplate + '<br>Info:<br><a href="https://www.ncbi.nlm.nih.gov/snp/' +
+                    resSnp + '">' + resSnp + '</a>',
                     ['#9BC4DE']
                 )
             })
@@ -1043,7 +1065,7 @@ plco.plot.manhattan2 = async (
     customLayout = {},
     customConfig = {},
 ) => {
-    // TODO https://plotly.com/javascript/subplots/
+    // TODO fixed the snp mapping in manhattan and manhattan2
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
 
     if (validObjects.length < 2) throw new Error('Incorrect number of arguments.')
@@ -1239,6 +1261,19 @@ plco.plot.manhattan2 = async (
         }
         div.appendChild(selector)
         div.appendChild(label)
+
+        if (numberOfChromosomes === 1) {
+            div.on('plotly_click', eventdata => {
+                let resSnp = eventdata.points[0].hovertemplate.split(' ')[4]
+                plco.plot.helpers.qqplotHoverTooltip(
+                    div,
+                    div_id,
+                    eventdata.points[0].hovertemplate +
+                    '<br>Info:<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>',
+                    [eventdata.points[0].data.marker.color]
+                )
+            })
+        }
 
         return div
     } else {
@@ -1462,8 +1497,8 @@ plco.plot.qq = async (
                         div_id,
                         filteredText + `Chromosome: ${resChromosome} <br>` +
                         `Position: ${resPosition} <br> SNP: ${resSnp}` +
-                        '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + 'Learn more at dbSNP: ' + resSnp + '</a>' +
-                        `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
+                        '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + 'Learn more at dbSNP: ' +
+                        resSnp + '</a>',
                         ['#d3d3d3']
                     )
                     plco.Plotly.restyle(div, { text: [updatedText] }, [1])
@@ -1611,8 +1646,7 @@ plco.plot.qq2 = (
                                 div_id,
                                 filteredText + `Chromosome: ${resChromosome} <br>` +
                                 `Position: ${resPosition} <br> SNP: ${resSnp}` +
-                                '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>' +
-                                `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
+                                '<br><a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '</a>',
                                 colors,
                                 points[i].curveNumber
                             )
@@ -1827,16 +1861,24 @@ plco.plot.helpers.addLoaderDiv = async (div, f) => {
 }
 
 plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber = 1) => {
-    let hoverDiv = document.getElementById(div_id + 'hoverdiv')
+    let randint = Math.round(Math.random() * 1000)
+    let hoverDiv = document.getElementById(div_id + 'hoverdiv' + randint)
     if (!hoverDiv) {
         hoverDiv = document.createElement('div')
-        hoverDiv.id = div_id + 'hoverdiv'
+        hoverDiv.id = div_id + 'hoverdiv' + randint
         div.appendChild(hoverDiv)
     }
     hoverDiv.innerHTML = text
     hoverDiv.style =
         `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
         `text-align:center; border: 1px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
+
+    let closeButton = document.createElement('button')
+    closeButton.addEventListener('click', function () { this.parentElement.remove() })
+    closeButton.id = div_id + 'closeButton' + randint
+    closeButton.innerHTML = 'Close'
+    closeButton.style = 'display:block;'
+    hoverDiv.appendChild(closeButton)
 
     hoverDiv.addEventListener('mousedown', e => {
         down = true
@@ -2082,6 +2124,9 @@ if (typeof (define) != 'undefined') {
     // define({ proto: plco })
     define(['https://cdn.plot.ly/plotly-latest.min.js'], (Plotly) => {
         plco.Plotly = Plotly
+    })
+    define(['localforage'], localforage => {
+        plco.localForage = localforage
         return plco
     })
 } else {
@@ -2090,6 +2135,12 @@ if (typeof (define) != 'undefined') {
     s.then(async s => {
         s.onload = () => {
             plco.Plotly = Plotly
+        }
+    })
+    let script2 = plco.loadScript('localforage.min.js')
+    script2.then(async s => {
+        s.onload = () => {
+            plco.localForage = localforage
         }
     })
 }
