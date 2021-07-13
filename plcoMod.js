@@ -25,5 +25,3 @@ if(typeof(define)!="undefined"){
         }
     })
 }
-
-console.log(plcoMod)
