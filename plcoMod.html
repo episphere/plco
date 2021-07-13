@@ -1,0 +1,22 @@
+<script src="plcoMod.js"></script>
+<h3>Testing module loading ...</h3>
+<p><li>See how Plotly was retrieved as a dependency, i.e. as <a href="https://github.com/episphere/plco/blob/master/plcoMod.js" target="_blank"><i>plcoMod.Plotly</i></a></li></p>
+<p><li>The same solution working as a required module in observable can be inspected at <a href="https://observablehq.com/@episphere/plcomod" target="_blank">https://observablehq.com/@episphere/plcomod</a> </li></p>
+<script>
+window.onload=function(){
+  let div = document.createElement("div");
+  let x = [...Array(100)].map((a, i) => i);
+  let trace = {
+    x: x,
+    y: x.map((xi) => (Math.sin(xi / 10) + Math.random() - 0.5))
+  };
+  plcoMod.Plotly.newPlot(div, [trace]);
+  document.body.appendChild(div)
+}
+</script>
+<style>
+    body{
+        color:navy;
+        font-family:verdana
+    }
+</style>
