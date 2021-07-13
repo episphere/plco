@@ -1067,14 +1067,6 @@ plco.plot.manhattan2 = async (
         document.body.appendChild(div)
     }
 
-    let div2 = document.getElementById(div_id + '2')
-    if (div2 === null && !to_json) {
-        // Here lays the reversed plot
-        div2 = document.createElement('div')
-        div2.id = div_id + '2'
-        document.body.appendChild(div2)
-    }
-
     let [inputData1, inputData2] = await Promise.all([
         plco.api.summary(Object.assign(validObjects[0], { p_value_nlog_min })),
         plco.api.summary(Object.assign(validObjects[1], { p_value_nlog_min }))
@@ -1127,7 +1119,7 @@ plco.plot.manhattan2 = async (
             type: 'scattergl',
             marker: {
                 opacity: 0.65,
-                size: 5
+                size: 5,
             },
             name: 'Chromosome ' + currentChromosome +
                 ('<br>' + validObjects[index].phenotype_id + '<br>' + validObjects[index].ancestry),
@@ -1137,6 +1129,12 @@ plco.plot.manhattan2 = async (
                 '<br>p-value: ' + Math.pow(10, -x.p_value_nlog)
             )
         }
+
+        if (!isFirst) {
+            traceInfo.xaxis = 'x'
+            traceInfo.yaxis = 'y2'
+        }
+
         maxYInTraces = traceInfo.y.reduce((max, cur) => cur > max ? cur : max, maxYInTraces)
         return traceInfo
     }
@@ -1147,8 +1145,22 @@ plco.plot.manhattan2 = async (
         else
             currentChromosome = i
 
-        traces.push(createTrace(inputData1, true, currentChromosome))
-        traces2nd.push(createTrace(inputData2, false, currentChromosome))
+        traces.push({
+            ...createTrace(inputData1, true, currentChromosome),
+            marker: {
+                opacity: 0.65,
+                size: 5,
+                color: i % 2 === 1 ? '#FF0000' : '#800000',
+            },
+        })
+        traces2nd.push({
+            ...createTrace(inputData2, false, currentChromosome),
+            marker: {
+                opacity: 0.65,
+                size: 5,
+                color: i % 2 === 1 ? '#5A26FF' : '#1B0071',
+            },
+        })
     }
 
     if (numberOfChromosomes == 1) {
@@ -1161,6 +1173,8 @@ plco.plot.manhattan2 = async (
             }
         }
     }
+
+    traces = traces.concat(traces2nd)
 
     let layout = {
         title: 'SNPs in ' + chromosomeName,
@@ -1175,79 +1189,38 @@ plco.plot.manhattan2 = async (
         yaxis: {
             title: '-log<sub>10</sub>(p)',
         },
+        yaxis2: {
+            range: [maxYInTraces, p_value_nlog_min],
+        },
         hovermode: 'closest',
         height: 700,
         width: 1200,
-        ...customLayout,
-    }
-
-    let layout2nd = {
-        ...layout,
-        yaxis: {
-            ...layout.yaxis,
-            range: [maxYInTraces, p_value_nlog_min],
+        grid: {
+            rows: 2,
+            columns: 1,
+            subplots: [['xy2'], ['xy']],
+            roworder: 'bottom to top',
+            ygap: 0.05,
         },
-        title: '',
-        xaxis: {
-            showticklabels: false,
-            title: '',
-            showgrid: false,
-        },
+        plot_bgcolor: '#fff',
+        colorway: ['#f3cec9', '#e7a4b6', '#cd7eaf', '#a262a9', '#6f4d96', '#3d3b72', '#182844'],
         ...customLayout,
     }
 
     let config = {
+        scrollZoom: true,
+        responsive: true,
         ...customConfig,
-    }
-
-    let config2 = {
-        ...config,
-        displayModeBar: false,
     }
 
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, layout, config)
-        plco.Plotly.newPlot(div2, traces2nd, layout2nd, config2)
-
-        // zoom listeners
-        div.on('plotly_relayout', eventdata => {
-            if (eventdata['yaxis.range[0]'] && eventdata['yaxis.range[1]']) {
-                if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-                    plco.Plotly.relayout(div2, {
-                        xaxis: { range: [eventdata['xaxis.range[0]'], eventdata['xaxis.range[1]']] },
-                        yaxis: {
-                            range: [eventdata['yaxis.range[1]'], eventdata['yaxis.range[0]']]
-                        },
-                    })
-                } else {
-                    plco.Plotly.relayout(div2, {
-                        yaxis: {
-                            range: [eventdata['yaxis.range[1]'], eventdata['yaxis.range[0]']]
-                        },
-                    })
-                }
-            } else if (eventdata['xaxis.autorange'] && eventdata['yaxis.autorange']) {
-                plco.Plotly.relayout(div2, {
-                    xaxis: { autorange: true },
-                    yaxis: { range: [maxYInTraces, p_value_nlog_min] },
-                })
-            } else {
-                plco.Plotly.relayout(div2, {
-                    ...eventdata,
-                })
-            }
-        })
-        return [div, div2]
+        return div
     } else {
-        let tracesString = '[{"traces":' + JSON.stringify(traces) + ','
+        let tracesString = '{"traces":' + JSON.stringify(traces) + ','
         let layoutString = '"layout":' + JSON.stringify(layout) + ','
-        let configString = '"config":' + JSON.stringify(config) + '},'
-
-        let tracesString2 = '{"traces":' + JSON.stringify(traces2nd) + ','
-        let layoutString2 = '"layout":' + JSON.stringify(layout2nd) + ','
-        let configString2 = '"config":' + JSON.stringify(config2) + '}]'
-
-        return tracesString + layoutString + configString + tracesString2 + layoutString2 + configString2
+        let configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
     }
 }
 
