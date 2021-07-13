@@ -49,8 +49,8 @@ console.log('plco.js loaded')
  * @property {Function} saveFile - {@link plco.saveFile}
  */
 const plco = async () => {
-    plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
-    console.log("plotly.js loaded")
+    // plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
+    // console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
     plco.addStyle()
 }
@@ -161,7 +161,7 @@ plco.plotTest = async (
             title: '-log(p)'
         }
     }
-    Plotly.newPlot(div, [trace], layout)
+    plco.Plotly.newPlot(div, [trace], layout)
     return div
 }
 
@@ -290,7 +290,7 @@ plco.explorePhenotypes = async (
             sunburstcolorway: phenotypes_json.map(phenotype => phenotype.color).filter(Boolean),
         }
 
-        Plotly.newPlot(div, data, layout)
+        plco.Plotly.newPlot(div, data, layout)
         div.on('plotly_click', async ({ event, points }) => {
             if (event.altKey) {
                 const part = await plco.api.participants({}, points[0].id, 'value,ancestry,sex', 0)
@@ -401,7 +401,7 @@ plco.explorePhenotypes = async (
                 div2.id = 'table' + Math.floor(Math.random() * 20)
                 document.body.appendChild(div2)
 
-                Plotly.newPlot(div2, trace, layout)
+                plco.Plotly.newPlot(div2, trace, layout)
             }
         })
         return phenotypes_json
@@ -865,6 +865,10 @@ plco.plot.manhattan = async (
     customLayout = {},
     customConfig = {},
 ) => {
+    const isValid = await plco.plot.helpers.validateInputs([{ phenotype_id, sex, ancestry }])
+
+    if (isValid.length &lt;= 0) throw new Error('Invalid inputs, check the phenotype_id/sex/ancestry provided.')
+
     // Set up div, in which Plotly graph may be inserted.
     let div = document.getElementById(div_id)
     if (div === null &amp;&amp; !to_json) {
@@ -892,8 +896,9 @@ plco.plot.manhattan = async (
     // Retrieve rs number for all SNPs if a chromosome number was passed as an argument.
     let rsNumbers = []
     if (numberOfChromosomes == 1) {
-        let rsNumbers_allData = await plco.api.variants({}, phenotype_id, sex, ancestry, chromosome)
-        rsNumbers_allData.data.map(x => rsNumbers.push(x.snp))
+        let rsNumbers_allData = await plco.api.variants(
+            { p_value_nlog_min, orderBy: 'id', order: 'asc' }, phenotype_id, sex, ancestry, chromosome)
+        rsNumbers_allData.data.map(x => rsNumbers.push({ snp: x.snp }))
     }
 
     // Set up traces
@@ -943,7 +948,7 @@ plco.plot.manhattan = async (
 
     if (numberOfChromosomes == 1) {
         for (i = 0; i &lt; traces[0].hovertemplate.length; i++) {
-            traces[0].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers[i]
+            traces[0].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers[i].snp
         }
     }
 
@@ -993,7 +998,7 @@ plco.plot.manhattan = async (
 
 
     if (!to_json) {
-        Plotly.newPlot(div, traces, layout, config)
+        plco.Plotly.newPlot(div, traces, layout, config)
 
         const oldCheckbox = document.getElementById(div_id + 'checkbox')
         if (oldCheckbox) {
@@ -1015,27 +1020,27 @@ plco.plot.manhattan = async (
         div.appendChild(label)
 
         div.on('plotly_relayout', async (eventdata) => {
-            // TODO Add an loader class
             if (checkbox.checked &amp;&amp; eventdata['xaxis2.range[0]'] &amp;&amp; eventdata['xaxis2.range[1]']) {
-                const tempDiv = document.createElement('div')
-                tempDiv.classList.add('loader')
-                document.body.appendChild(tempDiv)
-                div.style = 'display: none;'
                 const findStart = chromosomeAbsPos.find(({ val }) => val >= eventdata['xaxis2.range[0]'])
-                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum)
-                tempDiv.remove()
-                div.style = ''
+                plco.plot.helpers.addLoaderDiv(div, async () => await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, findStart.chromosomeNum))
             }
             else if (checkbox.checked) {
-                const tempDiv = document.createElement('div')
-                tempDiv.classList.add('loader')
-                document.body.appendChild(tempDiv)
-                div.style = 'display: none;'
-                await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined)
-                tempDiv.remove()
-                div.style = ''
+                plco.plot.helpers.addLoaderDiv(div, async () => await plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min, undefined))
             } else { return }
         })
+
+        if (numberOfChromosomes === 1) {
+            div.on('plotly_click', eventdata => {
+                let resSnp = eventdata.points[0].hovertemplate.split(' ')[4]
+                plco.plot.helpers.qqplotHoverTooltip(
+                    div,
+                    div_id,
+                    eventdata.points[0].hovertemplate + '&lt;br>Info:&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '&lt;/a>' +
+                    `&lt;br>&lt;button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close&lt;/button>`,
+                    ['#9BC4DE']
+                )
+            })
+        }
         return div
     } else {
         let tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -1049,9 +1054,13 @@ plco.plot.manhattan = async (
  * 
  * @param {string} div_id 
  * @param {Array} arrayOfObjects 
+ * @param {number}  [p_value_nlog_min=2]
+ * @param {number} [chromosome=undefined] _Optional_. Leave it undefined to plot all chromosomes. Else use an integer [1-22].
  * @param {boolean} [to_json=false]
  * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
  * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
+ * @example
+ * await plco.plot.manhattan2('plot', [{phenotype_id: 3080, ancestry: 'european', sex: 'female'},{phenotype_id: 3080, ancestry: 'east_asian', sex: 'female'}])
  */
 plco.plot.manhattan2 = async (
     div_id,
@@ -1062,7 +1071,7 @@ plco.plot.manhattan2 = async (
     customLayout = {},
     customConfig = {},
 ) => {
-    // TODO something with the variants endpoint
+    // TODO https://plotly.com/javascript/subplots/
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
 
     if (validObjects.length &lt; 2) throw new Error('Incorrect number of arguments.')
@@ -1074,8 +1083,10 @@ plco.plot.manhattan2 = async (
         document.body.appendChild(div)
     }
 
-    let inputData1 = await plco.api.summary(Object.assign(validObjects[0], { p_value_nlog_min }))
-    let inputData2 = await plco.api.summary(Object.assign(validObjects[1], { p_value_nlog_min }))
+    let [inputData1, inputData2] = await Promise.all([
+        plco.api.summary(Object.assign(validObjects[0], { p_value_nlog_min })),
+        plco.api.summary(Object.assign(validObjects[1], { p_value_nlog_min }))
+    ])
 
     let chromosomeName
     let numberOfChromosomes
@@ -1089,6 +1100,180 @@ plco.plot.manhattan2 = async (
         inputData2 = inputData2.data
         chromosomeName = 'All Chromosomes'
         numberOfChromosomes = 22
+    }
+
+    let rsNumbers1 = []
+    let rsNumbers2 = []
+    if (numberOfChromosomes === 1) {
+        const promises = []
+        validObjects.forEach((metadataObj) => {
+            const { phenotype_id, sex, ancestry } = metadataObj
+            promises.push(plco.api.variants(
+                { p_value_nlog_min, orderBy: 'id', order: 'asc' }, phenotype_id, sex, ancestry, chromosome))
+        })
+        const resultsOfPromises = await Promise.all(promises) // huge bottleneck
+        resultsOfPromises.forEach((arr, index) => {
+            if (index === 0)
+                arr.data.forEach(x => rsNumbers1.push(x.snp))
+            else
+                arr.data.forEach(x => rsNumbers2.push(x.snp))
+        })
+    }
+
+    // Set up traces
+    let traces = []
+    let traces2nd = []
+    let currentChromosome
+    let maxYInTraces = p_value_nlog_min
+
+    const createTrace = (inputData, isFirst, currentChromosome) => {
+        let index = isFirst ? 0 : 1
+        currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        const traceInfo = {
+            x: currentChromosomeData.map(x => parseInt(x.position_abs)),
+            y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
+            mode: 'markers',
+            type: 'scattergl',
+            marker: {
+                opacity: 0.65,
+                size: 5,
+            },
+            name: 'Chromosome ' + currentChromosome +
+                ('&lt;br>' + validObjects[index].phenotype_id + '&lt;br>' + validObjects[index].ancestry),
+            // appears as legend item
+            hovertemplate: currentChromosomeData.map(x =>
+                'absolute position: ' + parseInt(x.position_abs) +
+                '&lt;br>p-value: ' + Math.pow(10, -x.p_value_nlog)
+            )
+        }
+
+        if (!isFirst) {
+            traceInfo.xaxis = 'x'
+            traceInfo.yaxis = 'y2'
+        }
+
+        maxYInTraces = traceInfo.y.reduce((max, cur) => cur > max ? cur : max, maxYInTraces)
+        return traceInfo
+    }
+
+    for (i = 1; i &lt;= numberOfChromosomes; i++) {
+        if (numberOfChromosomes == 1)
+            currentChromosome = chromosome
+        else
+            currentChromosome = i
+
+        traces.push({
+            ...createTrace(inputData1, true, currentChromosome),
+            marker: {
+                opacity: 0.65,
+                size: 5,
+                color: i % 2 === 1 ? '#FF0000' : '#800000',
+            },
+        })
+        traces2nd.push({
+            ...createTrace(inputData2, false, currentChromosome),
+            marker: {
+                opacity: 0.65,
+                size: 5,
+                color: i % 2 === 1 ? '#5A26FF' : '#1B0071',
+            },
+        })
+    }
+
+    traces = traces.concat(traces2nd)
+
+    if (numberOfChromosomes == 1) {
+        for (let tracesNum = 0; tracesNum &lt;= 1; tracesNum++) {
+            for (i = 0; i &lt; traces[tracesNum].hovertemplate.length; i++) {
+                if (tracesNum === 0)
+                    traces[tracesNum].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers1[i]
+                else
+                    traces[tracesNum].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers2[i]
+            }
+        }
+    }
+
+    let layout = {
+        title: 'SNPs in ' + chromosomeName,
+        xaxis: {
+            title: 'absolute position',
+            showgrid: false,
+            tickfont: {
+                color: 'black',
+                size: 15
+            },
+        },
+        yaxis: {
+            title: '-log&lt;sub>10&lt;/sub>(p)',
+        },
+        yaxis2: {
+            range: [maxYInTraces, p_value_nlog_min],
+        },
+        hovermode: 'closest',
+        height: 700,
+        width: 1200,
+        grid: {
+            rows: 2,
+            columns: 1,
+            subplots: [['xy2'], ['xy']],
+            roworder: 'bottom to top',
+            ygap: 0.05,
+        },
+        plot_bgcolor: '#fff',
+        colorway: ['#f3cec9', '#e7a4b6', '#cd7eaf', '#a262a9', '#6f4d96', '#3d3b72', '#182844'],
+        ...customLayout,
+    }
+
+    let config = {
+        scrollZoom: true,
+        responsive: true,
+        ...customConfig,
+    }
+
+    if (!to_json) {
+        plco.Plotly.newPlot(div, traces, layout, config)
+
+        const selector = document.createElement('select')
+        selector.id = div_id + 'selector'
+        const label = document.createElement('label')
+        label.for = div_id + 'selector'
+        label.id = div_id + 'label'
+        label.innerHTML = 'View a single chromosome'
+
+        selector.onchange = async (event) => {
+            label.remove()
+            selector.remove()
+            plco.plot.helpers.addLoaderDiv(div, async () =>
+                await plco.plot.manhattan2(div_id, arrayOfObjects, p_value_nlog_min, event.target.value,
+                    to_json, customLayout, customConfig))
+        }
+        for (let i = 0; i &lt;= 22; i++) {
+            if (i === 0) {
+                const optblank = document.createElement('option')
+                optblank.value = undefined
+                optblank.innerHTML = ' '
+                selector.appendChild(optblank)
+
+                const opt = document.createElement('option')
+                opt.value = undefined
+                opt.innerHTML = 'All'
+                selector.appendChild(opt)
+            } else {
+                const opt = document.createElement('option')
+                opt.value = i
+                opt.innerHTML = i
+                selector.appendChild(opt)
+            }
+        }
+        div.appendChild(selector)
+        div.appendChild(label)
+
+        return div
+    } else {
+        let tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        let layoutString = '"layout":' + JSON.stringify(layout) + ','
+        let configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
     }
 }
 
@@ -1277,7 +1462,7 @@ plco.plot.qq = async (
     }
 
     if (!to_json) {
-        Plotly.newPlot(div, [traceLine, trace], layout, config)
+        plco.Plotly.newPlot(div, [traceLine, trace], layout, config)
 
         div.on('plotly_click', async (data) => {
             console.log(data) // contains the custom data
@@ -1296,9 +1481,20 @@ plco.plot.qq = async (
                     })
                     const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
                     let updatedText = points[i].data.text.slice()
-                    updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} &lt;br>` +
+                    let filteredText = updatedText[points[i].pointIndex].substring(0, updatedText[points[i].pointIndex].indexOf('Click'))
+                    updatedText[points[i].pointIndex] = filteredText + `&lt;br>Chromosome: ${resChromosome} &lt;br>` +
                         `Position: ${resPosition} &lt;br> SNP: ${resSnp}`
-                    Plotly.restyle(div, { text: [updatedText] }, [1])
+
+                    plco.plot.helpers.qqplotHoverTooltip(
+                        div,
+                        div_id,
+                        filteredText + `Chromosome: ${resChromosome} &lt;br>` +
+                        `Position: ${resPosition} &lt;br> SNP: ${resSnp}` +
+                        '&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + 'Learn more at dbSNP: ' + resSnp + '&lt;/a>' +
+                        `&lt;br>&lt;button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close&lt;/button>`,
+                        ['#d3d3d3']
+                    )
+                    plco.Plotly.restyle(div, { text: [updatedText] }, [1])
                 } catch (e) {
                     console.error(e)
                 }
@@ -1415,7 +1611,7 @@ plco.plot.qq2 = (
             }
 
             if (!to_json) {
-                Plotly.newPlot(div, traces, layout, config)
+                plco.Plotly.newPlot(div, traces, layout, config)
                 div.on('plotly_click', async (data) => {
                     console.log(data) // contains the custom data
 
@@ -1434,9 +1630,21 @@ plco.plot.qq2 = (
                             })
                             const { chromosome: resChromosome, position: resPosition, snp: resSnp } = res.data[0]
                             let updatedText = points[i].data.text.slice()
-                            updatedText[points[i].pointIndex] = `Chromosome: ${resChromosome} &lt;br>` +
+                            let filteredText = updatedText[points[i].pointIndex].substring(0, updatedText[points[i].pointIndex].indexOf('Click'))
+                            updatedText[points[i].pointIndex] = filteredText + `&lt;br>Chromosome: ${resChromosome} &lt;br>` +
                                 `Position: ${resPosition} &lt;br> SNP: ${resSnp}`
-                            Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
+
+                            plco.plot.helpers.qqplotHoverTooltip(
+                                div,
+                                div_id,
+                                filteredText + `Chromosome: ${resChromosome} &lt;br>` +
+                                `Position: ${resPosition} &lt;br> SNP: ${resSnp}` +
+                                '&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '&lt;/a>' +
+                                `&lt;br>&lt;button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close&lt;/button>`,
+                                colors,
+                                points[i].curveNumber
+                            )
+                            plco.Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
                         } catch (e) {
                             console.error(e)
                         }
@@ -1619,7 +1827,7 @@ plco.plot.pca2 = async (
     const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, 1, 2)
 
     if (!to_json) {
-        Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
+        plco.Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
         plco.plot.helpers.pcaGenerateXYInputs(div_id, arrayOfObjects, layout, config)
         return div
     } else {
@@ -1635,6 +1843,53 @@ plco.plot.pca2 = async (
  * @memberof plco.plot
  */
 plco.plot.helpers = {}
+
+plco.plot.helpers.addLoaderDiv = async (div, f) => {
+    const tempDiv = document.createElement('div')
+    tempDiv.classList.add('loader')
+    document.body.appendChild(tempDiv)
+    div.style = 'display: none;'
+    await (f())
+    tempDiv.remove()
+    div.style = ''
+}
+
+plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber = 1) => {
+    let hoverDiv = document.getElementById(div_id + 'hoverdiv')
+    if (!hoverDiv) {
+        hoverDiv = document.createElement('div')
+        hoverDiv.id = div_id + 'hoverdiv'
+        div.appendChild(hoverDiv)
+    }
+    hoverDiv.innerHTML = text
+    hoverDiv.style =
+        `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
+        `text-align:center; border: 1px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
+
+    hoverDiv.addEventListener('mousedown', e => {
+        down = true
+        startX = e.clientX // global vars
+        startY = e.clientY // global vars
+    })
+
+    hoverDiv.addEventListener('mouseup', e => {
+        down = false
+    })
+
+    hoverDiv.addEventListener('mousemove', e => {
+        try {
+            if (down) {
+                hoverDiv.style.left = hoverDiv.offsetLeft - (startX - e.clientX) + 'px'
+                hoverDiv.style.top = hoverDiv.offsetTop - (startY - e.clientY) + 'px'
+
+                startX = e.clientX // global vars
+                startY = e.clientY // global vars
+            }
+        } catch (e) {
+            down = false
+        }
+    })
+}
 
 plco.plot.helpers.validateInputs = async (
     arrayOfObjects = []
@@ -1832,7 +2087,7 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
 
         const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xVal, yVal)
         const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xVal, yVal)
-        Plotly.newPlot(div_id, traces, Object.assign({
+        plco.Plotly.newPlot(div_id, traces, Object.assign({
             ...layout,
             xaxis: { ...layout.xaxis, title: { text: `&lt;b>PC-X ${(xVal || '2')}&lt;/b>` } },
             yaxis: { ...layout.yaxis, title: { text: `&lt;b>PC-Y ${(yVal || '2')}&lt;/b>` } },
@@ -1852,7 +2107,19 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
 plco()
 
 if (typeof (define) != 'undefined') {
-    define({ proto: plco })
+    // define({ proto: plco })
+    define(['https://cdn.plot.ly/plotly-latest.min.js'], (Plotly) => {
+        plco.Plotly = Plotly
+        return plco
+    })
+} else {
+    // satisfy Plotly dependency already
+    let s = plco.loadScript('https://cdn.plot.ly/plotly-latest.min.js')
+    s.then(async s => {
+        s.onload = () => {
+            plco.Plotly = Plotly
+        }
+    })
 }
 </code></pre>
         </article>
@@ -1870,7 +2137,7 @@ if (typeof (define) != 'undefined') {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 13 2021 12:14:22 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 13 2021 17:51:48 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
