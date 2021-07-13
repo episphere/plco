@@ -8,7 +8,7 @@ window.onload=function(){
   let x = [...Array(100)].map((a, i) => i);
   let trace = {
     x: x,
-    y: x.map((xi) => (Math.sin(xi / 10) + (Math.random() - 0.5)) / 5)
+    y: x.map((xi) => (Math.sin(xi / 10) + Math.random() - 0.5))
   };
   plcoMod.Plotly.newPlot(div, [trace]);
   document.body.appendChild(div)
