@@ -21,8 +21,8 @@ console.log('plco.js loaded')
  * @property {Function} saveFile - {@link plco.saveFile}
  */
 const plco = async () => {
-    plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
-    console.log("plotly.js loaded")
+    // plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
+    // console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
     plco.addStyle()
 }
@@ -133,7 +133,7 @@ plco.plotTest = async (
             title: '-log(p)'
         }
     }
-    Plotly.newPlot(div, [trace], layout)
+    plco.Plotly.newPlot(div, [trace], layout)
     return div
 }
 
@@ -262,7 +262,7 @@ plco.explorePhenotypes = async (
             sunburstcolorway: phenotypes_json.map(phenotype => phenotype.color).filter(Boolean),
         }
 
-        Plotly.newPlot(div, data, layout)
+        plco.Plotly.newPlot(div, data, layout)
         div.on('plotly_click', async ({ event, points }) => {
             if (event.altKey) {
                 const part = await plco.api.participants({}, points[0].id, 'value,ancestry,sex', 0)
@@ -373,7 +373,7 @@ plco.explorePhenotypes = async (
                 div2.id = 'table' + Math.floor(Math.random() * 20)
                 document.body.appendChild(div2)
 
-                Plotly.newPlot(div2, trace, layout)
+                plco.Plotly.newPlot(div2, trace, layout)
             }
         })
         return phenotypes_json
@@ -969,7 +969,7 @@ plco.plot.manhattan = async (
 
 
     if (!to_json) {
-        Plotly.newPlot(div, traces, layout, config)
+        plco.Plotly.newPlot(div, traces, layout, config)
 
         const oldCheckbox = document.getElementById(div_id + 'checkbox')
         if (oldCheckbox) {
@@ -1055,7 +1055,7 @@ plco.plot.manhattan2 = async (
     customLayout = {},
     customConfig = {},
 ) => {
-    // TODO something with the variants endpoint
+    // TODO https://plotly.com/javascript/subplots/
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
 
     if (validObjects.length < 2) throw new Error('Incorrect number of arguments.')
@@ -1206,33 +1206,33 @@ plco.plot.manhattan2 = async (
     }
 
     if (!to_json) {
-        Plotly.newPlot(div, traces, layout, config)
-        Plotly.newPlot(div2, traces2nd, layout2nd, config2)
+        plco.Plotly.newPlot(div, traces, layout, config)
+        plco.Plotly.newPlot(div2, traces2nd, layout2nd, config2)
 
         // zoom listeners
         div.on('plotly_relayout', eventdata => {
             if (eventdata['yaxis.range[0]'] && eventdata['yaxis.range[1]']) {
                 if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-                    Plotly.relayout(div2, {
+                    plco.Plotly.relayout(div2, {
                         xaxis: { range: [eventdata['xaxis.range[0]'], eventdata['xaxis.range[1]']] },
                         yaxis: {
                             range: [eventdata['yaxis.range[1]'], eventdata['yaxis.range[0]']]
                         },
                     })
                 } else {
-                    Plotly.relayout(div2, {
+                    plco.Plotly.relayout(div2, {
                         yaxis: {
                             range: [eventdata['yaxis.range[1]'], eventdata['yaxis.range[0]']]
                         },
                     })
                 }
             } else if (eventdata['xaxis.autorange'] && eventdata['yaxis.autorange']) {
-                Plotly.relayout(div2, {
+                plco.Plotly.relayout(div2, {
                     xaxis: { autorange: true },
                     yaxis: { range: [maxYInTraces, p_value_nlog_min] },
                 })
             } else {
-                Plotly.relayout(div2, {
+                plco.Plotly.relayout(div2, {
                     ...eventdata,
                 })
             }
@@ -1436,7 +1436,7 @@ plco.plot.qq = async (
     }
 
     if (!to_json) {
-        Plotly.newPlot(div, [traceLine, trace], layout, config)
+        plco.Plotly.newPlot(div, [traceLine, trace], layout, config)
 
         div.on('plotly_click', async (data) => {
             console.log(data) // contains the custom data
@@ -1468,7 +1468,7 @@ plco.plot.qq = async (
                         `<br><button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close</button>`,
                         ['#d3d3d3']
                     )
-                    Plotly.restyle(div, { text: [updatedText] }, [1])
+                    plco.Plotly.restyle(div, { text: [updatedText] }, [1])
                 } catch (e) {
                     console.error(e)
                 }
@@ -1585,7 +1585,7 @@ plco.plot.qq2 = (
             }
 
             if (!to_json) {
-                Plotly.newPlot(div, traces, layout, config)
+                plco.Plotly.newPlot(div, traces, layout, config)
                 div.on('plotly_click', async (data) => {
                     console.log(data) // contains the custom data
 
@@ -1618,7 +1618,7 @@ plco.plot.qq2 = (
                                 colors,
                                 points[i].curveNumber
                             )
-                            Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
+                            plco.Plotly.restyle(div, { text: [updatedText] }, [points[i].curveNumber])
                         } catch (e) {
                             console.error(e)
                         }
@@ -1801,7 +1801,7 @@ plco.plot.pca2 = async (
     const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, 1, 2)
 
     if (!to_json) {
-        Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
+        plco.Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
         plco.plot.helpers.pcaGenerateXYInputs(div_id, arrayOfObjects, layout, config)
         return div
     } else {
@@ -2051,7 +2051,7 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
 
         const traces = await plco.plot.helpers.pcaHelper(arrayOfObjects, 'PLCO_GSA', xVal, yVal)
         const dropdownLayout = await plco.plot.helpers.pcaCreateDropdownLayout(arrayOfObjects, xVal, yVal)
-        Plotly.newPlot(div_id, traces, Object.assign({
+        plco.Plotly.newPlot(div_id, traces, Object.assign({
             ...layout,
             xaxis: { ...layout.xaxis, title: { text: `<b>PC-X ${(xVal || '2')}</b>` } },
             yaxis: { ...layout.yaxis, title: { text: `<b>PC-Y ${(yVal || '2')}</b>` } },
@@ -2071,5 +2071,17 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
 plco()
 
 if (typeof (define) != 'undefined') {
-    define({ proto: plco })
+    // define({ proto: plco })
+    define(['https://cdn.plot.ly/plotly-latest.min.js'], (Plotly) => {
+        plco.Plotly = Plotly
+        return plco
+    })
+} else {
+    // satisfy Plotly dependency already
+    let s = plco.loadScript('https://cdn.plot.ly/plotly-latest.min.js')
+    s.then(async s => {
+        s.onload = () => {
+            plco.Plotly = Plotly
+        }
+    })
 }
