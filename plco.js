@@ -2,7 +2,7 @@
  * @file JS SDK for NCI DCEG's PLCO API. 〜(￣▽￣〜)
  * 
  * @version 0.5
- * @author Jonas Almeida, Lorena Sandoval, Erika Nemeth, Eric Ruan
+ * @author Eric Ruan, Erika Nemeth, Lorena Sandoval, Jonas Almeida
  * @copyright 2021
  */
 console.log('plco.js loaded')
