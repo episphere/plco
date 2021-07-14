@@ -109,33 +109,33 @@ plco.loadScript = async (url, host) => {
     return document.head.appendChild(s)
 }
 
-plco.plotTest = async (
-    chr = 1,
-    div,
-    url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
-        summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true'
-) => {
-    let xx = await (await fetch(url)).json()
-    div = div || document.createElement('div')
-    let dt = xx.data.filter(x => x[4] == chr)
-    trace = {
-        x: dt.map(d => d[5]),
-        y: dt.map(d => d[6]),
-        mode: 'markers',
-        type: 'scatter'
-    }
-    let layout = {
-        title: `Chromosoome ${chr}`,
-        xaxis: {
-            title: 'position'
-        },
-        yaxis: {
-            title: '-log(p)'
-        }
-    }
-    plco.Plotly.newPlot(div, [trace], layout)
-    return div
-}
+// plco.plotTest = async (
+//     chr = 1,
+//     div,
+//     url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
+//         summary?phenotype_id=3080&sex=female&ancestry=east_asian&p_value_nlog_min=2&raw=true'
+// ) => {
+//     let xx = await (await fetch(url)).json()
+//     div = div || document.createElement('div')
+//     let dt = xx.data.filter(x => x[4] == chr)
+//     trace = {
+//         x: dt.map(d => d[5]),
+//         y: dt.map(d => d[6]),
+//         mode: 'markers',
+//         type: 'scatter'
+//     }
+//     let layout = {
+//         title: `Chromosoome ${chr}`,
+//         xaxis: {
+//             title: 'position'
+//         },
+//         yaxis: {
+//             title: '-log(p)'
+//         }
+//     }
+//     plco.Plotly.newPlot(div, [trace], layout)
+//     return div
+// }
 
 // plco.typeCheckAttributes = (obj = {}) => {
 //     const typeKey = {
@@ -381,6 +381,12 @@ plco.explorePhenotypes = async (
     return phenotypes_json
 }
 
+/**
+ * Fetches the result of the `url` from localForage if it exists else calls a HTTP request to the `url` and stores it into
+ * localForage. 
+ * @param {string} url The url will be used as the key when storing its response into IndexedDB.
+ * @returns Url HTTP response.
+ */
 plco.fetch = async (url) => {
     try {
         const value = await plco.localForage.getItem(url)
@@ -1045,14 +1051,16 @@ plco.plot.manhattan = async (
 }
 
 /**
- * 
- * @param {string} div_id 
- * @param {Array} arrayOfObjects 
- * @param {number}  [p_value_nlog_min=2]
+ * Generates a Plotly manhattan plot at the given div element with support for multiple inputs.
+ * @param {string} div_id The id of the div element. If it does not exist, a new div will be created.
+ * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
+ * @param {number}  [p_value_nlog_min=2] A numeric value >= 0 specifying the minimum -log10(p) for variants.
  * @param {number} [chromosome=undefined] _Optional_. Leave it undefined to plot all chromosomes. Else use an integer [1-22].
- * @param {boolean} [to_json=false]
+ * @param {boolean} [to_json=false] _Optional_ If true, returns a stringified JSON object containing traces and layout.
+ * If false, returns a div element containing the Plotly graph.
  * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
  * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
+ * @returns A div element or a string if 'to_json' is true.
  * @example
  * await plco.plot.manhattan2('plot', [{phenotype_id: 3080, ancestry: 'european', sex: 'female'},{phenotype_id: 3080, ancestry: 'east_asian', sex: 'female'}])
  */
