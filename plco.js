@@ -898,7 +898,9 @@ plco.plot.manhattan = async (
     if (numberOfChromosomes == 1) {
         let rsNumbers_allData = await plco.api.variants(
             { p_value_nlog_min, orderBy: 'id', order: 'asc' }, phenotype_id, sex, ancestry, chromosome)
-        rsNumbers_allData.data.map(x => rsNumbers.push({ snp: x.snp }))
+        rsNumbers_allData.data.map(x => rsNumbers.push({
+            snp: x.snp, position_abs: x.position, p_value_nlog: x.p_value_nlog
+        }))
     }
 
     // Set up traces
@@ -912,7 +914,11 @@ plco.plot.manhattan = async (
         } else {
             currentChromosome = i
         }
-        currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        if (numberOfChromosomes == 1) {
+            currentChromosomeData = rsNumbers
+        } else {
+            currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        }
         const traceInfo = {
             x: currentChromosomeData.map(x => parseInt(x.position_abs)),
             y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
@@ -942,7 +948,7 @@ plco.plot.manhattan = async (
             hoverinfo: 'none',
             xaxis: 'x2',
             showlegend: false,
-            name: 'Chromosome ' + currentChromosome,
+            name: 'C. ' + currentChromosome,
         })
     }
 
@@ -1116,9 +1122,13 @@ plco.plot.manhattan2 = async (
         const resultsOfPromises = await Promise.all(promises) // huge bottleneck
         resultsOfPromises.forEach((arr, index) => {
             if (index === 0)
-                arr.data.forEach(x => rsNumbers1.push(x.snp))
+                arr.data.forEach(x => rsNumbers1.push({
+                    snp: x.snp, position_abs: x.position, p_value_nlog: x.p_value_nlog, chromosome: x.chromosome
+                }))
             else
-                arr.data.forEach(x => rsNumbers2.push(x.snp))
+                arr.data.forEach(x => rsNumbers2.push({
+                    snp: x.snp, position_abs: x.position, p_value_nlog: x.p_value_nlog, chromosome: x.chromosome
+                }))
         })
     }
 
@@ -1165,7 +1175,7 @@ plco.plot.manhattan2 = async (
             currentChromosome = i
 
         traces.push({
-            ...createTrace(inputData1, true, currentChromosome),
+            ...createTrace(numberOfChromosomes == 1 ? rsNumbers1 : inputData1, true, currentChromosome),
             marker: {
                 opacity: 0.65,
                 size: 5,
@@ -1173,7 +1183,7 @@ plco.plot.manhattan2 = async (
             },
         })
         traces2nd.push({
-            ...createTrace(inputData2, false, currentChromosome),
+            ...createTrace(numberOfChromosomes == 1 ? rsNumbers2 : inputData2, false, currentChromosome),
             marker: {
                 opacity: 0.65,
                 size: 5,
@@ -1188,9 +1198,9 @@ plco.plot.manhattan2 = async (
         for (let tracesNum = 0; tracesNum <= 1; tracesNum++) {
             for (i = 0; i < traces[tracesNum].hovertemplate.length; i++) {
                 if (tracesNum === 0)
-                    traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers1[i]
+                    traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers1[i].snp
                 else
-                    traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers2[i]
+                    traces[tracesNum].hovertemplate[i] += '<br>snp: ' + rsNumbers2[i].snp
             }
         }
     }
@@ -1252,12 +1262,12 @@ plco.plot.manhattan2 = async (
         for (let i = 0; i <= 22; i++) {
             if (i === 0) {
                 const optblank = document.createElement('option')
-                optblank.value = undefined
+                optblank.value = ''
                 optblank.innerHTML = ' '
                 selector.appendChild(optblank)
 
                 const opt = document.createElement('option')
-                opt.value = undefined
+                opt.value = ''
                 opt.innerHTML = 'All'
                 selector.appendChild(opt)
             } else {
