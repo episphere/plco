@@ -157,12 +157,14 @@ plco.loadScript = async (url, host) => {
  * @param {boolean} [flatten=false] If 'true', returns an array of objects instead of a tree.
  * @param {boolean} [mini=false] If 'true', removes keys from the objects to provide a condensed view.
  * @param {boolean} [graph=false] If 'true', returns a Plotly chart instead of an array of objects.
+ * @param {string} div_id Used when graph is 'true', plots a Plotly chart at that container.
  * @returns An array of objects.
  */
 plco.explorePhenotypes = async (
     flatten = false,
     mini = false,
     graph = false,
+    div_id
 ) => {
     let phenotypes_json = await plco.api.phenotypes()
 
@@ -233,10 +235,12 @@ plco.explorePhenotypes = async (
 
     if (graph) {
         // https://plotly.com/javascript/sunburst-charts/
-        // TODO partipicants endpoint, perhaps like a table
-        const div = document.createElement('div')
-        div.id = 'sunburst'
-        document.body.appendChild(div)
+        let div = document.getElementById(div_id)
+        if (!div) {
+            div = document.createElement('div')
+            div.id = div_id
+            document.body.appendChild(div)
+        }
 
         phenotypes_json = await plco.explorePhenotypes(true, false, false)
 
@@ -338,7 +342,7 @@ plco.explorePhenotypes = async (
                     columnwidth: headerVal.map((_) => 150),
                     header: {
                         values: headerVal,
-                        fill: { color: "grey" },
+                        fill: { color: "#d3d3d3" },
                     }, cells: {
                         values: convertRowMajortoColMajor(
                             cellsVal.length, cellsVal[0].length || 0, cellsVal)
@@ -369,10 +373,14 @@ plco.explorePhenotypes = async (
                         }],
                     }]
                 }
-                const div2 = document.createElement('div')
-                div2.id = 'table' + Math.floor(Math.random() * 20)
-                document.body.appendChild(div2)
 
+                let div2 = document.getElementById(div_id + 'table')
+                if (!div2) {
+                    div2 = document.createElement('div')
+                    div2.id = div_id + 'table'
+                    document.body.appendChild(div2)
+                }
+                div2.innerHTML = ''
                 plco.Plotly.newPlot(div2, trace, layout)
             }
         })
