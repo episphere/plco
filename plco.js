@@ -1898,6 +1898,7 @@ plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber =
     hoverDiv.style =
         `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
         `text-align:center; border: 1px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
+    hoverDiv.className = 'plotHoverDivs'
 
     let closeButton = document.createElement('button')
     closeButton.addEventListener('click', function () { this.parentElement.remove() })
@@ -2094,17 +2095,20 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config) => {
     const xSelector = document.createElement('select')
     xSelector.id = div_id + 'xSelector'
+    xSelector.title = 'pcaSelector'
     const ySelector = document.createElement('select')
     ySelector.id = div_id + 'ySelector'
+    ySelector.title = 'pcaSelector'
 
     const xLabel = document.createElement('label')
     xLabel.for = div_id + 'xSelector'
     xLabel.innerHTML = 'PC_X: '
+    xLabel.id = div_id + 'xLabel'
 
     const yLabel = document.createElement('label')
     yLabel.for = div_id + 'ySelector'
     yLabel.innerHTML = 'PC_Y: '
-
+    yLabel.id = div_id + 'yLabel'
 
     for (let i = 1; i <= 20; i++) {
         const opt = document.createElement('option')
