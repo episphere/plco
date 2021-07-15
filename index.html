@@ -11,7 +11,7 @@
 <body class="divide-y-2 divide-gray-200" onload="plco.explorePhenotypes(false, false, true, 'explorePhenotypes'); ">
     <header class="bg-gradient-to-b from-white">
         <div class="text-2xl flex flex-row items-center justify-start ">
-            <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900" style="font-family: fantasy;">PLCO SDK Explorer</span>
+            <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO SDK Explorer</span>
             <span class="md:text-lg text-sm text-black">
                 [<a href="https://github.com/episphere/plco" target="_blank" class="text-blue-600">code</a>] 
                 [<a href="https://observablehq.com/@ericr491/plco-sdk" target="_blank" class="text-blue-600">notebook</a>] 
@@ -21,13 +21,19 @@
         </div>
         <nav class>
             <ul class="w-full md:flex text-center">
-                <li class="md:m-4 m-2 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';">Explore Phenotypes</a></li>
-                <li class="md:m-4 m-2 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';">Explore Plots</a></li>
-                <li class="md:m-4 m-2 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';">Other</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('homeContainer').style = '';document.getElementById('exploreContainer').style = 'display:none';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';">Home</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';">Explore Phenotypes</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';">Explore Plots</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl p-2 hover:bg-green-300"><a href="#" class onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';">Other</a></li>
             </ul>
         </nav>
     </header>
-    <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='exploreContainer'>
+
+    <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='homeContainer'>
+        <span>Welcome!</span>
+    </div>
+
+    <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='exploreContainer' style="display: none;">
         <span class="text-lg md:text-3xl font-semibold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
         <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
         <div class="flex flex-col items-center md:my-16 my-4 w-auto h-auto" id='explorePhenotypes'></div>
@@ -35,14 +41,45 @@
         <span class="text-lg md:text-3xl font-semibold text-red-900">Check if the phenotype has plotting data available.</span>
         <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
     </div>
+
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='plotContainer' style="display: none;">
-        <span class="text-lg md:text-3xl font-semibold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
-        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
+        <datalist id='sexValues'>
+            <option value='all'>
+            <option value='female'>
+            <option value='male'>
+        </datalist>
+        <datalist id='ancestryValues'>
+            <option value='african_american'>
+            <option value='east_asian'>
+            <option value='european'>
+        </datalist>
+        <form onsubmit="alert('hello');return false;">
+            <span class="text-lg md:text-3xl font-semibold text-red-900">Construct your stratifications for the plots.</span>
+            <textarea id="textarea1" readonly="true" class="block border border-black w-full my-4 text-sm">[ ]</textarea>
+
+            <label for='enterPhenotype' class="block text-lg">Enter Phenotype ID:</label> 
+            <input type="number" id='enterPhenotype' class="block border border-black w-auto">
+
+            <label for='enterSex' class="block text-lg">Enter Sex:</label> 
+            <input list="sexValues" type="text" id='enterSex' class="block border border-black w-auto" pattern="all|female|male">
+
+            <label for='enterAncestry' class="block text-lg">Enter Ancestry:</label> 
+            <input list="ancestryValues" type="text" id='enterAncestry' class="block border border-black w-auto" pattern="african_american|east_asian|european">
+
+            <button class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4" onclick="let content = JSON.parse(document.getElementById('textarea1').value); let id = Number.parseInt(document.getElementById('enterPhenotype').value);let sex = (document.getElementById('enterSex').value);let ancestry = (document.getElementById('enterAncestry').value); content.push({phenotype_id: id, sex, ancestry}); document.getElementById('textarea1').value = JSON.stringify(content); return false;">Add</button>
+            <button type="reset" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4">Reset</button>
+            <button type="submit" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4">Submit</button>
+        </form>
+        <div id="subplotsContainer">
+
+        </div>
     </div>
+
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='otherContainer' style="display: none;">
-        <span class="text-lg md:text-3xl font-semibold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
+        <span class="text-lg md:text-3xl font-semi bold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
         <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
     </div>
+
     <footer class="max-w-8xl p-6 mx-10 ">
         <span >
             Credits:
