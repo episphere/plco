@@ -115,16 +115,16 @@
                 } else if (arr.length == 1) {
                     const {phenotype_id, sex, ancestry} = arr[0]
                     Promise.all([
-                        plco.plot.manhattan('manhattan', phenotype_id, sex, ancestry, 2, undefined, false, {}, {responsive: true}).catch(e => {tabsMessages[0].innerHTML = e.message;}),
-                        plco.plot.qq('qq', phenotype_id, sex, ancestry, false, {}, {responsive: true}).catch(e => {tabsMessages[1].innerHTML = e.message;}), 
-                        plco.plot.pca('pca', phenotype_id, sex, ancestry, false, {}, {responsive: true}).catch(e => {tabsMessages[2].innerHTML = e.message;})
+                        plco.plot.manhattan('manhattan', phenotype_id, sex, ancestry, 2, undefined, false, {}, {}).catch(e => {tabsMessages[0].innerHTML = e.message;}),
+                        plco.plot.qq('qq', phenotype_id, sex, ancestry, false, {legend: {orientation: 'v', x: 0.0, y: 1.2}}, {}).catch(e => {tabsMessages[1].innerHTML = e.message;}), 
+                        plco.plot.pca('pca', phenotype_id, sex, ancestry, false, {}, {}).catch(e => {tabsMessages[2].innerHTML = e.message;})
                     ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
                 } else {
                     Promise.all([
-                        plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {responsive: true}).catch(e => tabsMessages[0].innerHTML = e.message),
-                        plco.plot.qq2('qq', arr, false, {}, {responsive: true}).catch(e => tabsMessages[1].innerHTML = e.message),
-                        plco.plot.pca2('pca', arr, false, {}, {responsive: true}).catch(e => tabsMessages[2].innerHTML = e.message),
+                        plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {}).catch(e => tabsMessages[0].innerHTML = e.message),
+                        plco.plot.qq2('qq', arr, false, {legend: {orientation: 'v', x: 0.0, y: 1.2}}, {}).catch(e => tabsMessages[1].innerHTML = e.message),
+                        plco.plot.pca2('pca', arr, false, {}, {}).catch(e => tabsMessages[2].innerHTML = e.message),
                     ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
                 }
@@ -141,17 +141,17 @@
             <textarea id="textarea1" readonly="true" class="block border border-black w-full my-4 text-sm">[ ]</textarea>
 
             <label for='enterPhenotype' class="block text-lg">Enter Phenotype ID: <sup class="text-red-600">*</sup></label> 
-            <input type="number" id='enterPhenotype' class="block border border-black md:w-1/4 w-full mb-2">
+            <input type="number" id='enterPhenotype' class="focus:ring-2 focus:ring-blue-600 focus:outline-none block border border-black md:w-1/4 w-full mb-2">
 
             <label for='enterSex' class="block text-lg">Enter Sex: <sup class="text-red-600">*</sup></label> 
-            <input list="sexValues" type="text" id='enterSex' class="block border border-black md:w-1/4 w-full mb-2">
+            <input list="sexValues" type="text" id='enterSex' class="focus:ring-2 focus:ring-blue-600 focus:outline-none block border border-black md:w-1/4 w-full mb-2">
 
             <label for='enterAncestry' class="block text-lg">Enter Ancestry: <sup class="text-red-600">*</sup></label> 
-            <input list="ancestryValues" type="text" id='enterAncestry' class="block border border-black md:w-1/4 w-full mb-2">
+            <input list="ancestryValues" type="text" id='enterAncestry' class="focus:ring-2 focus:ring-blue-600 focus:outline-none block border border-black md:w-1/4 w-full mb-2">
 
-            <button class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4" onclick="let content = JSON.parse(document.getElementById('textarea1').value); let id = Number.parseInt(document.getElementById('enterPhenotype').value);let sex = (document.getElementById('enterSex').value);let ancestry = (document.getElementById('enterAncestry').value); content.push({phenotype_id: id, sex, ancestry}); document.getElementById('textarea1').value = JSON.stringify(content); return false;">Add</button>
-            <button type="reset" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4">Reset</button>
-            <button type="submit" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4">Submit</button>
+            <button class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-blue-400" onclick="let content = JSON.parse(document.getElementById('textarea1').value); let id = Number.parseInt(document.getElementById('enterPhenotype').value);let sex = (document.getElementById('enterSex').value);let ancestry = (document.getElementById('enterAncestry').value); content.push({phenotype_id: id, sex, ancestry}); document.getElementById('textarea1').value = JSON.stringify(content); return false;">Add</button>
+            <button type="reset" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-red-400">Reset</button>
+            <button type="submit" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-green-400">Submit</button>
         </form>
         <div class="mt-20 mb-10 subplotsContainer flex flex-wrap max-w-8xl justify-evenly items-stretch">
             <input type="radio" class="tabsRadio hidden" name="plot" id="manhattanPlot" checked>
