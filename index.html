@@ -13,7 +13,7 @@
         }
 
         .tabsRadio:checked+.tabsLabel+.tabsContent  {
-            display: initial;
+            display: flex;
         }
 
         .plotHoverDivs {
@@ -39,17 +39,32 @@
             100% { transform: rotate(360deg); }
         }
 
-        
+        a {
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: 500ms;
+        }
+
+        a:hover {
+            text-decoration-color: inherit;
+        }
+
+        select {
+            border: 2px solid black;
+        }
+
     </style>
     <title>PLCO SDK Explorer</title>
 </head>
 
 <body class="divide-y-2 divide-gray-200" onload="plco.explorePhenotypes(false, false, true, 'explorePhenotypes');">
     <header class="bg-gradient-to-b from-white">
-        <div class="text-2xl flex flex-row items-center justify-start ">
+        <div class="text-2xl flex flex-row items-center justify-start flex-wrap">
             <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO SDK Explorer</span>
+            <sup class="font-semibold md:text-lg text-sm pr-2 text-green-600"><a href="https://dceg.cancer.gov/" target="_blank">DCEG</a></sup>
             <span class="md:text-lg text-sm text-black">
                 [<a href="https://github.com/episphere/plco" target="_blank" class="text-blue-600">code</a>] 
+                [<a href="https://episphere.github.io/plco/docs" target="_blank" class="text-blue-600">docs</a>] 
                 [<a href="https://observablehq.com/@ericr491/plco-sdk" target="_blank" class="text-blue-600">notebook</a>] 
                 [<a href="https://gitter.im/episphere/plco" target="_blank" class="text-blue-600">gitter</a>]
                 [<a href="https://dceg.cancer.gov/research/who-we-study/cohorts/prostate-lung-colon-ovary-prospective-study" target="_blank" class="text-blue-600">about</a>]
@@ -66,12 +81,12 @@
     </header>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='homeContainer'>
-        <span>Welcome!</span>
+        <span>Welcome! 🤗</span>
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='exploreContainer' style="display: none;">
         <span class="text-lg md:text-3xl font-semibold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
-        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
+        <span>Tip: Alt + LClick on a slice to display a table showing breakdown by sex and ancestry.</span>
         <div class="flex flex-col items-center md:my-16 my-4 w-auto h-auto" id='explorePhenotypes'></div>
         <div class="flex flex-col items-center w-auto h-auto" id='explorePhenotypestable'></div>
         <span class="text-lg md:text-3xl font-semibold text-red-900">Check if the phenotype has plotting data available.</span>
@@ -99,7 +114,18 @@
                     throw new SyntaxError('No inputs were given');
                 } else if (arr.length == 1) {
                     const {phenotype_id, sex, ancestry} = arr[0]
-                    Promise.all([plco.plot.manhattan('manhattan', phenotype_id, sex, ancestry, 2).catch(e => {tabsMessages[0].innerHTML = e.message;}), plco.plot.qq('qq', phenotype_id, sex, ancestry).catch(e => {tabsMessages[1].innerHTML = e.message;}), plco.plot.pca('pca', phenotype_id, sex, ancestry).catch(e => {tabsMessages[2].innerHTML = e.message;})])
+                    Promise.all([
+                        plco.plot.manhattan('manhattan', phenotype_id, sex, ancestry, 2, undefined, false, {}, {responsive: true}).catch(e => {tabsMessages[0].innerHTML = e.message;}),
+                        plco.plot.qq('qq', phenotype_id, sex, ancestry, false, {}, {responsive: true}).catch(e => {tabsMessages[1].innerHTML = e.message;}), 
+                        plco.plot.pca('pca', phenotype_id, sex, ancestry, false, {}, {responsive: true}).catch(e => {tabsMessages[2].innerHTML = e.message;})
+                    ])
+                        .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
+                } else {
+                    Promise.all([
+                        plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {responsive: true}).catch(e => tabsMessages[0].innerHTML = e.message),
+                        plco.plot.qq2('qq', arr, false, {}, {responsive: true}).catch(e => tabsMessages[1].innerHTML = e.message),
+                        plco.plot.pca2('pca', arr, false, {}, {responsive: true}).catch(e => tabsMessages[2].innerHTML = e.message),
+                    ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
                 }
             } catch(e){
@@ -110,17 +136,18 @@
             finally {
                 return false;
             }">
-            <span class="text-lg md:text-3xl font-semibold text-red-900">Construct your stratifications for the plots.</span>
+            <span class="text-lg md:text-3xl font-semibold text-red-900 block">Construct your stratifications for the plots.</span>
+            <span>The first textarea contains a collection of <b>phenotype id</b>, <b>sex</b>, and <b>ancestry</b> inputs to be plotted. It is initally empty, and you may add more inputs by filling out the input boxes as needed, and pressing the <b>Add</b> button. Finally, press <b>Submit</b> to see your plots! Do note that manhattan plot only supports 1 or 2 inputs, while qq and pca plot supports more than 2 inputs.</span>
             <textarea id="textarea1" readonly="true" class="block border border-black w-full my-4 text-sm">[ ]</textarea>
 
-            <label for='enterPhenotype' class="block text-lg">Enter Phenotype ID:</label> 
-            <input type="number" id='enterPhenotype' class="block border border-black md:w-1/4 w-full">
+            <label for='enterPhenotype' class="block text-lg">Enter Phenotype ID: <sup class="text-red-600">*</sup></label> 
+            <input type="number" id='enterPhenotype' class="block border border-black md:w-1/4 w-full mb-2">
 
-            <label for='enterSex' class="block text-lg">Enter Sex:</label> 
-            <input list="sexValues" type="text" id='enterSex' class="block border border-black md:w-1/4 w-full" pattern="all|female|male">
+            <label for='enterSex' class="block text-lg">Enter Sex: <sup class="text-red-600">*</sup></label> 
+            <input list="sexValues" type="text" id='enterSex' class="block border border-black md:w-1/4 w-full mb-2">
 
-            <label for='enterAncestry' class="block text-lg">Enter Ancestry:</label> 
-            <input list="ancestryValues" type="text" id='enterAncestry' class="block border border-black md:w-1/4 w-full" pattern="african_american|east_asian|european">
+            <label for='enterAncestry' class="block text-lg">Enter Ancestry: <sup class="text-red-600">*</sup></label> 
+            <input list="ancestryValues" type="text" id='enterAncestry' class="block border border-black md:w-1/4 w-full mb-2">
 
             <button class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4" onclick="let content = JSON.parse(document.getElementById('textarea1').value); let id = Number.parseInt(document.getElementById('enterPhenotype').value);let sex = (document.getElementById('enterSex').value);let ancestry = (document.getElementById('enterAncestry').value); content.push({phenotype_id: id, sex, ancestry}); document.getElementById('textarea1').value = JSON.stringify(content); return false;">Add</button>
             <button type="reset" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4">Reset</button>
@@ -129,7 +156,7 @@
         <div class="mt-20 mb-10 subplotsContainer flex flex-wrap max-w-8xl justify-evenly items-stretch">
             <input type="radio" class="tabsRadio hidden" name="plot" id="manhattanPlot" checked>
             <label for="manhattanPlot" class="tabsLabel text-xl cursor-pointer p-5 bg-gray-100 flex-grow text-center rounded-tl-xl">Manhattan Plot</label>
-            <div id="manhattan" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden">
+            <div id="manhattan" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden flex-col items-center">
                 <span class="tabsMessage">
                     Waiting...
                 </span>
@@ -137,7 +164,7 @@
 
             <input type="radio" class="tabsRadio hidden" name="plot" id="qqPlot">
             <label for="qqPlot" class="tabsLabel text-xl cursor-pointer p-5 bg-gray-100 flex-grow text-center">QQ Plot</label>
-            <div id="qq" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden">
+            <div id="qq" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden flex-col items-center">
                 <span class="tabsMessage">
                     Waiting...
                 </span>
@@ -145,12 +172,11 @@
 
             <input type="radio" class="tabsRadio hidden" name="plot" id="pcaPlot">
             <label for="pcaPlot" class="tabsLabel text-xl cursor-pointer p-5 bg-gray-100 flex-grow text-center rounded-tr-xl">PCA Plot</label>
-            <div id="pca" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden">
+            <div id="pca" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden flex-col items-center">
                 <span class="tabsMessage">
                     Waiting...
                 </span>
             </div>
-
         </div>
     </div>
 
@@ -160,8 +186,16 @@
     </div>
 
     <footer class="max-w-8xl p-6 mx-10 ">
-        <span >
-            Credits:
+        <span class="text-xs text-gray-400 select-none">
+            <span class="block">
+                Credits: Eric Ruan, Erika Nemeth, Lorena Sandoval, Jonas Almeida
+            </span>
+            <span class="block">
+                Acknowledgments: Kevin Jiang, Brian Park, Kai-Ling Chen for building the PLCO API and plots for which this is based on
+            </span>
+            <span class="block">
+                Libraries: Plotly.js, localforage, tailwindcss
+            </span>
         </span>
     </footer>
 </body>

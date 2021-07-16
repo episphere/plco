@@ -1253,9 +1253,15 @@ plco.plot.manhattan2 = async (
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, layout, config)
 
-        const selector = document.createElement('select')
+        let selector = document.getElementById(div_id + 'selector')
+        if (selector) selector.remove()
+        selector = document.createElement('select')
         selector.id = div_id + 'selector'
-        const label = document.createElement('label')
+
+
+        let label = document.getElementById(div_id + 'label')
+        if (label) label.remove()
+        label = document.createElement('label')
         label.for = div_id + 'selector'
         label.id = div_id + 'label'
         label.innerHTML = 'View a single chromosome'
@@ -2093,19 +2099,38 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 }
 
 plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config) => {
-    const xSelector = document.createElement('select')
+
+
+    let xSelector = document.getElementById(div_id + 'xSelector')
+    if (xSelector) {
+        xSelector.remove()
+    }
+    xSelector = document.createElement('select')
     xSelector.id = div_id + 'xSelector'
     xSelector.title = 'pcaSelector'
-    const ySelector = document.createElement('select')
+
+    let ySelector = document.getElementById(div_id + 'ySelector')
+    if (ySelector) {
+        ySelector.remove()
+    }
+    ySelector = document.createElement('select')
     ySelector.id = div_id + 'ySelector'
     ySelector.title = 'pcaSelector'
 
-    const xLabel = document.createElement('label')
+    let xLabel = document.getElementById(div_id + 'xLabel')
+    if (xLabel) {
+        xLabel.remove()
+    }
+    xLabel = document.createElement('label')
     xLabel.for = div_id + 'xSelector'
     xLabel.innerHTML = 'PC_X: '
     xLabel.id = div_id + 'xLabel'
 
-    const yLabel = document.createElement('label')
+    let yLabel = document.getElementById(div_id + 'yLabel')
+    if (yLabel) {
+        yLabel.remove()
+    }
+    yLabel = document.createElement('label')
     yLabel.for = div_id + 'ySelector'
     yLabel.innerHTML = 'PC_Y: '
     yLabel.id = div_id + 'yLabel'
