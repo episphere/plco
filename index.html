@@ -53,11 +53,23 @@
             border: 2px solid black;
         }
 
+        #resultsCheckbox:checked~#labelDown{
+            display: none;
+        }
+
+        #resultsCheckbox:checked~#labelUp{
+            display: inline-block;
+        }
+
+        #resultsCheckbox:checked~#fullResults{
+            display: inline-block;
+        }
+
     </style>
     <title>PLCO SDK Explorer</title>
 </head>
 
-<body class="divide-y-2 divide-gray-200" onload="plco.explorePhenotypes(false, false, true, 'explorePhenotypes');">
+<body class="divide-y-2 divide-gray-200" onload="plco.explorePhenotypes(false, false, true, 'explorePhenotypes', {width: undefined}, {responsive: true});">
     <header class="bg-gradient-to-b from-white">
         <div class="text-2xl flex flex-row items-center justify-start flex-wrap">
             <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO SDK Explorer</span>
@@ -84,13 +96,38 @@
         <span>Welcome! 🤗</span>
     </div>
 
-    <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='exploreContainer' style="display: none;">
+    <div class="bg-white flex flex-col max-w-8xl p-6 pb-12 mx-10" id='exploreContainer' style="display: none;">
         <span class="text-lg md:text-3xl font-semibold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
         <span>Tip: Alt + LClick on a slice to display a table showing breakdown by sex and ancestry.</span>
         <div class="flex flex-col items-center md:my-16 my-4 w-auto h-auto" id='explorePhenotypes'></div>
         <div class="flex flex-col items-center w-auto h-auto" id='explorePhenotypestable'></div>
         <span class="text-lg md:text-3xl font-semibold text-red-900">Check if the phenotype has plotting data available.</span>
-        <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
+        <form onsubmit="
+            plco.api.get('metadata', {chromosome: 'all', phenotype_id: Number.parseInt(document.getElementById('checkPhenotypeMetadata').value)})
+                .then(data => document.getElementById('fullResults').innerText = JSON.stringify(data, null, 4))
+            return false;
+        ">
+            <label for="checkPhenotypeMetadata">Enter Phenotype ID: </label>
+            <input type="number" id="checkPhenotypeMetadata" required class="focus:ring-2 focus:ring-blue-600 focus:outline-none block border border-black md:w-1/4 w-full mb-2">
+            <button type="submit" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-green-400">Submit</button>
+        </form>
+        <div id="results" class="w-full relative">
+            <span class="right-1/2 top-0 absolute inline-block p-2 text-lg">Results</span>
+            <input type="checkbox" id="resultsCheckbox" class="hidden">
+            <label for="resultsCheckbox" id="labelDown" class="inline-block absolute top-0 right-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </label>
+            <label for="resultsCheckbox" id="labelUp" class="hidden absolute top-0 right-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                </svg>
+            </label>
+            <span id="fullResults" class="hidden m-8 mb-0 md:break-normal break-all">
+                
+            </span>
+        </div>
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='plotContainer' style="display: none;">
@@ -116,14 +153,14 @@
                     const {phenotype_id, sex, ancestry} = arr[0]
                     Promise.all([
                         plco.plot.manhattan('manhattan', phenotype_id, sex, ancestry, 2, undefined, false, {}, {}).catch(e => {tabsMessages[0].innerHTML = e.message;}),
-                        plco.plot.qq('qq', phenotype_id, sex, ancestry, false, {legend: {orientation: 'v', x: 0.0, y: 1.2}}, {}).catch(e => {tabsMessages[1].innerHTML = e.message;}), 
+                        plco.plot.qq('qq', phenotype_id, sex, ancestry, false, {legend: {orientation: 'v', x: 0.0, y: 1.2}, width: undefined}, {responsive: true}).catch(e => {tabsMessages[1].innerHTML = e.message;}), 
                         plco.plot.pca('pca', phenotype_id, sex, ancestry, false, {}, {}).catch(e => {tabsMessages[2].innerHTML = e.message;})
                     ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
                 } else {
                     Promise.all([
                         plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {}).catch(e => tabsMessages[0].innerHTML = e.message),
-                        plco.plot.qq2('qq', arr, false, {legend: {orientation: 'v', x: 0.0, y: 1.2}}, {}).catch(e => tabsMessages[1].innerHTML = e.message),
+                        plco.plot.qq2('qq', arr, false, {legend: {orientation: 'v', x: 0.0, y: 1.2}, width: undefined}, {responsive: true}).catch(e => tabsMessages[1].innerHTML = e.message),
                         plco.plot.pca2('pca', arr, false, {}, {}).catch(e => tabsMessages[2].innerHTML = e.message),
                     ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})

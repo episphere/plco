@@ -158,13 +158,17 @@ plco.loadScript = async (url, host) => {
  * @param {boolean} [mini=false] If 'true', removes keys from the objects to provide a condensed view.
  * @param {boolean} [graph=false] If 'true', returns a Plotly chart instead of an array of objects.
  * @param {string} div_id Used when graph is 'true', plots a Plotly chart at that container.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns An array of objects.
  */
 plco.explorePhenotypes = async (
     flatten = false,
     mini = false,
     graph = false,
-    div_id
+    div_id,
+    customLayout = {},
+    customConfig = {},
 ) => {
     let phenotypes_json = await plco.api.phenotypes()
 
@@ -264,9 +268,10 @@ plco.explorePhenotypes = async (
             width: 800,
             height: 800,
             sunburstcolorway: phenotypes_json.map(phenotype => phenotype.color).filter(Boolean),
+            ...customLayout,
         }
 
-        plco.Plotly.newPlot(div, data, layout)
+        plco.Plotly.newPlot(div, data, layout, customConfig)
         div.on('plotly_click', async ({ event, points }) => {
             if (event.altKey) {
                 const part = await plco.api.participants({}, points[0].id, 'value,ancestry,sex', 0)
