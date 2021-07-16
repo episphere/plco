@@ -137,33 +137,33 @@ plco.loadScript = async (url, host) => {
     return document.head.appendChild(s)
 }
 
-plco.plotTest = async (
-    chr = 1,
-    div,
-    url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
-        summary?phenotype_id=3080&amp;sex=female&amp;ancestry=east_asian&amp;p_value_nlog_min=2&amp;raw=true'
-) => {
-    let xx = await (await fetch(url)).json()
-    div = div || document.createElement('div')
-    let dt = xx.data.filter(x => x[4] == chr)
-    trace = {
-        x: dt.map(d => d[5]),
-        y: dt.map(d => d[6]),
-        mode: 'markers',
-        type: 'scatter'
-    }
-    let layout = {
-        title: `Chromosoome ${chr}`,
-        xaxis: {
-            title: 'position'
-        },
-        yaxis: {
-            title: '-log(p)'
-        }
-    }
-    plco.Plotly.newPlot(div, [trace], layout)
-    return div
-}
+// plco.plotTest = async (
+//     chr = 1,
+//     div,
+//     url = 'https://exploregwas-dev.cancer.gov/plco-atlas/api/\
+//         summary?phenotype_id=3080&amp;sex=female&amp;ancestry=east_asian&amp;p_value_nlog_min=2&amp;raw=true'
+// ) => {
+//     let xx = await (await fetch(url)).json()
+//     div = div || document.createElement('div')
+//     let dt = xx.data.filter(x => x[4] == chr)
+//     trace = {
+//         x: dt.map(d => d[5]),
+//         y: dt.map(d => d[6]),
+//         mode: 'markers',
+//         type: 'scatter'
+//     }
+//     let layout = {
+//         title: `Chromosoome ${chr}`,
+//         xaxis: {
+//             title: 'position'
+//         },
+//         yaxis: {
+//             title: '-log(p)'
+//         }
+//     }
+//     plco.Plotly.newPlot(div, [trace], layout)
+//     return div
+// }
 
 // plco.typeCheckAttributes = (obj = {}) => {
 //     const typeKey = {
@@ -185,12 +185,18 @@ plco.plotTest = async (
  * @param {boolean} [flatten=false] If 'true', returns an array of objects instead of a tree.
  * @param {boolean} [mini=false] If 'true', removes keys from the objects to provide a condensed view.
  * @param {boolean} [graph=false] If 'true', returns a Plotly chart instead of an array of objects.
+ * @param {string} div_id Used when graph is 'true', plots a Plotly chart at that container.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
  * @returns An array of objects.
  */
 plco.explorePhenotypes = async (
     flatten = false,
     mini = false,
     graph = false,
+    div_id,
+    customLayout = {},
+    customConfig = {},
 ) => {
     let phenotypes_json = await plco.api.phenotypes()
 
@@ -261,10 +267,12 @@ plco.explorePhenotypes = async (
 
     if (graph) {
         // https://plotly.com/javascript/sunburst-charts/
-        // TODO partipicants endpoint, perhaps like a table
-        const div = document.createElement('div')
-        div.id = 'sunburst'
-        document.body.appendChild(div)
+        let div = document.getElementById(div_id)
+        if (!div) {
+            div = document.createElement('div')
+            div.id = div_id
+            document.body.appendChild(div)
+        }
 
         phenotypes_json = await plco.explorePhenotypes(true, false, false)
 
@@ -288,9 +296,10 @@ plco.explorePhenotypes = async (
             width: 800,
             height: 800,
             sunburstcolorway: phenotypes_json.map(phenotype => phenotype.color).filter(Boolean),
+            ...customLayout,
         }
 
-        plco.Plotly.newPlot(div, data, layout)
+        plco.Plotly.newPlot(div, data, layout, customConfig)
         div.on('plotly_click', async ({ event, points }) => {
             if (event.altKey) {
                 const part = await plco.api.participants({}, points[0].id, 'value,ancestry,sex', 0)
@@ -366,7 +375,7 @@ plco.explorePhenotypes = async (
                     columnwidth: headerVal.map((_) => 150),
                     header: {
                         values: headerVal,
-                        fill: { color: "grey" },
+                        fill: { color: "#d3d3d3" },
                     }, cells: {
                         values: convertRowMajortoColMajor(
                             cellsVal.length, cellsVal[0].length || 0, cellsVal)
@@ -397,16 +406,48 @@ plco.explorePhenotypes = async (
                         }],
                     }]
                 }
-                const div2 = document.createElement('div')
-                div2.id = 'table' + Math.floor(Math.random() * 20)
-                document.body.appendChild(div2)
 
+                let div2 = document.getElementById(div_id + 'table')
+                if (!div2) {
+                    div2 = document.createElement('div')
+                    div2.id = div_id + 'table'
+                    document.body.appendChild(div2)
+                }
+                div2.innerHTML = ''
                 plco.Plotly.newPlot(div2, trace, layout)
             }
         })
         return phenotypes_json
     }
     return phenotypes_json
+}
+
+/**
+ * Fetches the result of the `url` from localForage if it exists else calls a HTTP request to the `url` and stores it into
+ * localForage. 
+ * @param {string} url The url will be used as the key when storing its response into IndexedDB.
+ * @returns Url HTTP response.
+ */
+plco.fetch = async (url) => {
+    try {
+        const value = await plco.localForage.getItem(url)
+        if (!value || (value &amp;&amp; !value.data)) {
+            const apiResult = await (await fetch(url)).json()
+            plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
+            return apiResult
+        } else if (value &amp;&amp; value.date) {
+            if (Math.floor(new Date().getTime() / 1000.0) - value.date > 604800) {
+                const apiResult = await (await fetch(url)).json()
+                plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
+                return apiResult
+            } else {
+                return value.data
+            }
+        }
+        return value.data
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 /**
@@ -453,7 +494,7 @@ plco.api.get = async (cmd = "ping", parms = {}) => {
             return await new Promise((resolve) => resolve({}))
         }
     } else {
-        return (await fetch(plco.api.url + cmd + '?' + plco.api.parms2string(parms))).json()
+        return await plco.fetch(plco.api.url + cmd + '?' + plco.api.parms2string(parms))
     }
 }
 
@@ -898,7 +939,9 @@ plco.plot.manhattan = async (
     if (numberOfChromosomes == 1) {
         let rsNumbers_allData = await plco.api.variants(
             { p_value_nlog_min, orderBy: 'id', order: 'asc' }, phenotype_id, sex, ancestry, chromosome)
-        rsNumbers_allData.data.map(x => rsNumbers.push({ snp: x.snp }))
+        rsNumbers_allData.data.map(x => rsNumbers.push({
+            snp: x.snp, position_abs: x.position, p_value_nlog: x.p_value_nlog
+        }))
     }
 
     // Set up traces
@@ -912,7 +955,11 @@ plco.plot.manhattan = async (
         } else {
             currentChromosome = i
         }
-        currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        if (numberOfChromosomes == 1) {
+            currentChromosomeData = rsNumbers
+        } else {
+            currentChromosomeData = inputData.filter(x => x.chromosome == "" + currentChromosome)
+        }
         const traceInfo = {
             x: currentChromosomeData.map(x => parseInt(x.position_abs)),
             y: currentChromosomeData.map(x => parseFloat(x.p_value_nlog)),
@@ -942,7 +989,7 @@ plco.plot.manhattan = async (
             hoverinfo: 'none',
             xaxis: 'x2',
             showlegend: false,
-            name: 'Chromosome ' + currentChromosome,
+            name: 'C. ' + currentChromosome,
         })
     }
 
@@ -1035,8 +1082,8 @@ plco.plot.manhattan = async (
                 plco.plot.helpers.qqplotHoverTooltip(
                     div,
                     div_id,
-                    eventdata.points[0].hovertemplate + '&lt;br>Info:&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '&lt;/a>' +
-                    `&lt;br>&lt;button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close&lt;/button>`,
+                    eventdata.points[0].hovertemplate + '&lt;br>Info:&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' +
+                    resSnp + '">' + resSnp + '&lt;/a>',
                     ['#9BC4DE']
                 )
             })
@@ -1051,14 +1098,16 @@ plco.plot.manhattan = async (
 }
 
 /**
- * 
- * @param {string} div_id 
- * @param {Array} arrayOfObjects 
- * @param {number}  [p_value_nlog_min=2]
+ * Generates a Plotly manhattan plot at the given div element with support for multiple inputs.
+ * @param {string} div_id The id of the div element. If it does not exist, a new div will be created.
+ * @param {Array} arrayOfObjects Accepts an array of objects containing the following keys: phenotype_id, sex, ancestry.
+ * @param {number}  [p_value_nlog_min=2] A numeric value >= 0 specifying the minimum -log10(p) for variants.
  * @param {number} [chromosome=undefined] _Optional_. Leave it undefined to plot all chromosomes. Else use an integer [1-22].
- * @param {boolean} [to_json=false]
+ * @param {boolean} [to_json=false] _Optional_ If true, returns a stringified JSON object containing traces and layout.
+ * If false, returns a div element containing the Plotly graph.
  * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
  * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
+ * @returns A div element or a string if 'to_json' is true.
  * @example
  * await plco.plot.manhattan2('plot', [{phenotype_id: 3080, ancestry: 'european', sex: 'female'},{phenotype_id: 3080, ancestry: 'east_asian', sex: 'female'}])
  */
@@ -1071,7 +1120,7 @@ plco.plot.manhattan2 = async (
     customLayout = {},
     customConfig = {},
 ) => {
-    // TODO https://plotly.com/javascript/subplots/
+    // TODO fixed the snp mapping in manhattan and manhattan2
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
 
     if (validObjects.length &lt; 2) throw new Error('Incorrect number of arguments.')
@@ -1114,9 +1163,13 @@ plco.plot.manhattan2 = async (
         const resultsOfPromises = await Promise.all(promises) // huge bottleneck
         resultsOfPromises.forEach((arr, index) => {
             if (index === 0)
-                arr.data.forEach(x => rsNumbers1.push(x.snp))
+                arr.data.forEach(x => rsNumbers1.push({
+                    snp: x.snp, position_abs: x.position, p_value_nlog: x.p_value_nlog, chromosome: x.chromosome
+                }))
             else
-                arr.data.forEach(x => rsNumbers2.push(x.snp))
+                arr.data.forEach(x => rsNumbers2.push({
+                    snp: x.snp, position_abs: x.position, p_value_nlog: x.p_value_nlog, chromosome: x.chromosome
+                }))
         })
     }
 
@@ -1163,7 +1216,7 @@ plco.plot.manhattan2 = async (
             currentChromosome = i
 
         traces.push({
-            ...createTrace(inputData1, true, currentChromosome),
+            ...createTrace(numberOfChromosomes == 1 ? rsNumbers1 : inputData1, true, currentChromosome),
             marker: {
                 opacity: 0.65,
                 size: 5,
@@ -1171,7 +1224,7 @@ plco.plot.manhattan2 = async (
             },
         })
         traces2nd.push({
-            ...createTrace(inputData2, false, currentChromosome),
+            ...createTrace(numberOfChromosomes == 1 ? rsNumbers2 : inputData2, false, currentChromosome),
             marker: {
                 opacity: 0.65,
                 size: 5,
@@ -1186,9 +1239,9 @@ plco.plot.manhattan2 = async (
         for (let tracesNum = 0; tracesNum &lt;= 1; tracesNum++) {
             for (i = 0; i &lt; traces[tracesNum].hovertemplate.length; i++) {
                 if (tracesNum === 0)
-                    traces[tracesNum].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers1[i]
+                    traces[tracesNum].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers1[i].snp
                 else
-                    traces[tracesNum].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers2[i]
+                    traces[tracesNum].hovertemplate[i] += '&lt;br>snp: ' + rsNumbers2[i].snp
             }
         }
     }
@@ -1233,9 +1286,15 @@ plco.plot.manhattan2 = async (
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, layout, config)
 
-        const selector = document.createElement('select')
+        let selector = document.getElementById(div_id + 'selector')
+        if (selector) selector.remove()
+        selector = document.createElement('select')
         selector.id = div_id + 'selector'
-        const label = document.createElement('label')
+
+
+        let label = document.getElementById(div_id + 'label')
+        if (label) label.remove()
+        label = document.createElement('label')
         label.for = div_id + 'selector'
         label.id = div_id + 'label'
         label.innerHTML = 'View a single chromosome'
@@ -1250,12 +1309,12 @@ plco.plot.manhattan2 = async (
         for (let i = 0; i &lt;= 22; i++) {
             if (i === 0) {
                 const optblank = document.createElement('option')
-                optblank.value = undefined
+                optblank.value = ''
                 optblank.innerHTML = ' '
                 selector.appendChild(optblank)
 
                 const opt = document.createElement('option')
-                opt.value = undefined
+                opt.value = ''
                 opt.innerHTML = 'All'
                 selector.appendChild(opt)
             } else {
@@ -1267,6 +1326,19 @@ plco.plot.manhattan2 = async (
         }
         div.appendChild(selector)
         div.appendChild(label)
+
+        if (numberOfChromosomes === 1) {
+            div.on('plotly_click', eventdata => {
+                let resSnp = eventdata.points[0].hovertemplate.split(' ')[4]
+                plco.plot.helpers.qqplotHoverTooltip(
+                    div,
+                    div_id,
+                    eventdata.points[0].hovertemplate +
+                    '&lt;br>Info:&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '&lt;/a>',
+                    [eventdata.points[0].data.marker.color]
+                )
+            })
+        }
 
         return div
     } else {
@@ -1490,8 +1562,8 @@ plco.plot.qq = async (
                         div_id,
                         filteredText + `Chromosome: ${resChromosome} &lt;br>` +
                         `Position: ${resPosition} &lt;br> SNP: ${resSnp}` +
-                        '&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + 'Learn more at dbSNP: ' + resSnp + '&lt;/a>' +
-                        `&lt;br>&lt;button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close&lt;/button>`,
+                        '&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + 'Learn more at dbSNP: ' +
+                        resSnp + '&lt;/a>',
                         ['#d3d3d3']
                     )
                     plco.Plotly.restyle(div, { text: [updatedText] }, [1])
@@ -1639,8 +1711,7 @@ plco.plot.qq2 = (
                                 div_id,
                                 filteredText + `Chromosome: ${resChromosome} &lt;br>` +
                                 `Position: ${resPosition} &lt;br> SNP: ${resSnp}` +
-                                '&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '&lt;/a>' +
-                                `&lt;br>&lt;button onclick="document.getElementById('${div_id}hoverdiv').remove()" >Close&lt;/button>`,
+                                '&lt;br>&lt;a href="https://www.ncbi.nlm.nih.gov/snp/' + resSnp + '">' + resSnp + '&lt;/a>',
                                 colors,
                                 points[i].curveNumber
                             )
@@ -1855,16 +1926,25 @@ plco.plot.helpers.addLoaderDiv = async (div, f) => {
 }
 
 plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber = 1) => {
-    let hoverDiv = document.getElementById(div_id + 'hoverdiv')
+    let randint = Math.round(Math.random() * 1000)
+    let hoverDiv = document.getElementById(div_id + 'hoverdiv' + randint)
     if (!hoverDiv) {
         hoverDiv = document.createElement('div')
-        hoverDiv.id = div_id + 'hoverdiv'
+        hoverDiv.id = div_id + 'hoverdiv' + randint
         div.appendChild(hoverDiv)
     }
     hoverDiv.innerHTML = text
     hoverDiv.style =
         `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
         `text-align:center; border: 1px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
+    hoverDiv.className = 'plotHoverDivs'
+
+    let closeButton = document.createElement('button')
+    closeButton.addEventListener('click', function () { this.parentElement.remove() })
+    closeButton.id = div_id + 'closeButton' + randint
+    closeButton.innerHTML = 'Close'
+    closeButton.style = 'display:block;'
+    hoverDiv.appendChild(closeButton)
 
     hoverDiv.addEventListener('mousedown', e => {
         down = true
@@ -2052,19 +2132,41 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 }
 
 plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config) => {
-    const xSelector = document.createElement('select')
-    xSelector.id = div_id + 'xSelector'
-    const ySelector = document.createElement('select')
-    ySelector.id = div_id + 'ySelector'
 
-    const xLabel = document.createElement('label')
+
+    let xSelector = document.getElementById(div_id + 'xSelector')
+    if (xSelector) {
+        xSelector.remove()
+    }
+    xSelector = document.createElement('select')
+    xSelector.id = div_id + 'xSelector'
+    xSelector.title = 'pcaSelector'
+
+    let ySelector = document.getElementById(div_id + 'ySelector')
+    if (ySelector) {
+        ySelector.remove()
+    }
+    ySelector = document.createElement('select')
+    ySelector.id = div_id + 'ySelector'
+    ySelector.title = 'pcaSelector'
+
+    let xLabel = document.getElementById(div_id + 'xLabel')
+    if (xLabel) {
+        xLabel.remove()
+    }
+    xLabel = document.createElement('label')
     xLabel.for = div_id + 'xSelector'
     xLabel.innerHTML = 'PC_X: '
+    xLabel.id = div_id + 'xLabel'
 
-    const yLabel = document.createElement('label')
+    let yLabel = document.getElementById(div_id + 'yLabel')
+    if (yLabel) {
+        yLabel.remove()
+    }
+    yLabel = document.createElement('label')
     yLabel.for = div_id + 'ySelector'
     yLabel.innerHTML = 'PC_Y: '
-
+    yLabel.id = div_id + 'yLabel'
 
     for (let i = 1; i &lt;= 20; i++) {
         const opt = document.createElement('option')
@@ -2110,6 +2212,9 @@ if (typeof (define) != 'undefined') {
     // define({ proto: plco })
     define(['https://cdn.plot.ly/plotly-latest.min.js'], (Plotly) => {
         plco.Plotly = Plotly
+    })
+    define(['localforage'], localforage => {
+        plco.localForage = localforage
         return plco
     })
 } else {
@@ -2118,6 +2223,12 @@ if (typeof (define) != 'undefined') {
     s.then(async s => {
         s.onload = () => {
             plco.Plotly = Plotly
+        }
+    })
+    let script2 = plco.loadScript('localforage.min.js')
+    script2.then(async s => {
+        s.onload = () => {
+            plco.localForage = localforage
         }
     })
 }
@@ -2137,7 +2248,7 @@ if (typeof (define) != 'undefined') {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 14 2021 17:36:37 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 16 2021 19:07:16 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

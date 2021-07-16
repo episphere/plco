@@ -557,7 +557,7 @@
     
 
     
-    <h4 class="name" id=".explorePhenotypes"><span class="type-signature">(static) </span>explorePhenotypes<span class="signature">(flatten<span class="signature-attributes">opt</span>, mini<span class="signature-attributes">opt</span>, graph<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".explorePhenotypes"><span class="type-signature">(static) </span>explorePhenotypes<span class="signature">(flatten<span class="signature-attributes">opt</span>, mini<span class="signature-attributes">opt</span>, graph<span class="signature-attributes">opt</span>, div_id, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -719,6 +719,119 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>div_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Used when graph is 'true', plots a Plotly chart at that container.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -756,7 +869,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line162">line 162</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -786,6 +899,154 @@
         
 <div class="param-desc">
     <p>An array of objects.</p>
+</div>
+
+
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".fetch"><span class="type-signature">(static) </span>fetch<span class="signature">(url)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Fetches the result of the <code>url</code> from localForage if it exists else calls a HTTP request to the <code>url</code> and stores it into
+localForage.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The url will be used as the key when storing its response into IndexedDB.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line403">line 403</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Url HTTP response.</p>
 </div>
 
 
@@ -1161,7 +1422,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 14 2021 17:36:37 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 16 2021 19:07:16 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
