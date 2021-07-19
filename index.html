@@ -247,17 +247,21 @@
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='otherContainer' style="display: none;">
-        <span class="text-lg md:text-3xl font-semibold text-red-900 block">Demostrating support with the Epi-Plotly library.</span>        
-        <span>Pros: Great for static plots; faster due to not having to fetch API data; no JavaScript code needed </span>
-        <span>Cons: As of now, the json file must be hosted; </span>
+        <span class="text-lg md:text-3xl font-semibold text-red-900 block">Demostrating support with the <a href="https://episphere.github.io/plotly">Epi-Plotly library</a>.</span>        
+        <span class="text-green-500 text-md">Pros: Great for static plots; faster due to not having to fetch API data; no JavaScript code needed;</span>
+        <span class="text-red-500 text-md">Cons: As of now, the json file must be hosted; </span>
         <epi-plotly>https://episphere.github.io/plco/plot.json</epi-plotly>
-        <span>Steps to recreate:</span>
+        <br>
+        <span class="text-lg">Steps to recreate:</span>
         <ol class="list-decimal">
-            <li>Set the to_json parameter to true in any of the graphing methods. E.g.: plco.plot.qq('', 3080, 'female', 'east_asian', true)</li>
-            <li>Call it and then parse the results using JSON.parse(...)</li>
-            <li>Pass the JS object into plco.downloadJSON(your_obj)</li>
-            <li>Host the downloaded *.json file anywhere that supports raw files. E.g.: Github, Google Drive, Your Web Server</li>
+            <li class="mx-6">Set the to_json parameter to true in any of the graphing methods. E.g.: plco.plot.qq('', 3080, 'female', 'east_asian', true)</li>
+            <li class="mx-6">Call it and then parse the results using JSON.parse(...)</li>
+            <li class="mx-6">Pass the JS object into plco.downloadJSON(your_obj)</li>
+            <li class="mx-6">Host the downloaded *.json file anywhere that supports raw files. E.g.: Github, Google Drive, Your Web Server</li>
         </ol>
+        <br>
+        <span class="text-lg">Tips:</span>
+        <span>You can add Plotly event listeners by querying the div with js-plotly-plot class nested within the epi-plotly tag.</span>
     </div>
 
     <footer class="max-w-8xl p-6 mx-10 ">
