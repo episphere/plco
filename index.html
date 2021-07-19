@@ -94,6 +94,7 @@
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='homeContainer'>
         <span>Welcome! 🤗</span>
+        <span>If you encounter any bugs or have feedback for additional features, feel free to create a new issue in the GitHub <a href="https://github.com/episphere/plco/issues" class="text-blue-500">repo</a>.</span>
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 pb-12 mx-10" id='exploreContainer' style="display: none;">
@@ -133,7 +134,8 @@
                 return s
             };
             plco.api.get('metadata', {chromosome: 'all', phenotype_id: Number.parseInt(document.getElementById('checkPhenotypeMetadata').value)})
-                .then(data => document.getElementById('fullResults').innerHTML = formatJson(data, 0));
+                .then(data => document.getElementById('fullResults').innerHTML = formatJson(data, 0))
+                .then(_ => document.getElementById('resultsCheckbox').checked = true);
             return false;
         ">
             <label for="checkPhenotypeMetadata">Enter Phenotype ID: </label>
@@ -247,6 +249,18 @@
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='otherContainer' style="display: none;">
         <span class="text-lg md:text-3xl font-semi bold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
         <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
+        <epi-plotly>
+            {
+                traces:[
+                    {
+                        x:[...Array(1000)].map((_,i)=>i*0.1),
+                        y:[...Array(1000)].map((_,i)=>(Math.sin(i*0.01)+Math.random()/2)),
+                        mode:'markers',
+                        marker: { size: 2 }
+                    }
+                ]
+            }
+        </epi-plotly>
     </div>
 
     <footer class="max-w-8xl p-6 mx-10 ">

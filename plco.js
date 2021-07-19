@@ -2104,8 +2104,6 @@ plco.plot.helpers.pcaCreateDropdownLayout = async (validArray, pc_x, pc_y) => {
 }
 
 plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config) => {
-
-
     let xSelector = document.getElementById(div_id + 'xSelector')
     if (xSelector) {
         xSelector.remove()
@@ -2178,14 +2176,10 @@ plco.plot.helpers.pcaGenerateXYInputs = (div_id, arrayOfObjects, layout, config)
     div.appendChild(ySelector)
 }
 
-plco()
-
 if (typeof (define) != 'undefined') {
     // define({ proto: plco })
-    define(['https://cdn.plot.ly/plotly-latest.min.js'], (Plotly) => {
+    define(['https://cdn.plot.ly/plotly-latest.min.js', 'localforage'], (Plotly, localforage) => {
         plco.Plotly = Plotly
-    })
-    define(['localforage'], localforage => {
         plco.localForage = localforage
         return plco
     })
@@ -2204,3 +2198,5 @@ if (typeof (define) != 'undefined') {
         }
     })
 }
+
+plco()
