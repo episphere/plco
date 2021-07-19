@@ -47,6 +47,22 @@ plco.saveFile = (url) => {
 }
 
 /**
+ * Saves a JSON as a .json file.
+ * @param {object} contents A JS object.
+ * @param {string} fileName The name of the file without extensions.
+ * @returns {HTMLAnchorElement} HTMLAnchorElement.
+ */
+plco.downloadJSON = (contents, fileName = 'plot') => {
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(contents, null, 2)], {
+        type: 'text/plain'
+    }))
+    a.setAttribute('download', fileName + '.json')
+    a.click()
+    return a
+}
+
+/**
  * Adds a style tag containing css for some plot elements.
  */
 plco.addStyle = () => {

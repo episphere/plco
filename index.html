@@ -249,18 +249,6 @@
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='otherContainer' style="display: none;">
         <span class="text-lg md:text-3xl font-semi bold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
         <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem corporis sunt perferendis natus quibusdam nihil reprehenderit officiis, quasi earum tempora accusamus labore reiciendis obcaecati dolores animi saepe? Cupiditate, doloribus id!</span>
-        <epi-plotly>
-            {
-                traces:[
-                    {
-                        x:[...Array(1000)].map((_,i)=>i*0.1),
-                        y:[...Array(1000)].map((_,i)=>(Math.sin(i*0.01)+Math.random()/2)),
-                        mode:'markers',
-                        marker: { size: 2 }
-                    }
-                ]
-            }
-        </epi-plotly>
     </div>
 
     <footer class="max-w-8xl p-6 mx-10 ">
