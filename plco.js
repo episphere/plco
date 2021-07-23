@@ -936,6 +936,7 @@ plco.plot.manhattan = async (
     let traces = []
     let chromosomeTraces = []
     let currentChromosome
+    let largestY = p_value_nlog_min
 
     for (i = 1; i <= numberOfChromosomes; i++) {
         if (numberOfChromosomes == 1) {
@@ -964,6 +965,9 @@ plco.plot.manhattan = async (
             )
         }
         traces.push(traceInfo)
+
+        largestY = traceInfo.y.reduce((largest, cur) => largest > cur ? largest : cur, largestY)
+
         chromosomeTraces.push({
             x: [traceInfo.x.reduce((smallest, cur) => cur > smallest ? smallest : cur, Number.MAX_SAFE_INTEGER)],
             y: [p_value_nlog_min],
@@ -1016,6 +1020,32 @@ plco.plot.manhattan = async (
         hovermode: 'closest',
         height: 700,
         width: 1200,
+        updatemenus: [{
+            y: 1.2,
+            yanchor: 'top',
+            buttons: [
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', [2, largestY]],
+                    label: '2 (default)'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', [4, largestY]],
+                    label: '4'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', [6, largestY]],
+                    label: '6'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', (largestY > 8 ? [8, largestY] : [largestY, 8])],
+                    label: '8+'
+                }
+            ]
+        }],
         ...customLayout,
     }
 
@@ -1166,6 +1196,8 @@ plco.plot.manhattan2 = async (
     let traces2nd = []
     let currentChromosome
     let maxYInTraces = p_value_nlog_min
+    let largestYOne = p_value_nlog_min
+    let largestYTwo = p_value_nlog_min
 
     const createTrace = (inputData, isFirst, currentChromosome) => {
         let index = isFirst ? 0 : 1
@@ -1193,7 +1225,11 @@ plco.plot.manhattan2 = async (
             traceInfo.yaxis = 'y2'
         }
 
-        maxYInTraces = traceInfo.y.reduce((max, cur) => cur > max ? cur : max, maxYInTraces)
+        if (isFirst) {
+            largestYOne = traceInfo.y.reduce((max, cur) => cur > max ? cur : max, largestYOne)
+        } else {
+            largestYTwo = traceInfo.y.reduce((max, cur) => cur > max ? cur : max, largestYTwo)
+        }
         return traceInfo
     }
 
@@ -1234,6 +1270,8 @@ plco.plot.manhattan2 = async (
         }
     }
 
+    maxYInTraces = largestYOne > largestYTwo ? largestYOne : largestYTwo
+
     let layout = {
         title: 'SNPs in ' + chromosomeName,
         xaxis: {
@@ -1262,6 +1300,57 @@ plco.plot.manhattan2 = async (
         },
         plot_bgcolor: '#fff',
         colorway: ['#f3cec9', '#e7a4b6', '#cd7eaf', '#a262a9', '#6f4d96', '#3d3b72', '#182844'],
+        updatemenus: [{
+            y: 1.0,
+            yanchor: 'top',
+            buttons: [
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', [2, largestYOne]],
+                    label: '2 (default)'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', [4, largestYOne]],
+                    label: '4'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', [6, largestYOne]],
+                    label: '6'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis.range', (largestYOne > 8 ? [8, largestYOne] : [largestYOne, 8])],
+                    label: '8+'
+                }
+            ]
+        }, {
+            y: 0.6,
+            yanchor: 'top',
+            buttons: [
+                {
+                    method: 'relayout',
+                    args: ['yaxis2.range', [largestYTwo, 2]],
+                    label: '2 (default)'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis2.range', [largestYTwo, 4]],
+                    label: '4'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis2.range', [largestYTwo, 6]],
+                    label: '6'
+                },
+                {
+                    method: 'relayout',
+                    args: ['yaxis2.range', (largestYTwo > 8 ? [largestYTwo, 8] : [8, largestYTwo])],
+                    label: '8'
+                }
+            ]
+        }],
         ...customLayout,
     }
 
