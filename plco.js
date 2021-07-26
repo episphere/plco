@@ -1046,6 +1046,7 @@ plco.plot.manhattan = async (
                 }
             ]
         }],
+        colorway: ['#FF0000', '#800000'],
         ...customLayout,
     }
 
