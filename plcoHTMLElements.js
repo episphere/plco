@@ -27,19 +27,38 @@
         return [0, 1, 2, 3].map(_ => Math.round(Math.random() * 10)).join('')
     }
 
+    custom.parse = (string) => {
+        return string.split(';').reduce((total, cur) => {
+            if (cur.includes(':'))
+                total[cur.split(':')[0].trim()] = cur.split(':')[1].trim()
+            return total
+        }, {})
+    }
+
+    custom.listParse = (string) => {
+        // '[{id: 3080, sex: male}; {id:3080, sex:female}]'
+        return string.trim().substring(1, string.trim().length - 1).split(';').reduce((total, cur) => {
+            return total.concat(cur.trim().substring(1, cur.trim().length - 1).split(',').reduce((whole, part) => {
+                if (part.includes(':'))
+                    whole[part.split(':')[0].trim()] = part.split(':')[1].trim()
+                return whole
+            }, {}))
+        }, [])
+    }
+
     custom.plot = class Plot extends HTMLElement {
         constructor () {
             super()
             if (this.hasAttribute('data-inputs'))
-                this.arrayOfObjects = JSON.parse(this.getAttribute('data-inputs'))
+                this.arrayOfObjects = custom.listParse(this.getAttribute('data-inputs'))
             else
                 this.arrayOfObjects = [{ phenotype_id: 3080, sex: 'female', ancestry: 'east_asian' }, { phenotype_id: 3080, sex: 'female', ancestry: 'european' }]
 
             if (this.hasAttribute('custom-layout'))
-                this.customLayout = JSON.parse(this.getAttribute('custom-layout'))
+                this.customLayout = custom.parse(this.getAttribute('custom-layout'))
 
             if (this.hasAttribute('custom-config'))
-                this.customConfig = JSON.parse(this.getAttribute('custom-config'))
+                this.customConfig = custom.parse(this.getAttribute('custom-config'))
         }
 
         async connectedCallback() {
@@ -66,10 +85,10 @@
         constructor () {
             super()
             if (this.hasAttribute('p-val-nlog-min'))
-                this.p_val = this.getAttribute('p-val-nlog-min')
+                this.p_val = Number.parseInt(this.getAttribute('p-val-nlog-min'))
 
             if (this.hasAttribute('chromosome'))
-                this.chromosome = this.getAttribute('chromosome')
+                this.chromosome = Number.parseInt(this.getAttribute('chromosome'))
         }
 
         async connectedCallback() {
