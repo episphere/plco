@@ -28,22 +28,27 @@
     }
 
     custom.parse = (string) => {
-        return string.split(';').reduce((total, cur) => {
-            if (cur.includes(':'))
-                total[cur.split(':')[0].trim()] = cur.split(':')[1].trim()
-            return total
-        }, {})
+        return string.split(';')
+            .reduce((total, cur) => {
+                if (cur.includes(':'))
+                    total[cur.split(':')[0].trim()] = cur.split(':')[1].trim()
+                return total
+            }, {})
     }
 
     custom.listParse = (string) => {
         // '[{id: 3080, sex: male}; {id:3080, sex:female}]'
-        return string.trim().substring(1, string.trim().length - 1).split(';').reduce((total, cur) => {
-            return total.concat(cur.trim().substring(1, cur.trim().length - 1).split(',').reduce((whole, part) => {
-                if (part.includes(':'))
-                    whole[part.split(':')[0].trim()] = part.split(':')[1].trim()
-                return whole
-            }, {}))
-        }, [])
+        return string.trim().substring(1, string.trim().length - 1).split(';')
+            .filter(str => str !== "")
+            .reduce((total, cur) => {
+                return total.concat(
+                    cur.trim().substring(1, cur.trim().length - 1).split(',')
+                        .reduce((whole, part) => {
+                            if (part.includes(':'))
+                                whole[part.split(':')[0].trim()] = part.split(':')[1].trim()
+                            return whole
+                        }, {}))
+            }, [])
     }
 
     custom.plot = class Plot extends HTMLElement {
@@ -92,8 +97,8 @@
         }
 
         async connectedCallback() {
+            let id = await super.connectedCallback()
             try {
-                let id = await super.connectedCallback()
                 if (this.arrayOfObjects.length === 1) {
                     const { phenotype_id = 3080, sex = 'female', ancestry = 'east_asian' } = this.arrayOfObjects[0]
                     await plco.plot.manhattan(id, phenotype_id, sex, ancestry, p_val, chromosome, false, this.customLayout, this.customConfig)
@@ -101,14 +106,15 @@
                     await plco.plot.manhattan2(id, this.arrayOfObjects, this.p_val, this.chromosome, false, this.customLayout, this.customConfig)
             } catch (e) {
                 console.error(e)
+                document.querySelector(`manhattan-plot div[id="${id}"]`).innerHTML = e
             }
         }
     }
 
     custom.qq = class QQPlot extends custom.plot {
         async connectedCallback() {
+            let id = await super.connectedCallback()
             try {
-                let id = await super.connectedCallback()
                 if (this.arrayOfObjects.length === 1) {
                     const { phenotype_id = 3080, sex = 'female', ancestry = 'east_asian' } = this.arrayOfObjects[0]
                     await plco.plot.qq(id, phenotype_id, sex, ancestry, false, this.customLayout, this.customConfig)
@@ -116,14 +122,15 @@
                     await plco.plot.qq2(id, this.arrayOfObjects, false, this.customLayout, this.customConfig)
             } catch (e) {
                 console.error(e)
+                document.querySelector(`qq-plot div[id="${id}"]`).innerHTML = e
             }
         }
     }
 
     custom.pca = class PCAPlot extends custom.plot {
         async connectedCallback() {
+            let id = await super.connectedCallback()
             try {
-                let id = await super.connectedCallback()
                 if (this.arrayOfObjects.length === 1) {
                     const { phenotype_id = 3080, sex = 'female', ancestry = 'east_asian' } = this.arrayOfObjects[0]
                     await plco.plot.pca(id, phenotype_id, sex, ancestry, false, this.customLayout, this.customConfig)
@@ -131,6 +138,7 @@
                     await plco.plot.pca2(id, this.arrayOfObjects, false, this.customLayout, this.customConfig)
             } catch (e) {
                 console.error(e)
+                document.querySelector(`pca-plot div[id="${id}"]`).innerHTML = e
             }
         }
     }
