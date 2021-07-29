@@ -1139,7 +1139,6 @@ plco.plot.manhattan2 = async (
     customLayout = {},
     customConfig = {},
 ) => {
-    // TODO fixed the snp mapping in manhattan and manhattan2
     const validObjects = await plco.plot.helpers.validateInputs(arrayOfObjects)
 
     if (validObjects.length < 2) throw new Error('Incorrect number of arguments.')
@@ -1348,7 +1347,7 @@ plco.plot.manhattan2 = async (
                 {
                     method: 'relayout',
                     args: ['yaxis2.range', (largestYTwo > 8 ? [largestYTwo, 8] : [8, largestYTwo])],
-                    label: '8'
+                    label: '8+'
                 }
             ]
         }],
