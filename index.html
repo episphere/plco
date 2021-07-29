@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="plco.js"></script>
+    <script src="plcoHTMLElements.js"></script>
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
     <style>
         .tabsRadio:checked+.tabsLabel  {
@@ -262,6 +263,25 @@
         <br>
         <span class="text-lg">Tips:</span>
         <span>You can add Plotly event listeners by querying the div with js-plotly-plot class nested within the epi-plotly tag.</span>
+        <br>
+        <span class="text-lg md:text-3xl font-semibold text-red-900 block">An alternative to <a href="https://episphere.github.io/plotly">Epi-Plotly library</a>.</span>        
+        <span>Insert this into the header: <br> &lt;script src="https://episphere.github.io/plco/plcoHTMLElements.js"&gt;&lt;/script&gt; <br><br> 3 plotting tags available:</span>
+        <ul class="text-lg md:text-xl text-red-900 block">
+            <li>
+                &lt;manhattan-plot&gt;&lt;/manhattan-plot&gt; 
+            </li>
+            <li>
+                &lt;qq-plot&gt;&lt;/qq-plot&gt; 
+            </li>
+            <li>
+                &lt;pca-plot&gt;&lt;/pca-plot&gt;
+            </li>
+        </ul><br>
+        <span>All three plotting tags have the following attributes available: data-inputs, custom-layout, custom-config</span><br>
+        <span>Example: (Notice that for <span class="text-blue-500">data-inputs</span> each object is separated by a semi-colon)</span><br>
+        <span> &lt;manhattan-plot <span class="text-blue-500">data-inputs</span>="[{phenotype_id: 3080, sex: female, ancestry: european}; {phenotype_id:3080, sex: female, ancestry: east_asian}]" <span class="text-blue-500">custom-layout</span>="plot_bgcolor:#d3d3d3;paper_bgcolor:#fff" <span class="text-blue-500">custom-config</span>="scrollZoom:false" &gt;&lt;/manhattan-plot&gt; </span><br>
+        <span>The manhattan-plot have additionally <span class="text-blue-500">chromosome</span>=number and <span class="text-blue-500">p-val-nlog-min</span>=number attributes.</span>        
+        <manhattan-plot style="border: 2px solid black;"></manhattan-plot>
     </div>
 
     <footer class="max-w-8xl p-6 mx-10 ">
