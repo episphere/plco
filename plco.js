@@ -1995,6 +1995,10 @@ plco.plot.helpers = {}
 plco.plot.helpers.addLoaderDiv = async (div, f) => {
     const tempDiv = document.createElement('div')
     tempDiv.classList.add('loader')
+
+    let top = div.getBoundingClientRect().top + window.pageYOffset - div.ownerDocument.documentElement.clientTop
+    tempDiv.style.top = `${top}px`
+
     document.body.appendChild(tempDiv)
     div.style = 'display: none;'
     await (f())
@@ -2003,6 +2007,8 @@ plco.plot.helpers.addLoaderDiv = async (div, f) => {
 }
 
 plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber = 1) => {
+    let top = div.getBoundingClientRect().top + window.pageYOffset - div.ownerDocument.documentElement.clientTop
+
     let randint = Math.round(Math.random() * 1000)
     let hoverDiv = document.getElementById(div_id + 'hoverdiv' + randint)
     if (!hoverDiv) {
@@ -2012,7 +2018,7 @@ plco.plot.helpers.qqplotHoverTooltip = (div, div_id, text, colors, curveNumber =
     }
     hoverDiv.innerHTML = text
     hoverDiv.style =
-        `position:absolute;top:${100};left:${300};z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
+        `position:absolute;top:${top}px;left:40%;z-index:10;background-color:${colors[(curveNumber - 1) % colors.length]};` +
         `text-align:center; border: 1px solid #000; cursor:move; padding:10px; font-size: 0.7rem;`
     hoverDiv.className = 'plotHoverDivs'
 

@@ -54,6 +54,9 @@
     custom.plot = class Plot extends HTMLElement {
         constructor () {
             super()
+        }
+
+        async connectedCallback() {
             if (this.hasAttribute('data-inputs'))
                 this.arrayOfObjects = custom.listParse(this.getAttribute('data-inputs'))
             else
@@ -64,9 +67,7 @@
 
             if (this.hasAttribute('custom-config'))
                 this.customConfig = custom.parse(this.getAttribute('custom-config'))
-        }
 
-        async connectedCallback() {
             try {
                 await custom.timeout()
                 let id = custom.generateId()
@@ -87,16 +88,13 @@
     }
 
     custom.manhattan = class ManhattanPlot extends custom.plot {
-        constructor () {
-            super()
+        async connectedCallback() {
             if (this.hasAttribute('p-val-nlog-min'))
                 this.p_val = Number.parseInt(this.getAttribute('p-val-nlog-min'))
 
             if (this.hasAttribute('chromosome'))
                 this.chromosome = Number.parseInt(this.getAttribute('chromosome'))
-        }
 
-        async connectedCallback() {
             let id = await super.connectedCallback()
             try {
                 if (this.arrayOfObjects.length === 1) {
