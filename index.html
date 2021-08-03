@@ -250,7 +250,7 @@
                 <span class="tabsMessage">
                     Waiting...
                 </span>
-                <button class="shareButton order-last border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-yellow-400" style="display: none;"
+                <button class="shareButton self-end order-last border-2 border-black rounded-xl p-1 px-2 m-4 mr-4 hover:bg-yellow-400" style="display: none;"
                     onclick="
                     let textarea = document.querySelector('#plotContainer textarea');
                     let value = JSON.parse(textarea.value);
@@ -268,7 +268,7 @@
                     navigator.clipboard.writeText('https:\/\/episphere.github.io/plco/' + '?' + `id=${phenotype_ids}&sex=${sexes}&ancestry=${ancestries}`);
                     alert('URL copied to clipboard')
                     "
-                    >Share</button>
+                    >Share URL (Copies to Clipboard)</button>
             </div>
 
             <input type="radio" class="tabsRadio hidden" name="plot" id="qqPlot">
@@ -277,7 +277,7 @@
                 <span class="tabsMessage">
                     Waiting...
                 </span>
-                <button class="shareButton order-last border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-yellow-400" style="display: none;"
+                <button class="shareButton self-end order-last border-2 border-black rounded-xl p-1 px-2 m-4 mr-4 hover:bg-yellow-400" style="display: none;"
                     onclick="
                     let textarea = document.querySelector('#plotContainer textarea');
                     let value = JSON.parse(textarea.value);
@@ -295,7 +295,7 @@
                     navigator.clipboard.writeText('https:\/\/episphere.github.io/plco/' + '?' + `id=${phenotype_ids}&sex=${sexes}&ancestry=${ancestries}`);
                     alert('URL copied to clipboard')
                     "
-                    >Share</button>
+                    >Share URL (Copies to Clipboard)</button>
             </div>
 
             <input type="radio" class="tabsRadio hidden" name="plot" id="pcaPlot">
@@ -304,7 +304,7 @@
                 <span class="tabsMessage">
                     Waiting...
                 </span>
-                <button class="shareButton order-last border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-yellow-400" style="display: none;"
+                <button class="shareButton self-end order-last border-2 border-black rounded-xl p-1 px-2 m-4 mr-4 hover:bg-yellow-400" style="display: none;"
                     onclick="
                     let textarea = document.querySelector('#plotContainer textarea');
                     let value = JSON.parse(textarea.value);
@@ -322,7 +322,7 @@
                     navigator.clipboard.writeText('https:\/\/episphere.github.io/plco/' + '?' + `id=${phenotype_ids}&sex=${sexes}&ancestry=${ancestries}`);
                     alert('URL copied to clipboard')
                     "
-                    >Share</button>
+                    >Share URL (Copies to Clipboard)</button>
             </div>
         </div>
     </div>
