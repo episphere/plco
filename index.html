@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="plco.js"></script>
     <script src="plcoHTMLElements.js"></script>
+    <script src="index.js"></script>
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
     <style>
         .tabsRadio:checked+.tabsLabel  {
@@ -108,7 +109,7 @@
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = '';document.getElementById('exploreContainer').style = 'display:none';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Home</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Phenotypes</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Plots</a></li>
-                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';">Other</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';if(!visited) {document.getElementById('otherContainer').innerHTML = otherContainerContents;}visited = true;">Other</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='';">Bugs</a></li>
             </ul>
         </nav>
@@ -328,13 +329,13 @@
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='otherContainer' style="display: none;">
-        <span class="text-lg md:text-3xl font-semibold text-red-900 block">Demostrating support with the <a href="https://episphere.github.io/plotly">Epi-Plotly library</a>.</span>        
+        <!-- <span class="text-lg md:text-3xl font-semibold text-red-900 block">Demostrating support with the <a href="https://episphere.github.io/plotly">Epi-Plotly library</a>.</span>        
         <span class="text-green-500 text-md">Pros: Great for static plots; faster due to not having to fetch API data; no JavaScript code needed;</span>
         <span class="text-red-500 text-md">Cons: As of now, the json file must be hosted; </span>
         <epi-plotly>https://episphere.github.io/plco/plot.json</epi-plotly>
         <br>
         <span class="text-lg">Steps to recreate:</span>
-        <ol class="list-disc">
+        <ol class="list-decimal">
             <li class="mx-6">Set the to_json parameter to true in any of the graphing methods. E.g.: plco.plot.qq('', 3080, 'female', 'east_asian', true)</li>
             <li class="mx-6">Call it and then parse the results using JSON.parse(...)</li>
             <li class="mx-6">Pass the JS object into plco.downloadJSON(your_obj)</li>
@@ -361,12 +362,12 @@
         <span>Example: (Notice that for <span class="text-blue-500">data-inputs</span> each object is separated by a semi-colon)</span><br>
         <span> &lt;manhattan-plot <span class="text-blue-500">data-inputs</span>="[{phenotype_id: 3080, sex: female, ancestry: european}; {phenotype_id:3080, sex: female, ancestry: east_asian}]" <span class="text-blue-500">custom-layout</span>="plot_bgcolor:#d3d3d3;paper_bgcolor:#fff" <span class="text-blue-500">custom-config</span>="scrollZoom:false" &gt;&lt;/manhattan-plot&gt; </span><br>
         <span>The manhattan-plot have additionally <span class="text-blue-500">chromosome</span>=number and <span class="text-blue-500">p-val-nlog-min</span>=number attributes.</span>        
-        <manhattan-plot style="border: 2px solid black;" data-inputs="[{phenotype_id: 3080, sex: female, ancestry:european}; {phenotype_id:3080, sex: female, ancestry: east_asian}]" custom-layout="plot_bgcolor:#d3d3d3;paper_bgcolor:#fff" custom-config="scrollZoom:false"></manhattan-plot>
+        <manhattan-plot style="border: 2px solid black;" data-inputs="[{phenotype_id: 3080, sex: female, ancestry:european}; {phenotype_id:3080, sex: female, ancestry: east_asian}]" custom-layout="plot_bgcolor:#d3d3d3;paper_bgcolor:#fff" custom-config="scrollZoom:false"></manhattan-plot> -->
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='bugContainer' style="display: none;">
-        <ol class="list-decimal p-5 text-xl">
-            <li></li>
+        <ol class="list-disc p-5 text-xl">
+            <li>🐛</li>
         </ol>
     </div>
 
