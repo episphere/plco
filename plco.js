@@ -421,12 +421,12 @@ plco.fetch = async (url) => {
         const value = await plco.localForage.getItem(url)
         if (!value || (value && !value.data)) {
             const apiResult = await (await fetch(url)).json()
-            plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
+            await plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
             return apiResult
         } else if (value && value.date) {
             if (Math.floor(new Date().getTime() / 1000.0) - value.date > 604800) {
                 const apiResult = await (await fetch(url)).json()
-                plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
+                await plco.localForage.setItem(url, { data: apiResult, date: Math.floor(new Date().getTime() / 1000.0) })
                 return apiResult
             } else {
                 return value.data
