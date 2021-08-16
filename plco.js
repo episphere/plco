@@ -1,7 +1,7 @@
 /** 
  * @file JS SDK for NCI DCEG's PLCO API. 〜(￣▽￣〜)
  * 
- * @version 0.5
+ * @version 1.0
  * @author Eric Ruan, Erika Nemeth, Lorena Sandoval, Jonas Almeida
  * @copyright 2021
  */
@@ -1987,6 +1987,122 @@ plco.plot.pca2 = async (
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
         const layoutString = '"layout":' + JSON.stringify(Object.assign(layout, dropdownLayout)) + ','
+        const configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
+    }
+}
+
+
+plco.plot.histogram = async (
+    div_id,
+    phenotype_id,
+    to_json = false,
+    customLayout = {},
+    customConfig = {}
+) => {
+    const [uniqueValues, participantData] = await Promise.all([
+        plco.api.participants({}, phenotype_id, 'value', 0).then(res => res.data),
+        plco.api.participants({}, phenotype_id, 'value,ancestry,sex', 0).then(res => res.data)
+    ])
+
+    const traces = []
+    uniqueValues.forEach(({ value }, index) => {
+        for (let sex of ['male', 'female']) {
+            const filteredArray = participantData.filter(partObj =>
+                partObj.value === value && partObj.sex === sex && partObj.ancestry != null)
+
+            if (filteredArray.length > 0) {
+                if (index != 0)
+                    traces.push({
+                        x: filteredArray.map(partObj => partObj.ancestry),
+                        y: filteredArray.map(partObj =>
+                            isNaN(Number.parseInt(partObj.counts)) ? 10 : Number.parseInt(partObj.counts)),
+                        xaxis: `x${index + 1}`,
+                        yaxis: `y${index + 1}`,
+                        type: 'bar',
+                        name: value + ', ' + sex
+                    })
+                else
+                    traces.push({
+                        x: filteredArray.map(partObj => partObj.ancestry),
+                        y: filteredArray.map(partObj =>
+                            isNaN(Number.parseInt(partObj.counts)) ? 10 : Number.parseInt(partObj.counts)),
+                        type: 'bar',
+                        name: value + ', ' + sex
+                    })
+            }
+        }
+    })
+
+    const layout = {
+        grid: { rows: uniqueValues.length, columns: 1, pattern: 'independent' },
+        height: 800,
+        dragmode: 'pan',
+        barmode: 'group',
+        title: {
+            text: 'Frequency of partipicants by ancestry and sex',
+            font: {
+                size: 21,
+                color: 'black'
+            },
+        },
+        xaxis: {
+            showgrid: false,
+            title: {
+                text: 'Ancestry',
+                font: {
+                    size: 15,
+                    color: 'black'
+                },
+            },
+        },
+        yaxis: {
+            showgrid: true,
+            title: {
+                text: 'Number of participants',
+                font: {
+                    size: 15,
+                    color: 'black'
+                },
+            },
+        },
+        showlegend: true,
+        legend: {
+            x: 1,
+            xanchor: 'right',
+            y: 1
+        },
+        ...customLayout,
+    }
+
+    for (let i = 1; i < uniqueValues.length; i++) {
+        layout[`xaxis${i + 1}`] = {
+            title: 'Ancestry'
+        }
+        layout[`yaxis${i + 1}`] = {
+            title: 'Number of participants'
+        }
+    }
+
+    const config = {
+        scrollZoom: true,
+        responsive: true,
+        ...customConfig,
+    }
+
+    if (!to_json) {
+        let div = document.getElementById(div_id)
+        if (div === null && !to_json) {
+            div = document.createElement('div')
+            div.id = div_id
+            document.body.appendChild(div)
+        }
+
+        plco.Plotly.newPlot(div, traces, layout, config)
+        return div
+    } else {
+        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        const layoutString = '"layout":' + JSON.stringify(layout) + ','
         const configString = '"config":' + JSON.stringify(config) + '}'
         return tracesString + layoutString + configString
     }
