@@ -1066,14 +1066,14 @@ plco.plot.manhattan = async (
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, layout, config)
 
+        const man2Selector = document.getElementById(div_id + 'selector')
+        if (man2Selector) man2Selector.remove()
+
         const oldCheckbox = document.getElementById(div_id + 'checkbox')
-        if (oldCheckbox) {
-            oldCheckbox.remove()
-        }
+        if (oldCheckbox) oldCheckbox.remove()
+
         const oldLabel = document.getElementById(div_id + 'label')
-        if (oldLabel) {
-            oldLabel.remove()
-        }
+        if (oldLabel) oldLabel.remove()
 
         const checkbox = document.createElement('input')
         checkbox.type = 'checkbox'
@@ -1081,7 +1081,7 @@ plco.plot.manhattan = async (
         const label = document.createElement('label')
         label.id = div_id + 'label'
         label.for = div_id + 'checkbox'
-        label.innerHTML = 'allow graph to update on zoom: '
+        label.innerHTML = 'Allow graph to fetch additional information on zoom'
         div.appendChild(checkbox)
         div.appendChild(label)
 
@@ -1361,6 +1361,12 @@ plco.plot.manhattan2 = async (
     }
 
     if (!to_json) {
+        const oldCheckbox = document.getElementById(div_id + 'checkbox')
+        if (oldCheckbox) oldCheckbox.remove()
+
+        const oldLabel = document.getElementById(div_id + 'label')
+        if (oldLabel) oldLabel.remove()
+
         plco.Plotly.newPlot(div, traces, layout, config)
 
         let selector = document.getElementById(div_id + 'selector')

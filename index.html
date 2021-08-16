@@ -8,6 +8,10 @@
     <script src="index.js"></script>
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        .tabsMessage {
+            font-size: xx-large;
+        }
+
         .tabsRadio:checked+.tabsLabel  {
             font-weight: bolder;
             color: #6EE7B7;
@@ -248,7 +252,7 @@
             <input type="radio" class="tabsRadio hidden" name="plot" id="manhattanPlot" checked>
             <label for="manhattanPlot" class="tabsLabel text-xl cursor-pointer p-5 bg-gray-100 flex-grow text-center rounded-tl-xl">Manhattan Plot</label>
             <div id="manhattan" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden flex-col items-center">
-                <span class="tabsMessage">
+                <span class="tabsMessage order-first">
                     Waiting...
                 </span>
                 <button class="shareButton self-end order-last border-2 border-black rounded-xl p-1 px-2 m-4 mr-4 hover:bg-yellow-400" style="display: none;"
@@ -275,7 +279,7 @@
             <input type="radio" class="tabsRadio hidden" name="plot" id="qqPlot">
             <label for="qqPlot" class="tabsLabel text-xl cursor-pointer p-5 bg-gray-100 flex-grow text-center">QQ Plot</label>
             <div id="qq" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden flex-col items-center">
-                <span class="tabsMessage">
+                <span class="tabsMessage order-first">
                     Waiting...
                 </span>
                 <button class="shareButton self-end order-last border-2 border-black rounded-xl p-1 px-2 m-4 mr-4 hover:bg-yellow-400" style="display: none;"
@@ -302,7 +306,7 @@
             <input type="radio" class="tabsRadio hidden" name="plot" id="pcaPlot">
             <label for="pcaPlot" class="tabsLabel text-xl cursor-pointer p-5 bg-gray-100 flex-grow text-center rounded-tr-xl">PCA Plot</label>
             <div id="pca" class="tabsContent order-1 w-full border-b-2 border-gray-400 hidden flex-col items-center">
-                <span class="tabsMessage">
+                <span class="tabsMessage order-first">
                     Waiting...
                 </span>
                 <button class="shareButton self-end order-last border-2 border-black rounded-xl p-1 px-2 m-4 mr-4 hover:bg-yellow-400" style="display: none;"
