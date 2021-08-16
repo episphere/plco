@@ -861,6 +861,7 @@ if(typeof(define)!='undefined'){
  * @prop {Function} qq2 - {@link plco.plot.qq2}
  * @prop {Function} pca - {@link plco.plot.pca}
  * @prop {Function} pca2 - {@link plco.plot.pca2}
+ * @prop {Function} barchart - {@link plco.plot.barchart}
  */
 plco.plot = async () => {
 
