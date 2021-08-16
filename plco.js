@@ -1992,8 +1992,17 @@ plco.plot.pca2 = async (
     }
 }
 
-
-plco.plot.histogram = async (
+/**
+ * Generates a Plotly barchart showing the breakdown of participants by gender and ancestry for that phenotype.
+ * @param {string} div_id The id of the div element, if it does not exist, a new div will be created. 
+ * @param {number} phenotype_id A phenotype id.
+ * @param {boolean} [to_json=false] _Optional_. If true, returns a stringified JSON object containing traces and layout.
+ * Else, returns a div element containing the Plotly graph.
+ * @param {object} [customLayout={}] _Optional_. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set `to_json` to true to see what the default layout is.
+ * @param {object} [customConfig={}] _Optional_. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.
+ * @returns A div element or a string if `to_json` is true.
+ */
+plco.plot.barchart = async (
     div_id,
     phenotype_id,
     to_json = false,
@@ -2077,10 +2086,18 @@ plco.plot.histogram = async (
 
     for (let i = 1; i < uniqueValues.length; i++) {
         layout[`xaxis${i + 1}`] = {
-            title: 'Ancestry'
+            title: 'Ancestry',
+            font: {
+                size: 15,
+                color: 'black'
+            },
         }
         layout[`yaxis${i + 1}`] = {
-            title: 'Number of participants'
+            title: 'Number of participants',
+            font: {
+                size: 15,
+                color: 'black'
+            },
         }
     }
 
