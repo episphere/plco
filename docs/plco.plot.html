@@ -205,6 +205,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>barchart</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><a href="plco.plot.html#.barchart"><code>plco.plot.barchart</code></a></p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -317,7 +340,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1993">line 1993</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line2133">line 2133</a>
     </li></ul></dd>
     
 
@@ -338,6 +361,322 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".barchart"><span class="type-signature">(static) </span>barchart<span class="signature">(div_id, phenotype_id, to_json<span class="signature-attributes">opt</span>, customLayout<span class="signature-attributes">opt</span>, customConfig<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Generates a Plotly barchart showing the breakdown of participants by gender and ancestry for that phenotype.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>div_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>The id of the div element, if it does not exist, a new div will be created.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>phenotype_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>A phenotype id.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>to_json</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. If true, returns a stringified JSON object containing traces and layout.
+Else, returns a div element containing the Plotly graph.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customLayout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported layout key-values pair that will overwrite the default layout. Commonly overwritten values may include height and width of the graph. See: https://plotly.com/javascript/reference/layout/ for more details. Also, set <code>to_json</code> to true to see what the default layout is.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>customConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p><em>Optional</em>. Contains Plotly supported config key-values pair that will overwrite the default config. See: https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L22-L86 for full details.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line2006">line 2006</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>A div element or a string if <code>to_json</code> is true.</p>
+</div>
+
+
+
+    
+
+
+
+
 
         
             
@@ -773,7 +1112,7 @@ If false, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line886">line 886</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line887">line 887</a>
     </li></ul></dd>
     
 
@@ -1171,7 +1510,7 @@ If false, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1133">line 1133</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1134">line 1134</a>
     </li></ul></dd>
     
 
@@ -1562,7 +1901,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1825">line 1825</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1832">line 1832</a>
     </li></ul></dd>
     
 
@@ -1883,7 +2222,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1849">line 1849</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1856">line 1856</a>
     </li></ul></dd>
     
 
@@ -2286,7 +2625,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1444">line 1444</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1451">line 1451</a>
     </li></ul></dd>
     
 
@@ -2607,7 +2946,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1673">line 1673</a>
+        <a href="plco.js.html">plco.js</a>, <a href="plco.js.html#line1680">line 1680</a>
     </li></ul></dd>
     
 
@@ -2674,7 +3013,7 @@ Else, returns a div element containing the Plotly graph.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 10 2021 18:11:09 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 18 2021 17:47:03 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
