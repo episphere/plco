@@ -71,6 +71,36 @@
             display: inline-block;
         }
 
+        .explorePhenotypesNav {
+            animation: gradient 1s ease infinite, grow 1s ease-in-out infinite;
+            background: linear-gradient(-46deg, #6EE7B7, #6bb3e4);
+            background-size: 400% 400%;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 50% 100%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes grow {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
     </style>
     <title>PLCO SDK Explorer</title>
 </head>
@@ -112,7 +142,7 @@
         <nav class>
             <ul class="w-full md:flex text-center">
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = '';document.getElementById('exploreContainer').style = 'display:none';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Home</a></li>
-                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Phenotypes</a></li>
+                <li class="explorePhenotypesNav md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Phenotypes</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Plots</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';if(!visited) {document.getElementById('otherContainer').innerHTML = otherContainerContents;}visited = true;">Other</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='';">Bugs</a></li>
@@ -389,5 +419,14 @@
             </span>
         </span>
     </footer>
+    <script>
+        (function() { // anonymously to avoid polluting the global scope 
+            let li = document.querySelector('ul .explorePhenotypesNav')
+            setTimeout(_ => {
+                li.classList.remove('explorePhenotypesNav')
+                li.style.backgroundColor = null
+            }, 2500)
+        })()
+    </script>
 </body>
 </html>
