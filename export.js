@@ -21,7 +21,7 @@ function plot() { return plco.plot };
 export {
     hello,
     loadScript,
-    plco,
+    plco as plcoModule,
     api,
     plot
 };
