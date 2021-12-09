@@ -15,3 +15,14 @@ To use the custom HTML elements, add this to the document header:
 ```javascript
 <script src='https://episphere.github.io/plco/plcoHTMLElements.js'></script>
 ```
+
+<hr></hr>
+
+To make use of ES6 modules:
+
+```javascript
+import { hello } from 'https://episphere.github.io/plco/export.js'
+
+console.log(hello())
+```
+
