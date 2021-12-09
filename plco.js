@@ -2442,7 +2442,7 @@ if (typeof (define) != 'undefined') {
             plco.Plotly = Plotly
         }
     })
-    let script2 = plco.loadScript('localforage.min.js')
+    let script2 = plco.loadScript('https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js')
     script2.then(async s => {
         s.onload = () => {
             plco.localForage = localforage
