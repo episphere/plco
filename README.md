@@ -29,5 +29,5 @@ console.log(api)
 including dynamic import of the whole SDK:
 
 ```javascript
-plco = import('https://episphere.github.io/plco/export.js')
+plco = await import('https://episphere.github.io/plco/export.js')
 ```
