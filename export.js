@@ -14,14 +14,24 @@ async function loadScript(url) {
 
 await loadScript('https://episphere.github.io/plco/plco.js')
 
-function plco() { return plco };
+function defineProperties() { return plco.defineProperties };
+function explorePhenotypes() { return plco.explorePhenotypes };
+function saveFile() { return plco.saveFile };
 function api() { return plco.api };
 function plot() { return plco.plot };
+function help() { return 'https://episphere.github.io/plco'};
+function docs() { return 'https://episphere.github.io/plco/docs'};
 
 export {
-    hello,
-    loadScript,
-    plco as plcoModule,
+    help,
+    docs,
     api,
-    plot
+    plot,
+    loadScript,
+    defineProperties,
+    explorePhenotypes,
+    saveFile
 };
+
+
+
