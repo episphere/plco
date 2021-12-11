@@ -19,8 +19,8 @@ function explorePhenotypes() { return plco.explorePhenotypes };
 function saveFile() { return plco.saveFile };
 function api() { return plco.api };
 function plot() { return plco.plot };
-function help() { return 'https://episphere.github.io/plco'};
-function docs() { return 'https://episphere.github.io/plco/docs'};
+const help = 'https://episphere.github.io/plco';
+const docs = 'https://episphere.github.io/plco/docs';
 
 export {
     help,

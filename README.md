@@ -18,11 +18,16 @@ To use the custom HTML elements, add this to the document header:
 
 <hr></hr>
 
-To make use of ES6 modules:
+To make use of ES6 modules to load specific methods:
 
 ```javascript
-import { hello } from 'https://episphere.github.io/plco/export.js'
+import { api } from 'https://episphere.github.io/plco/export.js'
 
-console.log(hello())
+console.log(api)
 ```
 
+including dynamic import of the whole SDK:
+
+```javascript
+plco = import('https://episphere.github.io/plco/export.js')
+```
