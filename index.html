@@ -298,12 +298,18 @@
                             qqButton.innerHTML = `json`
                             const pcaButton = document.createElement('button')
                             pcaButton.innerHTML = `json`
-                            manButton.onclick = ((event) => 
-                                plco.downloadJSON(plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {})))
-                            qqButton.onclick = ((event) => 
-                                plco.downloadJSON(plco.plot.qq2('qq', arr, true, {legend: {orientation: 'v', x: 0.0, y: 1.2}, width: undefined}, {responsive: true})))
-                            pcaButton.onclick= ((event) => 
-                                plco.downloadJSON(plco.plot.pca2('pca', arr, true, {}, {})))
+                            manButton.onclick = (async (event) => {
+                                let data = await plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {});
+                                plco.downloadJSON(data);
+                            })
+                            qqButton.onclick = (async (event) => {
+                                let data = await plco.plot.qq2('qq', arr, true, {legend: {orientation: 'v', x: 0.0, y: 1.2}, width: undefined}, {responsive: true})
+                                plco.downloadJSON(data)
+                            })
+                            pcaButton.onclick= (async (event) => {
+                                let data = await plco.plot.pca2('pca', arr, true, {}, {})
+                                plco.downloadJSON(data)
+                            })
                             const supElement = document.createElement('sup')
                             supElement.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
                             const supElement2 = document.createElement('sup')
