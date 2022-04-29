@@ -299,7 +299,7 @@
                             const pcaButton = document.createElement('button')
                             pcaButton.innerHTML = `json`
                             manButton.onclick = (async (event) => {
-                                let data = await plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {});
+                                let data = await plco.plot.manhattan2('manhattan', arr, 2, undefined, true, {}, {});
                                 plco.downloadJSON(data);
                             })
                             qqButton.onclick = (async (event) => {
