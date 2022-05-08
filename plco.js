@@ -91,6 +91,21 @@ plco.addStyle = () => {
     }
 }
 
+plco.addDownloadLink = (id, f) => {
+    const div = document.createElement('div')
+    const button = document.createElement('button')
+    button.innerHTML = 'download json'
+    button.onclick = (async (_) => {
+        let data = await (f())
+        plco.downloadJSON(data)
+    })
+    const supElement = document.createElement('sup')
+    supElement.innerHTML = `<a target='_blank' href='https://episphere.github.io/plot/'>plot</a>`
+    div.appendChild(button)
+    div.appendChild(supElement)
+    document.getElementById(id).appendChild(div)
+}
+
 /**
  * Adds a key-value pair as specified in `m_fields` and `o_fields` to `obj` if the key does not already exist.
  * @param {object} obj An object.
@@ -1108,6 +1123,9 @@ plco.plot.manhattan = async (
                 )
             })
         }
+        plco.addDownloadLink(div_id,
+            () => plco.plot.manhattan(div_id, phenotype_id, sex, ancestry, p_value_nlog_min,
+                chromosome, true, customLayout, customConfig))
         return div
     } else {
         let tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -1423,7 +1441,9 @@ plco.plot.manhattan2 = async (
                 )
             })
         }
-
+        plco.addDownloadLink(div_id,
+            () => plco.plot.manhattan2(div_id, arrayOfObjects, p_value_nlog_min,
+                chromosome, true, customLayout, customConfig))
         return div
     } else {
         let tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -1656,6 +1676,8 @@ plco.plot.qq = async (
                 }
             }
         })
+        plco.addDownloadLink(div_id,
+            () => plco.plot.qq(div_id, phenotype_id, sex, ancestry, true, customLayout, customConfig))
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
@@ -1805,6 +1827,8 @@ plco.plot.qq2 = (
                         }
                     }
                 })
+                plco.addDownloadLink(div_id,
+                    () => plco.plot.qq2(div_id, arrayOfObjects, true, customLayout, customConfig))
                 return div
             } else {
                 const tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -2117,6 +2141,8 @@ plco.plot.barchart = async (
         }
 
         plco.Plotly.newPlot(div, traces, layout, config)
+        plco.addDownloadLink(div_id,
+            () => plco.plot.pca2(div_id, arrayOfObjects, true, customLayout, customConfig))
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
