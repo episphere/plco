@@ -92,7 +92,11 @@ plco.addStyle = () => {
 }
 
 plco.addDownloadLink = (id, f) => {
+    if (document.getElementById(id + 'download-json')) {
+        document.getElementById(id + 'download-json').remove()
+    }
     const div = document.createElement('div')
+    div.id = id + 'download-json'
     const button = document.createElement('button')
     button.innerHTML = 'download json'
     button.onclick = (async (_) => {
@@ -2008,6 +2012,8 @@ plco.plot.pca2 = async (
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
         plco.plot.helpers.pcaGenerateXYInputs(div_id, arrayOfObjects, layout, config)
+        plco.addDownloadLink(div_id,
+            () => plco.plot.pca2(div_id, arrayOfObjects, true, customLayout, customConfig))
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
@@ -2141,8 +2147,6 @@ plco.plot.barchart = async (
         }
 
         plco.Plotly.newPlot(div, traces, layout, config)
-        plco.addDownloadLink(div_id,
-            () => plco.plot.pca2(div_id, arrayOfObjects, true, customLayout, customConfig))
         return div
     } else {
         const tracesString = '{"traces":' + JSON.stringify(traces) + ','
