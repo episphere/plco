@@ -101,10 +101,6 @@
             }
         }
 
-        .download-links {
-            border: 1px solid #3498db;
-        }
-
     </style>
     <title>PLCO SDK Explorer</title>
 </head>
@@ -249,40 +245,6 @@
                         plco.plot.pca('pca', phenotype_id, sex, ancestry, false, {}, {}).catch(e => {tabsMessages[2].innerHTML = e.message;})
                     ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
-                        .then(_ => {
-                            document.querySelectorAll('.download-links').forEach(div => div.innerHTML = '')
-                            const manButton = document.createElement('button')
-                            manButton.innerHTML = `json`
-                            const qqButton = document.createElement('button')
-                            qqButton.innerHTML = `json`
-                            const pcaButton = document.createElement('button')
-                            pcaButton.innerHTML = `json`
-                            manButton.onclick = (async (event) => {
-                                let data = await plco.plot.manhattan('manhattan', phenotype_id, sex, ancestry, 2, undefined, true, {}, {});
-                                plco.downloadJSON(data);
-                            })
-                            qqButton.onclick = (async (event) => {
-                                let data = await plco.plot.qq('qq', phenotype_id, sex, ancestry, true, {legend: {orientation: 'v', x: 0.0, y: 1.2}, width: undefined}, {responsive: true});
-                                plco.downloadJSON(data);
-                            })
-                            pcaButton.onclick= (async (event) => {
-                                let data = await plco.plot.pca('pca', phenotype_id, sex, ancestry, true, {}, {});
-                                plco.downloadJSON(data);
-                            })
-                            const supElement = document.createElement('sup')
-                            supElement.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
-                            const supElement2 = document.createElement('sup')
-                            supElement2.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
-                            const supElement3 = document.createElement('sup')
-                            supElement3.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
-                            
-                            document.getElementById('manhattan-download').appendChild(manButton)
-                            document.getElementById('manhattan-download').appendChild(supElement)
-                            document.getElementById('qq-download').appendChild(qqButton)
-                            document.getElementById('qq-download').appendChild(supElement2)
-                            document.getElementById('pca-download').appendChild(pcaButton)
-                            document.getElementById('pca-download').appendChild(supElement3)
-                        })
                 } else {
                     Promise.all([
                         plco.plot.manhattan2('manhattan', arr, 2, undefined, false, {}, {}).catch(e => tabsMessages[0].innerHTML = e.message),
@@ -290,40 +252,6 @@
                         plco.plot.pca2('pca', arr, false, {}, {}).catch(e => tabsMessages[2].innerHTML = e.message),
                     ])
                         .then(_ => {tabsMessages.forEach(tab => {if (tab.innerHTML.includes('Loading...')) tab.innerHTML = ''})})
-                        .then(_ => {
-                            document.querySelectorAll('.download-links').forEach(div => div.innerHTML = '')
-                            const manButton = document.createElement('button')
-                            manButton.innerHTML = `json`
-                            const qqButton = document.createElement('button')
-                            qqButton.innerHTML = `json`
-                            const pcaButton = document.createElement('button')
-                            pcaButton.innerHTML = `json`
-                            manButton.onclick = (async (event) => {
-                                let data = await plco.plot.manhattan2('manhattan', arr, 2, undefined, true, {}, {});
-                                plco.downloadJSON(data);
-                            })
-                            qqButton.onclick = (async (event) => {
-                                let data = await plco.plot.qq2('qq', arr, true, {legend: {orientation: 'v', x: 0.0, y: 1.2}, width: undefined}, {responsive: true});
-                                plco.downloadJSON(data);
-                            })
-                            pcaButton.onclick= (async (event) => {
-                                let data = await plco.plot.pca2('pca', arr, true, {}, {});
-                                plco.downloadJSON(data);
-                            })
-                            const supElement = document.createElement('sup')
-                            supElement.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
-                            const supElement2 = document.createElement('sup')
-                            supElement2.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
-                            const supElement3 = document.createElement('sup')
-                            supElement3.innerHTML= `<a href='https://episphere.github.io/plot/'>plot</a>`
-                            
-                            document.getElementById('manhattan-download').appendChild(manButton)
-                            document.getElementById('manhattan-download').appendChild(supElement)
-                            document.getElementById('qq-download').appendChild(qqButton)
-                            document.getElementById('qq-download').appendChild(supElement2)
-                            document.getElementById('pca-download').appendChild(pcaButton)
-                            document.getElementById('pca-download').appendChild(supElement3)
-                        })
                 }
             } catch(e){
                 if (e instanceof SyntaxError) {
@@ -377,7 +305,6 @@
                     alert('URL copied to clipboard')
                     "
                     >Share URL (Copies to Clipboard)</button>
-                <div id="manhattan-download" class="download-links"></div>
             </div>
 
             <input type="radio" class="tabsRadio hidden" name="plot" id="qqPlot">
@@ -405,7 +332,6 @@
                     alert('URL copied to clipboard')
                     "
                     >Share URL (Copies to Clipboard)</button>
-                <div id="qq-download" class="download-links"></div>
             </div>
 
             <input type="radio" class="tabsRadio hidden" name="plot" id="pcaPlot">
@@ -433,7 +359,6 @@
                     alert('URL copied to clipboard')
                     "
                     >Share URL (Copies to Clipboard)</button>
-                <div id="pca-download" class="download-links"></div>
             </div>
         </div>
     </div>
