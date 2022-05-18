@@ -54,7 +54,7 @@ plco.saveFile = (url) => {
  */
 plco.downloadJSON = (contents, fileName = 'plot') => {
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(contents, null, 2)], {
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(JSON.parse(contents))], {
         type: 'text/plain'
     }))
     a.setAttribute('download', fileName + '.json')
