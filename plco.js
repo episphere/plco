@@ -2043,7 +2043,7 @@ plco.plot.pca2 = async (
         //return tracesString + layoutString + configString
         return {
             traces:traces,
-            layout:layout,
+            layout:Object.assign(layout, dropdownLayout),
             config:config
         }
     }
