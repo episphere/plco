@@ -102,7 +102,7 @@
         }
 
     </style>
-    <title>PLCO SDK Explorer</title>
+    <title>PLCOjs SDK Explorer</title>
 </head>
 
 <body class="divide-y-2 divide-gray-200" onload="
@@ -128,16 +128,19 @@
 >
     <header class="bg-gradient-to-b from-white">
         <div class="text-2xl flex flex-row items-center justify-start flex-wrap">
-            <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO SDK Explorer</span>
+            <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO<sub style="color:green"><a href="https://bootcamp.berkeley.edu/blog/most-in-demand-programming-languages" target="_blank">js</a></sub> SDK Explorer</span>
             <sup class="font-semibold md:text-lg text-sm pr-2 text-green-600"><a href="https://dceg.cancer.gov/" target="_blank">DCEG</a></sup>
+            <div>
             <span class="md:text-lg text-sm text-black">
                 [<a href="https://github.com/episphere/plco" target="_blank" class="text-blue-600">code</a>] 
-                [<a href="https://episphere.github.io/plco/docs" target="_blank" class="text-blue-600">docs</a>] 
+                [<a href="https://episphere.github.io/plco/docs" target="_blank" class="text-blue-600">docs</a>]
+                [<a href="https://observablehq.com/@episphere/plcojs" target="_blank" class="text-blue-600">tutorial</a>]
                 [<a href="https://observablehq.com/@ericr491/plco-sdk" target="_blank" class="text-blue-600">notebook</a>] 
                 [<a href="https://gitter.im/episphere/plco" target="_blank" class="text-blue-600">gitter</a>]
                 [<a href="https://www.youtube.com/watch?v=wtieipSYvTY" target="_blank" class="text-red-600">YouTube</a>]
                 [<a href="https://dceg.cancer.gov/research/who-we-study/cohorts/prostate-lung-colon-ovary-prospective-study" target="_blank" class="text-blue-600">about</a>]
             </span>
+            </div>
         </div>
         <nav class>
             <ul class="w-full md:flex text-center">
@@ -145,14 +148,23 @@
                 <li class="explorePhenotypesNav md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Phenotypes</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Plots</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';if(!visited) {document.getElementById('otherContainer').innerHTML = otherContainerContents;}visited = true;">Other</a></li>
-                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='';">Bugs</a></li>
             </ul>
         </nav>
     </header>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='homeContainer'>
-        <span>Welcome! 🤗</span>
-        <span>If you encounter any bugs or have feedback for additional features, feel free to create a new issue in the GitHub <a href="https://github.com/episphere/plco/issues" class="text-blue-500">repo</a>.</span>
+        <h2 style="color:maroon;font-size:x-large"><b>PLCO</b></h2>
+        <p style="color:navy;font-size:large">
+            <a href="https://dceg.cancer.gov/research/who-we-study/cohorts/prostate-lung-colon-ovary-prospective-study" target="_blank" style="color:blue">PLCO is a large NCI trial</a> (n=155,000) that, since 1993 evaluated screening for early detection of prostate, lung, colon, and ovarian cancer.
+            In 2021-2022, summary GWAS data (no individual data!) was made available in the public domain with an <a href="https://exploregwas-dev.cancer.gov/plco-atlas/#/api-access" target="_blank" style="color:blue">Application Programming Interface (API)</a>.
+            This creates the opportinity to facilitate data retrieval from a variety of programming languages and analytical environments by developing the corresponding Software Development Kits (SDK). 
+        </p>
+        <h2 style="color:maroon;font-size:x-large"><b>This is not the data portal</b></h2>
+        <p style="color:navy;font-size:large">
+            Instead, PLCOjs is a JavaScript SDK developed to provide programatic interoperability with <a href="https://exploregwas-dev.cancer.gov/plco-atlas/#/api-access" target="_blank" style="color:blue">PLCO's public APIs</a>. This developemnt effort was pursued by modularizing <a href="https://exploregwas.cancer.gov/plco-atlas" target="_blank"  style="color:blue">PLCO's Data portal</a> graphic plotting and data retrieval components.
+            The rationale is that PLCO data analytics might be integrated with a variety of GWAS data processing applications. This integration is overviewed in the <a href="https://observablehq.com/@episphere/plcojs" target="_blank" style="color:blue">tutorial</a><sup>[<a href="" target="_blank" style="color:red">YouTube</a>]</sup>.
+        </p>
+        
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 pb-12 mx-10" id='exploreContainer' style="display: none;">
