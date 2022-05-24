@@ -20,7 +20,7 @@ console.log('plco.js loaded')
  * @property {Function} loadScript - {@link plco.loadScript}
  * @property {Function} saveFile - {@link plco.saveFile}
  */
-const plco = async () => {
+plco = async () => {
     // plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     // console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
