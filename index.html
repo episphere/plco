@@ -283,7 +283,8 @@
                 document.querySelectorAll('.shareButton').forEach(button => button.style.display = '')
                 return false;
             }">
-            <span class="text-lg md:text-3xl font-semibold text-red-900 block">Construct your stratifications for the plots.</span>
+            <span class="text-lg md:text-3xl font-semibold text-red-900 block">Plot stratification.</span>
+            <span>The primary use of this panel is to generate multiple plots for each statification (Manhattan, PCA and QQ). For exmples see <a href="https://www.youtube.com/watch?v=wtieipSYvTY" target="_blank" style="color:blue">this presentation</a> first.</span>
             <span>The first textarea contains a collection of <b>phenotype id</b>, <b>sex</b>, and <b>ancestry</b> inputs to be plotted. It is initally empty, and you may add more inputs by filling out the input boxes as needed, and pressing the <b>Add</b> button. Finally, press <b>Submit</b> to see your plots! Do note that manhattan plot only supports 1 or 2 inputs, while qq and pca plot supports more than 2 inputs.</span>
             <textarea id="textarea1" readonly="true" class="block border border-black w-full my-4 text-sm">[ ]</textarea>
 
