@@ -148,6 +148,7 @@
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Phenotype IDs</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Plots</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';if(!visited) {document.getElementById('otherContainer').innerHTML = otherContainerContents;}visited = true;">Custom Elements</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="window.open('https://exploregwas.cancer.gov/plco-atlas/#/gwas/summary')">GWAS Explorer</a></li>
             </ul>
         </nav>
     </header>
@@ -445,8 +446,13 @@
         (function() { // anonymously to avoid polluting the global scope 
             let li = document.querySelector('ul .explorePhenotypesNav')
             setTimeout(_ => {
-                li.classList.remove('explorePhenotypesNav')
-                li.style.backgroundColor = null
+                try{
+                    li.classList.remove('explorePhenotypesNav')
+                    li.style.backgroundColor = null
+                }catch(err){
+                    // console.log(err)
+                }
+                
             }, 2500)
         })()
     </script>
