@@ -48,7 +48,7 @@ console.log('plco.js loaded')
  * @property {Function} loadScript - {@link plco.loadScript}
  * @property {Function} saveFile - {@link plco.saveFile}
  */
-const plco = async () => {
+plco = async () => {
     // plco.loadScript("https://cdn.plot.ly/plotly-latest.min.js")
     // console.log("plotly.js loaded")
     plco.loadScript("https://episphere.github.io/plotly/epiPlotly.js")
@@ -82,7 +82,8 @@ plco.saveFile = (url) => {
  */
 plco.downloadJSON = (contents, fileName = 'plot') => {
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(contents, null, 2)], {
+    //a.href = URL.createObjectURL(new Blob([JSON.stringify(JSON.parse(contents))], {
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(contents)], {
         type: 'text/plain'
     }))
     a.setAttribute('download', fileName + '.json')
@@ -120,7 +121,11 @@ plco.addStyle = () => {
 }
 
 plco.addDownloadLink = (id, f) => {
+    if (document.getElementById(id + 'download-json')) {
+        document.getElementById(id + 'download-json').remove()
+    }
     const div = document.createElement('div')
+    div.id = id + 'download-json'
     const button = document.createElement('button')
     button.innerHTML = 'download json'
     button.onclick = (async (_) => {
@@ -1156,10 +1161,15 @@ plco.plot.manhattan = async (
                 chromosome, true, customLayout, customConfig))
         return div
     } else {
-        let tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        let layoutString = '"layout":' + JSON.stringify(layout) + ','
-        let configString = '"config":' + JSON.stringify(config) + '}'
-        return tracesString + layoutString + configString
+        //let tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        //let layoutString = '"layout":' + JSON.stringify(layout) + ','
+        //let configString = '"config":' + JSON.stringify(config) + '}'
+        //return tracesString + layoutString + configString
+        return {
+            traces:traces,
+            layout:layout,
+            config:config
+        }
     }
 }
 
@@ -1474,10 +1484,15 @@ plco.plot.manhattan2 = async (
                 chromosome, true, customLayout, customConfig))
         return div
     } else {
-        let tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        let layoutString = '"layout":' + JSON.stringify(layout) + ','
-        let configString = '"config":' + JSON.stringify(config) + '}'
-        return tracesString + layoutString + configString
+        //let tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        //let layoutString = '"layout":' + JSON.stringify(layout) + ','
+        //let configString = '"config":' + JSON.stringify(config) + '}'
+        //return tracesString + layoutString + configString
+        return {
+            traces:traces,
+            layout:layout,
+            config:config
+        }
     }
 }
 
@@ -1708,10 +1723,15 @@ plco.plot.qq = async (
             () => plco.plot.qq(div_id, phenotype_id, sex, ancestry, true, customLayout, customConfig))
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
-        const layoutString = '"layout":' + JSON.stringify(layout) + ','
-        const configString = '"config":' + JSON.stringify(config) + '}'
-        return tracesString + layoutString + configString
+        //const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
+        //const layoutString = '"layout":' + JSON.stringify(layout) + ','
+        //const configString = '"config":' + JSON.stringify(config) + '}'
+        //return tracesString + layoutString + configString
+        return {
+            traces:traces,
+            layout:layout,
+            config:config
+        }
     }
 }
 
@@ -1859,10 +1879,15 @@ plco.plot.qq2 = (
                     () => plco.plot.qq2(div_id, arrayOfObjects, true, customLayout, customConfig))
                 return div
             } else {
-                const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-                const layoutString = '"layout":' + JSON.stringify(layout) + ','
-                const configString = '"config":' + JSON.stringify(config) + '}'
-                return tracesString + layoutString + configString
+                //const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+                //const layoutString = '"layout":' + JSON.stringify(layout) + ','
+                //const configString = '"config":' + JSON.stringify(config) + '}'
+                //return tracesString + layoutString + configString
+                return {
+                    traces:traces,
+                    layout:layout,
+                    config:config
+                }
             }
         })
 }
@@ -2036,12 +2061,19 @@ plco.plot.pca2 = async (
     if (!to_json) {
         plco.Plotly.newPlot(div, traces, Object.assign(layout, dropdownLayout), config)
         plco.plot.helpers.pcaGenerateXYInputs(div_id, arrayOfObjects, layout, config)
+        plco.addDownloadLink(div_id,
+            () => plco.plot.pca2(div_id, arrayOfObjects, true, customLayout, customConfig))
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        const layoutString = '"layout":' + JSON.stringify(Object.assign(layout, dropdownLayout)) + ','
-        const configString = '"config":' + JSON.stringify(config) + '}'
-        return tracesString + layoutString + configString
+        //const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        //const layoutString = '"layout":' + JSON.stringify(Object.assign(layout, dropdownLayout)) + ','
+        //const configString = '"config":' + JSON.stringify(config) + '}'
+        //return tracesString + layoutString + configString
+        return {
+            traces:traces,
+            layout:Object.assign(layout, dropdownLayout),
+            config:config
+        }
     }
 }
 
@@ -2169,14 +2201,17 @@ plco.plot.barchart = async (
         }
 
         plco.Plotly.newPlot(div, traces, layout, config)
-        plco.addDownloadLink(div_id,
-            () => plco.plot.pca2(div_id, arrayOfObjects, true, customLayout, customConfig))
         return div
     } else {
-        const tracesString = '{"traces":' + JSON.stringify(traces) + ','
-        const layoutString = '"layout":' + JSON.stringify(layout) + ','
-        const configString = '"config":' + JSON.stringify(config) + '}'
-        return tracesString + layoutString + configString
+        //const tracesString = '{"traces":' + JSON.stringify(traces) + ','
+        //const layoutString = '"layout":' + JSON.stringify(layout) + ','
+        //const configString = '"config":' + JSON.stringify(config) + '}'
+        //return tracesString + layoutString + configString
+        return {
+            traces:traces,
+            layout:layout,
+            config:config
+        }
     }
 }
 
@@ -2521,7 +2556,7 @@ plco()
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon May 09 2022 17:08:38 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Wed May 25 2022 13:29:36 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -102,7 +102,7 @@
         }
 
     </style>
-    <title>PLCO SDK Explorer</title>
+    <title>PLCOjs SDK Explorer</title>
 </head>
 
 <body class="divide-y-2 divide-gray-200" onload="
@@ -128,40 +128,61 @@
 >
     <header class="bg-gradient-to-b from-white">
         <div class="text-2xl flex flex-row items-center justify-start flex-wrap">
-            <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO SDK Explorer</span>
+            <span class="text-3xl md:text-5xl font-extrabold m-4 text-red-900 flex-shrink-0" style="font-family: fantasy;">PLCO<sub style="color:green"><a href="https://bootcamp.berkeley.edu/blog/most-in-demand-programming-languages" target="_blank">js</a></sub> SDK Explorer</span>
             <sup class="font-semibold md:text-lg text-sm pr-2 text-green-600"><a href="https://dceg.cancer.gov/" target="_blank">DCEG</a></sup>
+            <div>
             <span class="md:text-lg text-sm text-black">
                 [<a href="https://github.com/episphere/plco" target="_blank" class="text-blue-600">code</a>] 
-                [<a href="https://episphere.github.io/plco/docs" target="_blank" class="text-blue-600">docs</a>] 
+                [<a href="https://episphere.github.io/plco/docs" target="_blank" class="text-blue-600">documentation</a>]
+                [<a href="https://observablehq.com/@episphere/plcojs" target="_blank" class="text-blue-600">tutorial</a>]
                 [<a href="https://observablehq.com/@ericr491/plco-sdk" target="_blank" class="text-blue-600">notebook</a>] 
                 [<a href="https://gitter.im/episphere/plco" target="_blank" class="text-blue-600">gitter</a>]
-                [<a href="https://www.youtube.com/watch?v=wtieipSYvTY" target="_blank" class="text-red-600">YouTube</a>]
+                [<a href="https://www.youtube.com/watch?v=wtieipSYvTY" target="_blank" class="text-red-600">Project presentation</a>]
+                [<a href="https://youtu.be/87dXT9YtbfY" target="_blank" class="text-red-600">Tutorial Webcast</a>]
                 [<a href="https://dceg.cancer.gov/research/who-we-study/cohorts/prostate-lung-colon-ovary-prospective-study" target="_blank" class="text-blue-600">about</a>]
             </span>
+            </div>
         </div>
         <nav class>
             <ul class="w-full md:flex text-center">
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = '';document.getElementById('exploreContainer').style = 'display:none';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Home</a></li>
-                <li class="explorePhenotypesNav md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Phenotypes</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = '';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Phenotype IDs</a></li>
                 <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = '';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='display:none;';">Explore Plots</a></li>
-                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';if(!visited) {document.getElementById('otherContainer').innerHTML = otherContainerContents;}visited = true;">Other</a></li>
-                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = 'display:none;';document.getElementById('bugContainer').style='';">Bugs</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="document.getElementById('homeContainer').style = 'display:none;';document.getElementById('exploreContainer').style = 'display:none;';document.getElementById('plotContainer').style = 'display:none;';document.getElementById('otherContainer').style = '';document.getElementById('bugContainer').style='display:none;';if(!visited) {document.getElementById('otherContainer').innerHTML = otherContainerContents;}visited = true;">Custom Elements</a></li>
+                <li class="md:m-4 my-2 mx-4 md:text-xl text-md font-bold border-black border-2 rounded-3xl hover:bg-green-300"><a href="#" class="block md:p-2 py-2 px-4" onclick="window.open('https://exploregwas.cancer.gov/plco-atlas/#/gwas/summary')">GWAS Explorer</a></li>
             </ul>
         </nav>
     </header>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='homeContainer'>
-        <span>Welcome! 🤗</span>
-        <span>If you encounter any bugs or have feedback for additional features, feel free to create a new issue in the GitHub <a href="https://github.com/episphere/plco/issues" class="text-blue-500">repo</a>.</span>
+        <h2 style="color:maroon;font-size:x-large"><b>PLCO</b></h2>
+        <p style="color:navy;font-size:large">
+            <a href="https://dceg.cancer.gov/research/who-we-study/cohorts/prostate-lung-colon-ovary-prospective-study" target="_blank" style="color:blue">PLCO is a large NCI trial</a> (n=155,000) that, since 1993 evaluated screening for early detection of prostate, lung, colon, and ovarian cancer.
+            In 2021-2022, summary GWAS data (no individual data!) was made available in the public domain with an <a href="https://exploregwas-dev.cancer.gov/plco-atlas/#/api-access" target="_blank" style="color:blue">Application Programming Interface (API)</a>.
+            This creates the opportinity to facilitate data retrieval from a variety of programming languages and analytical environments by developing the corresponding Software Development Kits (SDK). 
+        </p>
+        <h2 style="color:maroon;font-size:x-large"><b>This is not the data portal</b></h2>
+        <p style="color:navy;font-size:large">
+            You could develop a data portal using PLCOjs and other libraries mediating access to one or more data sources of interrest. Instead, PLCOjs is a JavaScript SDK developed to provide programatic interoperability with <a href="https://exploregwas-dev.cancer.gov/plco-atlas/#/api-access" target="_blank" style="color:blue">PLCO's public APIs</a>. This developemnt effort was pursued by modularizing <a href="https://exploregwas.cancer.gov/plco-atlas" target="_blank"  style="color:blue">PLCO's Data portal</a> graphic plotting and data retrieval components.
+            The rationale is that PLCO data analytics might be integrated with a variety of GWAS data processing applications. This integration is overviewed in the <b><a href="https://observablehq.com/@episphere/plcojs" target="_blank" style="color:blue">tutorial</a><sup>[<a href="https://youtu.be/87dXT9YtbfY" target="_blank" style="color:red">YouTube</a>]</sup></b>, the suggested starting point to uderstand PLCOjs.
+        </p>
+        <h2 style="color:maroon;font-size:x-large"><b>FAIR</b></h2>
+        <p style="color:navy;font-size:large">
+            Let's find out how Findable, Accessible, Interoperable and, most defining, Reusable, are the data objects generated by PLCOjs:
+            <li style="color:navy;font-size:large">If I place my data in a versioned host as in <a href="https://jonasalmeida.github.io/pub/PLCOpca2.json" target="_blank" style="color:blue">jonasalmeida.github.io/pub/PLCOpca2.json</a> ...</li>
+            <li style="color:navy;font-size:large">... would I be able to also recover the interactive plot with a URL shortner, such as <a href="https://bit.ly/plcopca" target="_blank" style="color:blue">bit.ly/plcopca</a>?</li>
+            <p style="color:maroon;font-size:large">give it a try!</p>
+        </p>
+        
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 pb-12 mx-10" id='exploreContainer' style="display: none;">
-        <span class="text-lg md:text-3xl font-semibold text-red-900">Explore all the phenotypes available in the PLCO data ecosystem.</span>
-        <span>Tip: Alt + LClick on a slice to display a table showing breakdown by sex and ancestry.</span>
+        <span class="text-lg md:text-3xl font-semibold text-red-900">Phenotype codes</span>
+        <span>The primary use of this plot is to highlight the hierarchy between phenotype codes. For a quick exploration of existing data see <a href="https://www.youtube.com/watch?v=wtieipSYvTY" target="_blank" style="color:blue">this presentation first</a>.</span>
         <div class="flex flex-col items-center md:my-16 my-4 w-auto h-auto" id='explorePhenotypes'></div>
         <div class="flex flex-col items-center w-auto h-auto" id='explorePhenotypestable'></div>
-        <span class="text-lg md:text-3xl font-semibold text-red-900">Check if the phenotype has plotting data available.</span>
-        <span class="mb-4">The JSON object(s) highlighted in red has plotting data available.</span>
+        <span class="text-lg md:text-3xl font-semibold text-red-900">Additional data available.</span>
+        <span class="mb-4" style="font-size:small">Only the phenotypes highlighted in red are garanteed to have additional data. For others, it varies.</span>
         <form onsubmit="
             let formatJson = (jsonArray, spacing) => {
                 let s = '['
@@ -196,10 +217,11 @@
                 .then(_ => document.getElementById('resultsCheckbox').checked = true);
             return false;
         ">
-            <label for="checkPhenotypeMetadata">Enter Phenotype ID: </label>
+            <label for="checkPhenotypeMetadata">Enter Phenotype ID (for example, try 3080 for Breast Cancer, or 7470 for Rheumatoid Arthritis): </label>
             <input type="number" id="checkPhenotypeMetadata" required class="focus:ring-2 focus:ring-blue-600 focus:outline-none block border border-black md:w-1/4 w-full mb-2">
             <button type="submit" class="border-2 border-black rounded-xl p-1 px-2 mt-4 mr-4 hover:bg-green-400">Submit</button>
         </form>
+        
         <div id="results" class="w-full relative">
             <span class="right-1/2 top-0 absolute inline-block p-2 text-lg font-bold">Results</span>
             <input type="checkbox" id="resultsCheckbox" class="hidden">
@@ -215,6 +237,7 @@
             </label>
             <span id="fullResults" class="hidden m-8 mb-0 md:break-normal break-all">👻</span>
         </div>
+        -->
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='plotContainer' style="display: none;">
@@ -262,7 +285,9 @@
                 document.querySelectorAll('.shareButton').forEach(button => button.style.display = '')
                 return false;
             }">
-            <span class="text-lg md:text-3xl font-semibold text-red-900 block">Construct your stratifications for the plots.</span>
+            <span class="text-lg md:text-3xl font-semibold text-red-900 block">Plotting by population stratification</span>
+            <span>See also <a href="https://episphere.github.io/plco/docs/plco.plot.html" target="_blank" style="color:blue">Plot Documentation</a>.</span>
+            <span>The primary use of this panel is to generate multiple plots for each statification (Manhattan, PCA and QQ). For exmples see <a href="https://www.youtube.com/watch?v=wtieipSYvTY" target="_blank" style="color:blue">this presentation</a> first.</span>
             <span>The first textarea contains a collection of <b>phenotype id</b>, <b>sex</b>, and <b>ancestry</b> inputs to be plotted. It is initally empty, and you may add more inputs by filling out the input boxes as needed, and pressing the <b>Add</b> button. Finally, press <b>Submit</b> to see your plots! Do note that manhattan plot only supports 1 or 2 inputs, while qq and pca plot supports more than 2 inputs.</span>
             <textarea id="textarea1" readonly="true" class="block border border-black w-full my-4 text-sm">[ ]</textarea>
 
@@ -364,7 +389,7 @@
     </div>
 
     <div class="bg-white flex flex-col max-w-8xl p-6 mx-10" id='otherContainer' style="display: none;">
-        <!-- <span class="text-lg md:text-3xl font-semibold text-red-900 block">Demostrating support with the <a href="https://episphere.github.io/plotly">Epi-Plotly library</a>.</span>        
+        <span class="text-lg md:text-3xl font-semibold text-red-900 block">Demostrating support with the <a href="https://episphere.github.io/plotly" style="color:blue">Epi-Plotly library</a>.</span>        
         <span class="text-green-500 text-md">Pros: Great for static plots; faster due to not having to fetch API data; no JavaScript code needed;</span>
         <span class="text-red-500 text-md">Cons: As of now, the json file must be hosted; </span>
         <epi-plotly>https://episphere.github.io/plco/plot.json</epi-plotly>
@@ -380,7 +405,7 @@
         <span class="text-lg">Tips:</span>
         <span>You can add Plotly event listeners by querying the div with js-plotly-plot class nested within the epi-plotly tag.</span>
         <br>
-        <span class="text-lg md:text-3xl font-semibold text-red-900 block">An alternative to <a href="https://episphere.github.io/plotly">Epi-Plotly library</a>.</span>        
+        <span class="text-lg md:text-3xl font-semibold text-red-900 block">An alternative to <a href="https://episphere.github.io/plotly" style="color:blue">Epi-Plotly library</a>.</span>        
         <span>Insert this into the header: <br> &lt;script src="https://episphere.github.io/plco/plcoHTMLElements.js"&gt;&lt;/script&gt; <br><br> 3 plotting tags available:</span>
         <ul class="text-lg md:text-xl text-red-900 block">
             <li>
@@ -423,8 +448,13 @@
         (function() { // anonymously to avoid polluting the global scope 
             let li = document.querySelector('ul .explorePhenotypesNav')
             setTimeout(_ => {
-                li.classList.remove('explorePhenotypesNav')
-                li.style.backgroundColor = null
+                try{
+                    li.classList.remove('explorePhenotypesNav')
+                    li.style.backgroundColor = null
+                }catch(err){
+                    // console.log(err)
+                }
+                
             }, 2500)
         })()
     </script>
