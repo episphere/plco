@@ -1695,15 +1695,17 @@ plco.plot.qq = async (
             () => plco.plot.qq(div_id, phenotype_id, sex, ancestry, true, customLayout, customConfig))
         return div
     } else {
-        //const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
-        //const layoutString = '"layout":' + JSON.stringify(layout) + ','
-        //const configString = '"config":' + JSON.stringify(config) + '}'
-        //return tracesString + layoutString + configString
+        const tracesString = '{"traces":' + JSON.stringify([traceLine, trace]) + ','
+        const layoutString = '"layout":' + JSON.stringify(layout) + ','
+        const configString = '"config":' + JSON.stringify(config) + '}'
+        return tracesString + layoutString + configString
+        /*
         return {
             traces:traces,
             layout:layout,
             config:config
         }
+        */
     }
 }
 
